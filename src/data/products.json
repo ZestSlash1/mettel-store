@@ -1,0 +1,153 @@
+{
+  "categories": [
+    { "id": "cases", "label": "Phone Covers", "slug": "phone-covers", "active": true },
+    { "id": "accessories", "label": "Accessories", "slug": "accessories", "active": true },
+    { "id": "audio", "label": "Audio", "slug": "audio", "active": false }
+  ],
+  "products": [
+    {
+      "id": "mt-01-aramid",
+      "sku": "MT-CASE-ARAMID-001",
+      "category_id": "cases",
+      "name": "Aramid Shell 01",
+      "tagline": "0.95 mm woven aramid. No bulk. No print.",
+      "price": 2499,
+      "currency": "INR",
+      "status": "available",
+      "is_featured": true,
+      "color": "Carbon",
+      "color_hex": "#1b1b1b",
+      "accent_hex": "#ff6b00",
+      "specs": [
+        { "k": "MATERIAL", "v": "600D Aramid Fiber" },
+        { "k": "PROFILE", "v": "0.95 MM" },
+        { "k": "DROP", "v": "MIL-STD 3.0 M" },
+        { "k": "WEIGHT", "v": "14 G" }
+      ],
+      "image": null,
+      "models": ["iPhone 16 Pro", "iPhone 16", "Pixel 9 Pro"],
+      "stock": 120,
+      "rank": 1
+    },
+    {
+      "id": "mt-02-machined",
+      "sku": "MT-CASE-ALU-002",
+      "category_id": "cases",
+      "name": "Machined Frame 02",
+      "tagline": "CNC 6063 aluminium bumper. Bare metal edge.",
+      "price": 3299,
+      "currency": "INR",
+      "status": "available",
+      "is_featured": true,
+      "color": "Raw Silver",
+      "color_hex": "#c9c9c9",
+      "accent_hex": "#ff6b00",
+      "specs": [
+        { "k": "MATERIAL", "v": "6063 ALUMINIUM" },
+        { "k": "FINISH", "v": "BEAD BLAST" },
+        { "k": "PROFILE", "v": "2.10 MM" },
+        { "k": "WEIGHT", "v": "31 G" }
+      ],
+      "image": null,
+      "models": ["iPhone 16 Pro Max", "iPhone 16 Pro"],
+      "stock": 64,
+      "rank": 2
+    },
+    {
+      "id": "mt-03-translucent",
+      "sku": "MT-CASE-TPU-003",
+      "category_id": "cases",
+      "name": "Translucent 03",
+      "tagline": "Frosted polycarbonate. Tactile grip rails.",
+      "price": 1499,
+      "currency": "INR",
+      "status": "available",
+      "is_featured": false,
+      "color": "Smoke",
+      "color_hex": "#8a8a8a",
+      "accent_hex": "#ff6b00",
+      "specs": [
+        { "k": "MATERIAL", "v": "FROSTED PC" },
+        { "k": "PROFILE", "v": "1.40 MM" },
+        { "k": "GRIP", "v": "MICRO-RAIL" },
+        { "k": "WEIGHT", "v": "19 G" }
+      ],
+      "image": null,
+      "models": ["iPhone 16", "Galaxy S25"],
+      "stock": 240,
+      "rank": 3
+    },
+    {
+      "id": "mt-04-magsafe-puck",
+      "sku": "MT-ACC-MAG-004",
+      "category_id": "accessories",
+      "name": "Mag Puck 04",
+      "tagline": "15W magnetic dock. Anodised disc, braided lead.",
+      "price": 2199,
+      "currency": "INR",
+      "status": "preorder",
+      "is_featured": true,
+      "color": "Orange",
+      "color_hex": "#ff6b00",
+      "accent_hex": "#000000",
+      "specs": [
+        { "k": "OUTPUT", "v": "15 W MAGNETIC" },
+        { "k": "CABLE", "v": "1.5 M BRAIDED" },
+        { "k": "BODY", "v": "ANODISED ALU" },
+        { "k": "INPUT", "v": "USB-C PD" }
+      ],
+      "image": null,
+      "models": ["Universal Qi2"],
+      "stock": 0,
+      "rank": 4
+    },
+    {
+      "id": "mt-05-lanyard",
+      "sku": "MT-ACC-CORD-005",
+      "category_id": "accessories",
+      "name": "Utility Cord 05",
+      "tagline": "Climbing-grade cord. Adjustable crossbody.",
+      "price": 899,
+      "currency": "INR",
+      "status": "available",
+      "is_featured": false,
+      "color": "Hi-Vis",
+      "color_hex": "#ff8a1f",
+      "accent_hex": "#000000",
+      "specs": [
+        { "k": "MATERIAL", "v": "8 MM NYLON" },
+        { "k": "LOAD", "v": "120 KG" },
+        { "k": "LENGTH", "v": "ADJUSTABLE" },
+        { "k": "CLIP", "v": "STEEL HOOK" }
+      ],
+      "image": null,
+      "models": ["Universal"],
+      "stock": 310,
+      "rank": 5
+    },
+    {
+      "id": "mt-06-leather",
+      "sku": "MT-CASE-LTHR-006",
+      "category_id": "cases",
+      "name": "Full-Grain 06",
+      "tagline": "Vegetable-tanned leather. Ages with use.",
+      "price": 2899,
+      "currency": "INR",
+      "status": "available",
+      "is_featured": false,
+      "color": "Tan",
+      "color_hex": "#a86b3c",
+      "accent_hex": "#ff6b00",
+      "specs": [
+        { "k": "MATERIAL", "v": "FULL-GRAIN" },
+        { "k": "TANNING", "v": "VEGETABLE" },
+        { "k": "PROFILE", "v": "1.80 MM" },
+        { "k": "WEIGHT", "v": "26 G" }
+      ],
+      "image": null,
+      "models": ["iPhone 16 Pro", "Pixel 9"],
+      "stock": 88,
+      "rank": 6
+    }
+  ]
+}

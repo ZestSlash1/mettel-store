@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-silver text-ink font-mono antialiased;
+    /* Faint technical grid wash, like a spec sheet */
+    background-image:
+      linear-gradient(to right, rgba(0, 0, 0, 0.02) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(0, 0, 0, 0.02) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+
+  /* Massive display headings: tight, mechanical */
+  .font-display {
+    font-stretch: expanded;
+  }
+
+  ::selection {
+    @apply bg-flame-500 text-white;
+  }
+}
+
+@layer components {
+  /* Hairline technical divider used across spec blocks */
+  .rule {
+    @apply border-t border-ink/15;
+  }
+
+  /* Eyebrow caption used to tag spec groups */
+  .eyebrow {
+    @apply font-mono text-[10px] uppercase tracking-[0.28em] text-ink/45;
+  }
+}
+
+@layer utilities {
+  /* Respect users who prefer reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+    }
+  }
+}
