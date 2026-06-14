@@ -19,6 +19,37 @@ function loadRazorpay() {
   })
 }
 
+/**
+ * POST JSON and parse the response defensively. The serverless endpoints can
+ * return an empty body (e.g. a 404 when /api isn't served, or a crashed 500),
+ * which would make res.json() throw a cryptic "Unexpected end of JSON input".
+ * Read as text first and turn any non-JSON / error response into a clear message.
+ */
+async function postJSON(url, payload) {
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+  const text = await res.text()
+  let data = null
+  if (text) {
+    try {
+      data = JSON.parse(text)
+    } catch {
+      /* non-JSON body (e.g. an HTML error page) */
+    }
+  }
+  if (!res.ok || data === null) {
+    if (data?.error) throw new Error(data.error)
+    if (res.status === 404) {
+      throw new Error('Checkout API not found — run the app with `vercel dev` (plain `npm run dev` does not serve /api).')
+    }
+    throw new Error(`Checkout failed (HTTP ${res.status}). Please try again.`)
+  }
+  return data
+}
+
 export default function CartDrawer() {
   const { items, isOpen, closeCart, updateQty, removeItem, subtotal, count, clear } = useCart()
   const [placed, setPlaced] = useState(false)
@@ -47,22 +78,16 @@ export default function CartDrawer() {
     setLoading(true)
     try {
       // 1. Create the order server-side (amount is computed from DB prices).
-      const res = await fetch('/api/create-order', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          items: items.map((l) => ({ id: l.productId, qty: l.qty })),
-          customer: { name: form.name, email: form.email, phone: form.phone },
-          shipping: {
-            address: form.address,
-            city: form.city,
-            state: form.state,
-            pincode: form.pincode,
-          },
-        }),
+      const data = await postJSON('/api/create-order', {
+        items: items.map((l) => ({ id: l.productId, qty: l.qty })),
+        customer: { name: form.name, email: form.email, phone: form.phone },
+        shipping: {
+          address: form.address,
+          city: form.city,
+          state: form.state,
+          pincode: form.pincode,
+        },
       })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Could not start checkout.')
 
       // 2. Load the gateway and open Checkout.
       const ok = await loadRazorpay()
@@ -81,17 +106,12 @@ export default function CartDrawer() {
         handler: async (response) => {
           setLoading(true)
           try {
-            const vr = await fetch('/api/verify-payment', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-              }),
+            const vd = await postJSON('/api/verify-payment', {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
             })
-            const vd = await vr.json()
-            if (!vr.ok || !vd.verified) throw new Error(vd.error || 'Payment could not be verified.')
+            if (!vd.verified) throw new Error(vd.error || 'Payment could not be verified.')
 
             // Verified — show confirmation and clear the bag.
             setPlaced(true)
