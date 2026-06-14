@@ -15,13 +15,14 @@ import {
 import ProductsTable from './ProductsTable'
 import ProductForm from './ProductForm'
 import CategoryManager from './CategoryManager'
+import OrdersTable from './OrdersTable'
 import { Btn } from './ui'
 import { useAuth } from '../context/AuthContext'
 
 export default function AdminDashboard() {
   const { products, categories, loading } = useProducts()
   const { user, signOut, authEnabled } = useAuth()
-  const [tab, setTab] = useState('products') // products | categories
+  const [tab, setTab] = useState('products') // products | categories | orders
   const [filter, setFilter] = useState('all')
   const [editing, setEditing] = useState(null) // product | {} (new) | null (closed)
   const fileRef = useRef(null)
@@ -122,6 +123,7 @@ export default function AdminDashboard() {
           {[
             ['products', `Products (${products.length})`],
             ['categories', `Categories (${categories.length})`],
+            ['orders', 'Orders'],
           ].map(([key, label]) => (
             <button
               key={key}
@@ -159,13 +161,15 @@ export default function AdminDashboard() {
               onDelete={removeProduct}
             />
           </>
-        ) : (
+        ) : tab === 'categories' ? (
           <CategoryManager
             categories={categories}
             products={products}
             onSave={upsertCategory}
             onDelete={deleteCategory}
           />
+        ) : (
+          <OrdersTable />
         )}
       </main>
 
