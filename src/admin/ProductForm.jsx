@@ -161,7 +161,7 @@ export default function ProductForm({ product, categories, existingIds, onSave, 
         <div className="mb-6 flex items-center gap-4 rounded-2xl bg-white p-4 ring-1 ring-ink/5">
           <div className="w-16 shrink-0">
             {form.image ? (
-              <div className="aspect-square w-full">
+              <div className="aspect-[1/2] w-full">
                 <img src={form.image} alt="" className="h-full w-full object-contain" />
               </div>
             ) : (

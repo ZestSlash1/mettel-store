@@ -49,7 +49,7 @@ export default function ProductCard({ product, index = 0 }) {
           className="relative w-[44%] min-w-[120px] drop-shadow-[0_24px_40px_rgba(0,0,0,0.28)]"
         >
           {image ? (
-            <div className="aspect-square w-full">
+            <div className="aspect-[1/2] w-full">
               <img src={image} alt={name} className="h-full w-full object-contain" loading="lazy" />
             </div>
           ) : (
