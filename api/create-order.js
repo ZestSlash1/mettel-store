@@ -99,6 +99,10 @@ export default async function handler(req, res) {
       receipt: `rcpt_${Date.now()}`,
     })
 
+    // Invoice number assigned at order time (e.g. MT-20260616-AB12CD).
+    const ymd = new Date().toISOString().slice(0, 10).replace(/-/g, '')
+    const invoiceNumber = `MT-${ymd}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`
+
     // ---- record a pending order ----
     const { error: insErr } = await supabase.from('orders').insert({
       razorpay_order_id: rzpOrder.id,
@@ -110,6 +114,7 @@ export default async function handler(req, res) {
       customer_phone: customer.phone,
       shipping_address: shipping || null,
       items: orderItems,
+      invoice_number: invoiceNumber,
     })
     if (insErr) throw insErr
 

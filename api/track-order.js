@@ -45,7 +45,9 @@ export default async function handler(req, res) {
 
     const { data, error } = await supabase
       .from('orders')
-      .select('status, created_at, amount, currency, items, customer_name, shipping_address')
+      .select(
+        'status, created_at, amount, currency, items, customer_name, customer_email, customer_phone, shipping_address, tracking_number, carrier, invoice_number',
+      )
       .ilike('customer_email', String(email).trim())
       .or(`razorpay_order_id.eq.${ref},razorpay_payment_id.eq.${ref}`)
       .order('created_at', { ascending: false })
@@ -61,8 +63,9 @@ export default async function handler(req, res) {
     const itemCount = Array.isArray(order.items)
       ? order.items.reduce((n, it) => n + (Number(it.qty) || 0), 0)
       : 0
-    const city = order.shipping_address?.city || null
 
+    // The requester proved ownership (email + reference), so return the full
+    // order — the Track page renders both a status summary and the invoice.
     res.status(200).json({
       found: true,
       status: order.status,
@@ -71,7 +74,13 @@ export default async function handler(req, res) {
       currency: order.currency,
       itemCount,
       customerName: order.customer_name,
-      city,
+      customerEmail: order.customer_email,
+      customerPhone: order.customer_phone,
+      shippingAddress: order.shipping_address || null,
+      items: Array.isArray(order.items) ? order.items : [],
+      trackingNumber: order.tracking_number || null,
+      carrier: order.carrier || null,
+      invoiceNumber: order.invoice_number || null,
     })
   } catch (e) {
     console.error('[track-order]', e)

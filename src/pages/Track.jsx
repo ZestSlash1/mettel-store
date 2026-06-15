@@ -1,25 +1,16 @@
 import { useState } from 'react'
 import PageShell from '../components/PageShell'
+import Invoice from '../components/Invoice'
 import { formatPrice } from '../hooks/useProducts'
+import { statusStyle, statusCopy } from '../lib/orderStatus'
 import { inputClass, labelClass, Btn } from '../admin/ui'
-
-const STATUS_COPY = {
-  paid: 'Paid — being prepared for dispatch.',
-  created: 'Payment pending or incomplete.',
-  failed: 'Payment failed — this order was not placed.',
-}
-
-const STATUS_STYLE = {
-  paid: 'bg-green-100 text-green-700',
-  created: 'bg-flame-100 text-flame-700',
-  failed: 'bg-ink/10 text-ink/50',
-}
 
 export default function Track() {
   const [form, setForm] = useState({ reference: '', email: '' })
   const [result, setResult] = useState(null) // { found, ... }
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showInvoice, setShowInvoice] = useState(false)
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }))
 
   const submit = async (e) => {
@@ -76,21 +67,30 @@ export default function Track() {
             <div className="rounded-3xl bg-white p-6 ring-1 ring-ink/5">
               <div className="flex items-center justify-between gap-3">
                 <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink/40">
-                  {formatDate(result.createdAt)}
+                  {result.invoiceNumber || formatDate(result.createdAt)}
                 </span>
-                <span className={`rounded-full px-2.5 py-1 font-mono text-[9px] uppercase tracking-wider ${STATUS_STYLE[result.status] || STATUS_STYLE.created}`}>
+                <span className={`rounded-full px-2.5 py-1 font-mono text-[9px] uppercase tracking-wider ${statusStyle(result.status)}`}>
                   {result.status}
                 </span>
               </div>
-              <p className="mt-3 font-mono text-[12px] leading-relaxed text-ink/70">
-                {STATUS_COPY[result.status] || 'Order found.'}
-              </p>
+              <p className="mt-3 font-mono text-[12px] leading-relaxed text-ink/70">{statusCopy(result.status)}</p>
+
+              {result.trackingNumber ? (
+                <p className="mt-3 rounded-xl bg-blue-50 px-3 py-2 font-mono text-[11px] text-blue-700">
+                  Tracking: <span className="font-bold">{result.trackingNumber}</span>
+                  {result.carrier ? ` · ${result.carrier}` : ''}
+                </p>
+              ) : null}
+
               <dl className="mt-5 space-y-2 border-t border-ink/10 pt-4 font-mono text-[11px] uppercase tracking-wider">
                 <Row k="Name" v={result.customerName} />
                 <Row k="Items" v={result.itemCount} />
                 <Row k="Total" v={formatPrice(Math.round((result.amount || 0) / 100), result.currency || 'INR')} />
-                {result.city ? <Row k="Ship to" v={result.city} /> : null}
               </dl>
+
+              <div className="mt-5">
+                <Btn variant="ghost" type="button" onClick={() => setShowInvoice(true)}>Download invoice</Btn>
+              </div>
             </div>
           ) : result && !result.found ? (
             <div className="rounded-3xl border border-ink/10 bg-silver-50 p-8 text-center">
@@ -107,6 +107,10 @@ export default function Track() {
           )}
         </div>
       </div>
+
+      {showInvoice && result?.found ? (
+        <Invoice order={result} onClose={() => setShowInvoice(false)} />
+      ) : null}
     </PageShell>
   )
 }
@@ -124,11 +128,7 @@ function formatDate(ts) {
   if (!ts) return '—'
   try {
     return new Date(ts).toLocaleString('en-IN', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+      day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
     })
   } catch {
     return ts

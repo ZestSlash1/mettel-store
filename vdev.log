@@ -1,0 +1,17 @@
+<claude-code-hint v="1" type="plugin" value="vercel@claude-plugins-official" />
+Vercel CLI 54.14.0 (Node.js 24.16.0)
+Retrieving project…
+> Creating initial build
+yarn run v1.22.22
+$ vite
+
+  [32m[1mVITE[22m v5.4.21[39m  [2mready in [0m[1m310[22m[2m[0m ms[22m
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m51548[22m/[39m
+[2m  [32m➜[39m  [1mNetwork[22m[2m: use [22m[1m--host[22m[2m to expose[22m
+> Success! Build completed
+> Ready! Available at http://localhost:3000
+Assertion failed: !(handle->flags & UV_HANDLE_CLOSING), file src\win\async.c, line 94
+[2m1:05:39 am[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m1:07:03 am[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/admin/OrdersTable.jsx, /src/index.css[22m
+[2m1:07:30 am[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/Track.jsx, /src/index.css[22m

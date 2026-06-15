@@ -2,18 +2,25 @@ import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient'
 import { formatPrice } from '../hooks/useProducts'
+import { ORDER_STATUSES, statusStyle } from '../lib/orderStatus'
+import Invoice from '../components/Invoice'
+import { Btn, inputClass, labelClass } from './ui'
 
 /**
- * Read-only Orders view. Reads from Supabase through the admin's authenticated
- * session — the "auth read orders" RLS policy (supabase/orders.sql) allows it.
- * Orders are written only by the serverless functions, so there's nothing to
- * edit here.
+ * Orders admin. Reads via the authenticated session ("auth read orders" RLS).
+ * Status / tracking / carrier / notes are editable through the order detail
+ * panel, which saves via the api/update-order serverless function (it verifies
+ * the admin token and writes with the service_role key). Each order also has a
+ * printable invoice.
  */
 export default function OrdersTable() {
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [selected, setSelected] = useState(null) // order opened in the detail panel
+  const [selected, setSelected] = useState(null) // order in the detail panel
+  const [invoiceOrder, setInvoiceOrder] = useState(null) // order in the invoice modal
+  const [query, setQuery] = useState('')
+  const [statusFilter, setStatusFilter] = useState('all')
 
   useEffect(() => {
     let active = true
@@ -44,6 +51,12 @@ export default function OrdersTable() {
       active = false
     }
   }, [])
+
+  // Merge an updated order back into local state (after a save).
+  const applyUpdate = (updated) => {
+    setOrders((prev) => prev.map((o) => (o.id === updated.id ? { ...o, ...updated } : o)))
+    setSelected((s) => (s && s.id === updated.id ? { ...s, ...updated } : s))
+  }
 
   if (!isSupabaseConfigured) {
     return (
@@ -76,8 +89,38 @@ export default function OrdersTable() {
     )
   }
 
+  const filtered = orders.filter((o) => {
+    if (statusFilter !== 'all' && o.status !== statusFilter) return false
+    if (query.trim()) {
+      const q = query.trim().toLowerCase()
+      const hay = [o.customer_name, o.customer_email, o.razorpay_order_id, o.razorpay_payment_id, o.invoice_number]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase()
+      if (!hay.includes(q)) return false
+    }
+    return true
+  })
+
   return (
     <>
+      {/* Search + status filter */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search name, email, reference…"
+          className={`${inputClass} max-w-xs`}
+        />
+        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className={`${inputClass} max-w-[180px]`}>
+          <option value="all">All statuses</option>
+          {ORDER_STATUSES.map((s) => (
+            <option key={s} value={s}>{s}</option>
+          ))}
+        </select>
+        <span className="font-mono text-[10px] uppercase tracking-wider text-ink/35">{filtered.length} of {orders.length}</span>
+      </div>
+
       <div className="overflow-x-auto rounded-2xl border border-ink/10 bg-white">
         <table className="w-full min-w-[720px] border-collapse">
           <thead>
@@ -91,51 +134,94 @@ export default function OrdersTable() {
             </tr>
           </thead>
           <tbody>
-            {orders.map((o) => {
-              const itemCount = Array.isArray(o.items)
-                ? o.items.reduce((n, it) => n + (Number(it.qty) || 0), 0)
-                : 0
+            {filtered.map((o) => {
+              const itemCount = itemTotalQty(o.items)
               return (
                 <tr
                   key={o.id}
                   onClick={() => setSelected(o)}
                   className="cursor-pointer border-b border-ink/5 last:border-0 hover:bg-silver-50"
                 >
-                  <Td>
-                    <span className="font-mono text-[11px] text-ink/70">{formatDate(o.created_at)}</span>
-                  </Td>
+                  <Td><span className="font-mono text-[11px] text-ink/70">{formatDate(o.created_at)}</span></Td>
                   <Td>
                     <div className="font-mono text-[12px] text-ink">{o.customer_name || '—'}</div>
                     <div className="font-mono text-[10px] text-ink/40">{o.customer_email || ''}</div>
                   </Td>
+                  <Td><span className="font-mono text-[12px] text-ink/70">{itemCount}</span></Td>
                   <Td>
-                    <span className="font-mono text-[12px] text-ink/70">{itemCount}</span>
-                  </Td>
-                  <Td>
-                    {/* amount is stored in paise → convert to rupees for display */}
                     <span className="font-pixel text-sm text-flame-600">
                       {formatPrice(Math.round((o.amount || 0) / 100), o.currency || 'INR')}
                     </span>
                   </Td>
-                  <Td>
-                    <StatusChip status={o.status} />
-                  </Td>
-                  <Td>
-                    <span className="font-mono text-[10px] uppercase tracking-wider text-ink/35">View →</span>
-                  </Td>
+                  <Td><StatusChip status={o.status} /></Td>
+                  <Td><span className="font-mono text-[10px] uppercase tracking-wider text-ink/35">View →</span></Td>
                 </tr>
               )
             })}
           </tbody>
         </table>
+        {filtered.length === 0 ? (
+          <p className="px-4 py-8 text-center font-mono text-[11px] text-ink/40">No orders match that filter.</p>
+        ) : null}
       </div>
 
-      <OrderDetail order={selected} onClose={() => setSelected(null)} />
+      <OrderDetail
+        order={selected}
+        onClose={() => setSelected(null)}
+        onSaved={applyUpdate}
+        onShowInvoice={() => setInvoiceOrder(selected)}
+      />
+      {invoiceOrder ? <Invoice order={invoiceOrder} onClose={() => setInvoiceOrder(null)} /> : null}
     </>
   )
 }
 
-function OrderDetail({ order, onClose }) {
+function OrderDetail({ order, onClose, onSaved, onShowInvoice }) {
+  const [form, setForm] = useState({ status: '', tracking_number: '', carrier: '', admin_notes: '' })
+  const [saving, setSaving] = useState(false)
+  const [saveMsg, setSaveMsg] = useState('')
+  const [saveErr, setSaveErr] = useState('')
+
+  // Sync the form whenever a different order is opened.
+  useEffect(() => {
+    if (!order) return
+    setForm({
+      status: order.status || 'created',
+      tracking_number: order.tracking_number || '',
+      carrier: order.carrier || '',
+      admin_notes: order.admin_notes || '',
+    })
+    setSaveMsg('')
+    setSaveErr('')
+  }, [order?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }))
+
+  async function save() {
+    setSaving(true)
+    setSaveErr('')
+    setSaveMsg('')
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const token = session?.access_token
+      if (!token) throw new Error('Your session expired — sign in again.')
+      const res = await fetch('/api/update-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ id: order.id, ...form }),
+      })
+      const text = await res.text()
+      const data = text ? JSON.parse(text) : null
+      if (!res.ok || !data?.ok) throw new Error(data?.error || `Save failed (HTTP ${res.status}).`)
+      onSaved(data.order)
+      setSaveMsg(data.emailSent ? 'Saved · customer emailed.' : 'Saved.')
+    } catch (e) {
+      setSaveErr(e.message)
+    } finally {
+      setSaving(false)
+    }
+  }
+
   return (
     <AnimatePresence>
       {order && (
@@ -158,11 +244,11 @@ function OrderDetail({ order, onClose }) {
             <div className="flex items-start justify-between border-b border-ink/10 px-6 py-4">
               <div>
                 <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink/40">
-                  Order · {formatDate(order.created_at)}
+                  {order.invoice_number || 'Order'} · {formatDate(order.created_at)}
                 </div>
                 <h2 className="mt-1 flex items-center gap-2 font-display text-2xl font-black uppercase tracking-tight">
                   {formatPrice(Math.round((order.amount || 0) / 100), order.currency || 'INR')}
-                  <StatusChip status={order.status} />
+                  <StatusChip status={form.status || order.status} />
                 </h2>
               </div>
               <button onClick={onClose} className="text-2xl leading-none text-ink/50 hover:text-ink" aria-label="Close">×</button>
@@ -170,15 +256,45 @@ function OrderDetail({ order, onClose }) {
 
             {/* Body */}
             <div className="flex-1 overflow-y-auto px-6 py-5">
+              {/* Fulfilment — editable */}
+              <Section title="Fulfilment">
+                <label className="block">
+                  <span className={labelClass}>Status</span>
+                  <select className={inputClass} value={form.status} onChange={set('status')}>
+                    {ORDER_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                </label>
+                <div className="mt-3 grid grid-cols-2 gap-3">
+                  <label className="block">
+                    <span className={labelClass}>Carrier</span>
+                    <input className={inputClass} value={form.carrier} onChange={set('carrier')} placeholder="e.g. Delhivery" />
+                  </label>
+                  <label className="block">
+                    <span className={labelClass}>Tracking #</span>
+                    <input className={inputClass} value={form.tracking_number} onChange={set('tracking_number')} placeholder="AWB / tracking" />
+                  </label>
+                </div>
+                <label className="mt-3 block">
+                  <span className={labelClass}>Internal notes</span>
+                  <textarea className={`${inputClass} min-h-20 resize-y`} value={form.admin_notes} onChange={set('admin_notes')} placeholder="Private — not shown to the customer." />
+                </label>
+                <div className="mt-3 flex items-center gap-3">
+                  <Btn variant="flame" type="button" onClick={save} disabled={saving}>
+                    {saving ? 'Saving…' : 'Save changes'}
+                  </Btn>
+                  {saveMsg ? <span className="font-mono text-[10px] text-green-700">{saveMsg}</span> : null}
+                  {saveErr ? <span className="font-mono text-[10px] text-flame-700">{saveErr}</span> : null}
+                </div>
+                <p className="mt-2 font-mono text-[9px] text-ink/35">Setting status to shipped/delivered emails the customer (if email is configured).</p>
+              </Section>
+
               <Section title="Customer">
                 <Line label="Name" value={order.customer_name} />
                 <Line label="Email" value={order.customer_email} />
                 <Line label="Phone" value={order.customer_phone} />
               </Section>
 
-              <Section title="Ship to">
-                {renderAddress(order.shipping_address)}
-              </Section>
+              <Section title="Ship to">{renderAddress(order.shipping_address)}</Section>
 
               <Section title={`Items (${itemTotalQty(order.items)})`}>
                 {Array.isArray(order.items) && order.items.length ? (
@@ -202,10 +318,14 @@ function OrderDetail({ order, onClose }) {
                 )}
               </Section>
 
-              <Section title="Payment">
+              <Section title="Payment & invoice">
                 <Line label="Total" value={formatPrice(Math.round((order.amount || 0) / 100), order.currency || 'INR')} />
+                <Line label="Invoice no." value={order.invoice_number} mono />
                 <Line label="Razorpay order" value={order.razorpay_order_id} mono />
                 <Line label="Razorpay payment" value={order.razorpay_payment_id} mono />
+                <div className="mt-3">
+                  <Btn variant="ghost" type="button" onClick={onShowInvoice}>View / print invoice</Btn>
+                </div>
               </Section>
             </div>
           </motion.aside>
@@ -237,7 +357,6 @@ function Line({ label, value, mono }) {
 
 function renderAddress(addr) {
   if (!addr) return <p className="font-mono text-[11px] text-ink/40">No address recorded.</p>
-  // shipping_address is jsonb: { address, city, state, pincode }
   const a = typeof addr === 'string' ? safeParse(addr) : addr
   if (!a || typeof a !== 'object') {
     return <p className="font-mono text-[12px] text-ink">{String(addr)}</p>
@@ -267,13 +386,8 @@ function itemTotalQty(items) {
 }
 
 function StatusChip({ status }) {
-  const styles = {
-    paid: 'bg-green-100 text-green-700',
-    created: 'bg-flame-100 text-flame-700',
-    failed: 'bg-ink/10 text-ink/50',
-  }
   return (
-    <span className={`rounded-full px-2.5 py-1 font-mono text-[9px] uppercase tracking-wider ${styles[status] || styles.created}`}>
+    <span className={`rounded-full px-2.5 py-1 font-mono text-[9px] uppercase tracking-wider ${statusStyle(status)}`}>
       {status || 'created'}
     </span>
   )
@@ -283,11 +397,7 @@ function formatDate(ts) {
   if (!ts) return '—'
   try {
     return new Date(ts).toLocaleString('en-IN', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+      day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
     })
   } catch {
     return ts
@@ -295,9 +405,7 @@ function formatDate(ts) {
 }
 
 function Th({ children }) {
-  return (
-    <th className="px-4 py-3 font-mono text-[9px] uppercase tracking-[0.18em] text-ink/40">{children}</th>
-  )
+  return <th className="px-4 py-3 font-mono text-[9px] uppercase tracking-[0.18em] text-ink/40">{children}</th>
 }
 
 function Td({ children }) {
