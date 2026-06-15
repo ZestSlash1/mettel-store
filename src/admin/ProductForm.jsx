@@ -1,9 +1,14 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
-import { makeProductId } from '../lib/dataStore'
+import { makeProductId, slugify } from '../lib/dataStore'
+import { supabase, isSupabaseConfigured } from '../lib/supabaseClient'
 import { formatPrice } from '../hooks/useProducts'
 import PhoneCase from '../components/PhoneCase'
 import { Field, Btn, inputClass, labelClass } from './ui'
+
+const ACCEPTED_IMAGE_TYPES = ['image/png', 'image/webp', 'image/jpeg']
+const MAX_IMAGE_BYTES = 2 * 1024 * 1024 // ~2 MB
+const EXT_BY_TYPE = { 'image/png': 'png', 'image/webp': 'webp', 'image/jpeg': 'jpg' }
 
 const STATUS = ['available', 'preorder', 'soldout']
 const CURRENCIES = ['INR', 'USD']
@@ -39,8 +44,50 @@ export default function ProductForm({ product, categories, existingIds, onSave, 
   const [modelsText, setModelsText] = useState((product?.models || []).join(', '))
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const [uploadError, setUploadError] = useState('')
+  const fileRef = useRef(null)
 
   const set = (patch) => setForm((f) => ({ ...f, ...patch }))
+
+  // Upload a chosen image to Supabase Storage and store its public URL in
+  // form.image. Requires an authenticated admin session (enforced by the
+  // bucket's RLS policy — see supabase/storage.sql).
+  async function handleImageFile(e) {
+    const file = e.target.files?.[0]
+    e.target.value = '' // allow re-selecting the same file later
+    if (!file) return
+    setUploadError('')
+
+    if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
+      return setUploadError('Use a PNG, WEBP or JPEG image.')
+    }
+    if (file.size > MAX_IMAGE_BYTES) {
+      return setUploadError('Image must be under 2 MB.')
+    }
+    if (!isSupabaseConfigured) {
+      return setUploadError('Connect Supabase to upload images (local mode can paste a URL instead).')
+    }
+
+    setUploading(true)
+    try {
+      const ext = EXT_BY_TYPE[file.type] || 'png'
+      const base = slugify(form.sku || form.name) || 'product'
+      const path = `${base}-${Date.now()}.${ext}`
+
+      const { error: upErr } = await supabase.storage
+        .from('product-images')
+        .upload(path, file, { upsert: true, contentType: file.type })
+      if (upErr) throw upErr
+
+      const { data } = supabase.storage.from('product-images').getPublicUrl(path)
+      set({ image: data.publicUrl })
+    } catch (err) {
+      setUploadError(err?.message || 'Upload failed.')
+    } finally {
+      setUploading(false)
+    }
+  }
 
   const setSpec = (i, key, value) =>
     setForm((f) => {
@@ -114,7 +161,9 @@ export default function ProductForm({ product, categories, existingIds, onSave, 
         <div className="mb-6 flex items-center gap-4 rounded-2xl bg-white p-4 ring-1 ring-ink/5">
           <div className="w-16 shrink-0">
             {form.image ? (
-              <img src={form.image} alt="" className="h-auto w-full" />
+              <div className="aspect-square w-full">
+                <img src={form.image} alt="" className="h-full w-full object-contain" />
+              </div>
             ) : (
               <PhoneCase className="h-auto w-full" shell={form.color_hex} accent={form.accent_hex} />
             )}
@@ -188,9 +237,32 @@ export default function ProductForm({ product, categories, existingIds, onSave, 
             </div>
           </Field>
 
-          <Field label="Image URL" hint="Leave blank to use the vector case. Local files: put in /public, e.g. /shell.png" className="col-span-2">
-            <input className={inputClass} value={form.image || ''} onChange={(e) => set({ image: e.target.value })} placeholder="/aramid.png or https://…" />
-          </Field>
+          <div className="col-span-2">
+            <Field label="Image" hint="Upload a file, or paste a URL. Leave blank to use the vector case.">
+              <input className={inputClass} value={form.image || ''} onChange={(e) => set({ image: e.target.value })} placeholder="/aramid.png or https://…" />
+            </Field>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/png,image/webp,image/jpeg"
+                onChange={handleImageFile}
+                className="hidden"
+              />
+              <Btn variant="ghost" type="button" onClick={() => fileRef.current?.click()} disabled={uploading}>
+                {uploading ? 'Uploading…' : 'Upload image'}
+              </Btn>
+              {form.image ? (
+                <Btn variant="danger" type="button" onClick={() => set({ image: null })} disabled={uploading}>
+                  Remove image
+                </Btn>
+              ) : null}
+              <span className="font-mono text-[10px] text-ink/35">PNG · WEBP · JPEG · max 2 MB</span>
+            </div>
+            {uploadError ? (
+              <p className="mt-2 rounded-xl bg-flame-50 px-3 py-2 font-mono text-[10px] text-flame-700">{uploadError}</p>
+            ) : null}
+          </div>
 
           <Field label="Compatible models" hint="Comma-separated" className="col-span-2">
             <input className={inputClass} value={modelsText} onChange={(e) => setModelsText(e.target.value)} placeholder="iPhone 16 Pro, Pixel 9 Pro" />

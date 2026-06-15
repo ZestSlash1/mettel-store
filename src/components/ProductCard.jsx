@@ -49,7 +49,9 @@ export default function ProductCard({ product, index = 0 }) {
           className="relative w-[44%] min-w-[120px] drop-shadow-[0_24px_40px_rgba(0,0,0,0.28)]"
         >
           {image ? (
-            <img src={image} alt={name} className="h-auto w-full" loading="lazy" />
+            <div className="aspect-square w-full">
+              <img src={image} alt={name} className="h-full w-full object-contain" loading="lazy" />
+            </div>
           ) : (
             <PhoneCase className="h-auto w-full" shell={color_hex} accent={accent_hex} />
           )}

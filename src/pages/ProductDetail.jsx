@@ -84,7 +84,9 @@ export default function ProductDetail() {
               className="relative w-[58%] max-w-[260px] drop-shadow-[0_40px_60px_rgba(0,0,0,0.4)]"
             >
               {product.image ? (
-                <img src={product.image} alt={product.name} className="h-auto w-full" />
+                <div className="aspect-square w-full">
+                  <img src={product.image} alt={product.name} className="h-full w-full object-contain" />
+                </div>
               ) : (
                 <PhoneCase className="h-auto w-full" shell={product.color_hex} accent={product.accent_hex} />
               )}
