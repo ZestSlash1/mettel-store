@@ -3,9 +3,17 @@ import { Routes, Route } from 'react-router-dom'
 import Navigation from './components/Navigation'
 import Hero from './components/Hero'
 import ProductGrid from './components/ProductGrid'
+import Subscribe from './components/Subscribe'
 import Footer from './components/Footer'
 import CartDrawer from './components/CartDrawer'
 import ProductDetail from './pages/ProductDetail'
+import Shop from './pages/Shop'
+import About from './pages/About'
+import News from './pages/News'
+import Contact from './pages/Contact'
+import GiftCards from './pages/GiftCards'
+import { Shipping, Returns, Warranty } from './pages/Policies'
+import NotFound from './pages/NotFound'
 import AuthGate from './admin/AuthGate'
 
 // Admin is code-split: shoppers never download it.
@@ -18,6 +26,7 @@ function Storefront() {
       <main>
         <Hero />
         <ProductGrid />
+        <Subscribe />
       </main>
       <Footer />
     </>
@@ -38,6 +47,14 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Storefront />} />
         <Route path="/product/:id" element={<ProductDetail />} />
+        <Route path="/shop" element={<Shop />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/news" element={<News />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/gift-cards" element={<GiftCards />} />
+        <Route path="/shipping" element={<Shipping />} />
+        <Route path="/returns" element={<Returns />} />
+        <Route path="/warranty" element={<Warranty />} />
         <Route
           path="/admin/*"
           element={
@@ -48,6 +65,7 @@ export default function App() {
             </AuthGate>
           }
         />
+        <Route path="*" element={<NotFound />} />
       </Routes>
 
       {/* Cart drawer lives at app level so it's reachable from every route */}

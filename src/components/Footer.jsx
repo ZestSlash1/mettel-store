@@ -1,10 +1,43 @@
+import { Link } from 'react-router-dom'
+
+// Each footer link points at a real route. Phone Covers/Accessories deep-link
+// to the Shop page pre-filtered by category id (cases / accessories).
+const COLUMNS = [
+  {
+    h: 'Shop',
+    items: [
+      { label: 'Phone Covers', to: '/shop?category=cases' },
+      { label: 'Accessories', to: '/shop?category=accessories' },
+      { label: 'Gift Cards', to: '/gift-cards' },
+    ],
+  },
+  {
+    h: 'Company',
+    items: [
+      { label: 'About', to: '/about' },
+      { label: 'News', to: '/news' },
+      { label: 'Contact', to: '/contact' },
+    ],
+  },
+  {
+    h: 'Support',
+    items: [
+      { label: 'Shipping', to: '/shipping' },
+      { label: 'Returns', to: '/returns' },
+      { label: 'Warranty', to: '/warranty' },
+    ],
+  },
+]
+
 export default function Footer() {
   return (
     <footer id="info" className="mx-auto max-w-[1400px] px-4 pb-12 pt-8 sm:px-6">
       <div className="rounded-3xl bg-ink p-8 text-silver sm:p-12">
         <div className="flex flex-col gap-10 sm:flex-row sm:items-start sm:justify-between">
           <div className="max-w-sm">
-            <div className="font-display text-4xl font-black tracking-tight">METTEL</div>
+            <Link to="/" className="font-display text-4xl font-black tracking-tight transition-colors hover:text-flame-500">
+              METTEL
+            </Link>
             <p className="mt-3 font-mono text-[11px] leading-relaxed text-silver/60">
               Engineered coverage for the device you carry everywhere. Built in India. Shipped
               worldwide.
@@ -12,19 +45,15 @@ export default function Footer() {
           </div>
 
           <div className="grid grid-cols-2 gap-10 font-mono text-[11px] uppercase tracking-wider sm:grid-cols-3">
-            {[
-              { h: 'Shop', items: ['Phone Covers', 'Accessories', 'Gift Cards'] },
-              { h: 'Company', items: ['About', 'News', 'Contact'] },
-              { h: 'Support', items: ['Shipping', 'Returns', 'Warranty'] },
-            ].map((col) => (
+            {COLUMNS.map((col) => (
               <div key={col.h}>
                 <div className="mb-3 text-flame-500">{col.h}</div>
                 <ul className="space-y-2 text-silver/55">
                   {col.items.map((i) => (
-                    <li key={i}>
-                      <a href="#" className="transition-colors hover:text-white">
-                        {i}
-                      </a>
+                    <li key={i.label}>
+                      <Link to={i.to} className="transition-colors hover:text-white">
+                        {i.label}
+                      </Link>
                     </li>
                   ))}
                 </ul>

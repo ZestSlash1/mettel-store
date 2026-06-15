@@ -3,20 +3,24 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useCart } from '../context/CartContext'
 
+// Anchors (/#…) jump to home sections; `to` paths are real routes.
 const LINKS = [
-  { label: 'Info', href: '#info' },
-  { label: 'News', href: '#news' },
-  { label: 'Features', href: '#features' },
-  { label: 'Buy', href: '#buy' },
+  { label: 'Info', to: '/about' },
+  { label: 'News', to: '/news' },
+  { label: 'Features', href: '/#features' },
+  { label: 'Buy', href: '/#products' },
 ]
 
+const MotionLink = motion(Link)
+
 /**
- * Reusable pill. `variant` controls the look:
+ * Reusable pill. Pass `to` for an in-app route (React Router) or `href` for a
+ * hash anchor / external link. `variant` controls the look:
  *  - 'ghost'  : transparent, hover fills light
  *  - 'solid'  : black
  *  - 'flame'  : orange accent
  */
-function Pill({ children, href = '#', variant = 'ghost', active = false, className = '' }) {
+function Pill({ children, href, to, variant = 'ghost', active = false, className = '' }) {
   const base =
     'relative inline-flex items-center justify-center rounded-full px-5 py-2.5 text-[11px] font-mono uppercase tracking-[0.18em] transition-colors duration-200 select-none'
   const variants = {
@@ -26,16 +30,13 @@ function Pill({ children, href = '#', variant = 'ghost', active = false, classNa
     solid: 'bg-ink text-white hover:bg-flame-500',
     flame: 'bg-flame-500 text-white hover:bg-flame-600',
   }
-  return (
-    <motion.a
-      href={href}
-      whileHover={{ y: -1 }}
-      whileTap={{ scale: 0.97 }}
-      className={`${base} ${variants[variant]} ${className}`}
-    >
-      {children}
-    </motion.a>
-  )
+  const cls = `${base} ${variants[variant]} ${className}`
+  const motionProps = { whileHover: { y: -1 }, whileTap: { scale: 0.97 } }
+
+  if (to) {
+    return <MotionLink to={to} {...motionProps} className={cls}>{children}</MotionLink>
+  }
+  return <motion.a href={href || '#'} {...motionProps} className={cls}>{children}</motion.a>
 }
 
 /**
@@ -46,7 +47,7 @@ function DiscoverPill() {
   const [hover, setHover] = useState(false)
   return (
     <a
-      href="#products"
+      href="/#products"
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
       className="relative inline-flex items-center gap-3 rounded-full px-7 py-2.5 text-[11px] font-mono uppercase tracking-[0.2em] text-ink overflow-hidden"
@@ -101,18 +102,18 @@ export default function Navigation() {
     >
       <nav className="mx-auto flex max-w-[1400px] items-center gap-2 rounded-full bg-silver-50/85 p-2 shadow-panel ring-1 ring-ink/5 backdrop-blur-md">
         {/* Brand mark */}
-        <a
-          href="#"
+        <Link
+          to="/"
           className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-ink text-white"
           aria-label="MetTel home"
         >
           <span className="font-display text-sm font-black leading-none">MT</span>
-        </a>
+        </Link>
 
         {/* Primary links */}
         <div className="hidden items-center gap-1 md:flex">
           {LINKS.map((l) => (
-            <Pill key={l.label} href={l.href} active={l.label === 'Features'}>
+            <Pill key={l.label} to={l.to} href={l.href}>
               {l.label}
             </Pill>
           ))}
@@ -125,7 +126,7 @@ export default function Navigation() {
 
         {/* Right cluster */}
         <div className="ml-auto flex items-center gap-2 lg:ml-2">
-          <Pill href="#subscribe" variant="solid">
+          <Pill href="/#subscribe" variant="solid">
             Subscribe
           </Pill>
 
