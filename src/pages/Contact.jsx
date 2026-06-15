@@ -18,6 +18,8 @@ export default function Contact() {
   return (
     <PageShell
       eyebrow="Company / Contact"
+      seoTitle="Contact"
+      seoDescription="Reach the MetTel team about an order, a product, or a partnership."
       title={<>Contact</>}
       intro="Questions about an order, a product, or a partnership? Reach us directly."
     >

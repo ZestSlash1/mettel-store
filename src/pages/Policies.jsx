@@ -6,6 +6,8 @@ export function Shipping() {
   return (
     <PolicyPage
       eyebrow="Support / Shipping"
+      seoTitle="Shipping"
+      seoDescription="Dispatch times, domestic and international delivery, and tracking for MetTel orders."
       title={<>Shipping</>}
       intro="How and when your order reaches you. Built in India, shipped worldwide."
       sections={[
@@ -43,6 +45,8 @@ export function Returns() {
   return (
     <PolicyPage
       eyebrow="Support / Returns"
+      seoTitle="Returns"
+      seoDescription="MetTel's 14-day return window, how to start a return, and refund timelines."
       title={<>Returns</>}
       intro="Coverage you can change your mind about. A 14-day, no-drama return window."
       sections={[
@@ -79,6 +83,8 @@ export function Warranty() {
   return (
     <PolicyPage
       eyebrow="Support / Warranty"
+      seoTitle="Warranty"
+      seoDescription="MetTel's 12-month limited warranty: what's covered and how to make a claim."
       title={<>Warranty</>}
       intro="Built to outlive the device it protects. Backed by a 12-month warranty."
       sections={[

@@ -3,7 +3,7 @@ import PageShell from '../components/PageShell'
 
 export default function NotFound() {
   return (
-    <PageShell>
+    <PageShell seoTitle="Page not found">
       <div className="flex min-h-[50vh] flex-col items-center justify-center text-center">
         <div className="font-pixel text-7xl text-flame-500">404</div>
         <h1 className="mt-4 font-display text-5xl font-black uppercase tracking-tight">Page not found</h1>

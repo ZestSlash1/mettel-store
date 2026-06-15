@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import Navigation from '../components/Navigation'
 import Footer from '../components/Footer'
+import Seo from '../components/Seo'
 import PhoneCase from '../components/PhoneCase'
 import ProductCard from '../components/ProductCard'
 import { useProducts, formatPrice } from '../hooks/useProducts'
@@ -62,6 +63,7 @@ export default function ProductDetail() {
 
   return (
     <>
+      <Seo title={product.name} description={product.tagline} />
       <Navigation />
       <main className="mx-auto max-w-[1200px] px-4 pb-24 pt-28 sm:px-6 sm:pt-32">
         {/* Breadcrumb */}

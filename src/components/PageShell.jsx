@@ -1,19 +1,16 @@
-import { useEffect } from 'react'
 import Navigation from './Navigation'
 import Footer from './Footer'
+import Seo from './Seo'
 
 /**
  * Standard layout for content pages: floating nav, a big brutalist page header,
- * the page body, then the footer. Scrolls to top on mount so navigating between
- * pages always starts at the heading.
+ * the page body, then the footer. Scroll reset on navigation is handled globally
+ * by <ScrollManager>. Pass seoTitle/seoDescription to set the tab + share tags.
  */
-export default function PageShell({ eyebrow, title, intro, children }) {
-  useEffect(() => {
-    window.scrollTo(0, 0)
-  }, [])
-
+export default function PageShell({ eyebrow, title, intro, seoTitle, seoDescription, children }) {
   return (
     <>
+      <Seo title={seoTitle} description={seoDescription} />
       <Navigation />
       <main className="mx-auto max-w-[1100px] px-4 pb-24 pt-28 sm:px-6 sm:pt-36">
         {eyebrow || title || intro ? (
@@ -40,9 +37,9 @@ export default function PageShell({ eyebrow, title, intro, children }) {
  * Shared template for text-heavy policy pages (shipping, returns, warranty).
  * `sections` is [{ h, body: string[] }].
  */
-export function PolicyPage({ eyebrow, title, intro, sections }) {
+export function PolicyPage({ eyebrow, title, intro, seoTitle, seoDescription, sections }) {
   return (
-    <PageShell eyebrow={eyebrow} title={title} intro={intro}>
+    <PageShell eyebrow={eyebrow} title={title} intro={intro} seoTitle={seoTitle} seoDescription={seoDescription}>
       <div className="space-y-10">
         {sections.map((s) => (
           <section key={s.h}>

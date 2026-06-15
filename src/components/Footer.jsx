@@ -22,6 +22,7 @@ const COLUMNS = [
   {
     h: 'Support',
     items: [
+      { label: 'FAQ', to: '/faq' },
       { label: 'Shipping', to: '/shipping' },
       { label: 'Returns', to: '/returns' },
       { label: 'Warranty', to: '/warranty' },
@@ -62,9 +63,13 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-10 flex flex-wrap items-center justify-between gap-2 border-t border-silver/10 pt-6 font-mono text-[10px] uppercase tracking-[0.2em] text-silver/40">
+        <div className="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-silver/10 pt-6 font-mono text-[10px] uppercase tracking-[0.2em] text-silver/40">
           <span>© {new Date().getFullYear()} MetTel · mettel.in</span>
-          <span>Made for the everyday object</span>
+          <div className="flex flex-wrap items-center gap-4">
+            <Link to="/privacy" className="transition-colors hover:text-white">Privacy</Link>
+            <Link to="/terms" className="transition-colors hover:text-white">Terms</Link>
+            <span className="hidden sm:inline">Made for the everyday object</span>
+          </div>
         </div>
       </div>
     </footer>

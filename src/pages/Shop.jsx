@@ -18,6 +18,8 @@ export default function Shop() {
   return (
     <PageShell
       eyebrow="Catalogue"
+      seoTitle="Shop"
+      seoDescription="Browse the full MetTel lineup of engineered phone covers and accessories."
       title={<>The<br />Lineup</>}
       intro="Engineered coverage and accessories. Filter by category, or browse the lot."
     >

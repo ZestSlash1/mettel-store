@@ -18,6 +18,8 @@ export default function GiftCards() {
   return (
     <PageShell
       eyebrow="Shop / Gift Cards"
+      seoTitle="Gift Cards"
+      seoDescription="Digital MetTel gift cards, delivered by email and redeemable on the full lineup."
       title={<>Gift<br />cards</>}
       intro="Give engineered coverage. Digital gift cards delivered by email, redeemable on anything in the lineup."
     >

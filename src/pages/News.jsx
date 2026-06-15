@@ -33,6 +33,8 @@ export default function News() {
   return (
     <PageShell
       eyebrow="Company / News"
+      seoTitle="News"
+      seoDescription="Product drops, restocks, and notes from the MetTel workshop."
       title={<>News</>}
       intro="Product drops, restocks, and notes from the workshop."
     >

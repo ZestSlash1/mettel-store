@@ -5,6 +5,8 @@ export default function About() {
   return (
     <PageShell
       eyebrow="Company / About"
+      seoTitle="About"
+      seoDescription="MetTel makes engineered phone covers and accessories — designed in India, shipped worldwide."
       title={<>Built<br />to last</>}
       intro="MetTel makes engineered coverage for the device you carry everywhere — high-end phone covers and accessories, designed in India and shipped worldwide."
     >
