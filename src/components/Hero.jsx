@@ -1,5 +1,9 @@
+import { useEffect, useState } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
+import { listCategories, subscribe } from '../lib/dataStore'
 import PhoneCase from './PhoneCase'
+
+const FALLBACK_CATEGORIES = ['Coverage', 'Audio', 'Accessories', 'Lifestyle']
 
 /* Staggered upward reveal for text clusters on load */
 const container = {
@@ -25,6 +29,24 @@ function SpecBlock({ eyebrow, children, className = '' }) {
 
 export default function Hero() {
   const reduce = useReducedMotion()
+
+  // Category strip is built live from active categories (falls back to a
+  // default set before they load or if none are configured).
+  const [categories, setCategories] = useState([])
+  useEffect(() => {
+    let active = true
+    const load = () =>
+      listCategories().then((cats) => {
+        if (active) setCategories(cats.filter((c) => c.active !== false))
+      })
+    load()
+    const unsub = subscribe(load)
+    return () => {
+      active = false
+      unsub()
+    }
+  }, [])
+  const categoryLabels = categories.length ? categories.map((c) => c.label) : FALLBACK_CATEGORIES
 
   const float = reduce
     ? {}
@@ -89,10 +111,9 @@ export default function Hero() {
             variants={rise}
             className="flex flex-wrap items-center gap-x-4 gap-y-1 pt-2 font-mono text-[11px] uppercase tracking-[0.2em] text-ink/50"
           >
-            <span className="text-flame-600">Coverage</span>
-            <span>Audio</span>
-            <span>Accessories</span>
-            <span>Lifestyle</span>
+            {categoryLabels.map((label, i) => (
+              <span key={label} className={i === 0 ? 'text-flame-600' : ''}>{label}</span>
+            ))}
           </motion.div>
         </div>
 

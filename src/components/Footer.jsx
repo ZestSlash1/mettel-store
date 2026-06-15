@@ -16,6 +16,7 @@ const STATIC_COLUMNS = [
   {
     h: 'Support',
     items: [
+      { label: 'Track Order', to: '/track' },
       { label: 'FAQ', to: '/faq' },
       { label: 'Shipping', to: '/shipping' },
       { label: 'Returns', to: '/returns' },

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useCart } from '../context/CartContext'
+import Logo from './Logo'
 
 // Anchors (/#…) jump to home sections; `to` paths are real routes.
 const LINKS = [
@@ -102,12 +103,8 @@ export default function Navigation() {
     >
       <nav className="mx-auto flex max-w-[1400px] items-center gap-2 rounded-full bg-silver-50/85 p-2 shadow-panel ring-1 ring-ink/5 backdrop-blur-md">
         {/* Brand mark */}
-        <Link
-          to="/"
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-ink text-white"
-          aria-label="MetTel home"
-        >
-          <span className="font-display text-sm font-black leading-none">MT</span>
+        <Link to="/" className="flex shrink-0 items-center" aria-label="MetTel home">
+          <Logo />
         </Link>
 
         {/* Primary links */}

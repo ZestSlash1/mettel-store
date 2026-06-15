@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useCart } from '../context/CartContext'
 import { formatPrice } from '../hooks/useProducts'
@@ -53,6 +54,7 @@ async function postJSON(url, payload) {
 export default function CartDrawer() {
   const { items, isOpen, closeCart, updateQty, removeItem, subtotal, count, clear } = useCart()
   const [placed, setPlaced] = useState(false)
+  const [orderRef, setOrderRef] = useState('') // reference shown on confirmation
   const [checkingOut, setCheckingOut] = useState(false) // showing the address form
   const [form, setForm] = useState(emptyForm)
   const [loading, setLoading] = useState(false)
@@ -65,6 +67,13 @@ export default function CartDrawer() {
     setCheckingOut(false)
     setLoading(false)
     setError('')
+  }
+
+  // Close the drawer and clear the post-payment confirmation state.
+  const dismiss = () => {
+    setPlaced(false)
+    setOrderRef('')
+    closeCart()
   }
 
   // Real checkout: server creates the order (recomputing the total), Razorpay
@@ -113,16 +122,15 @@ export default function CartDrawer() {
             })
             if (!vd.verified) throw new Error(vd.error || 'Payment could not be verified.')
 
-            // Verified — show confirmation and clear the bag.
+            // Verified — clear the bag and show the confirmation (with a
+            // reference the customer can use to track the order). The
+            // confirmation stays up until they dismiss it.
+            setOrderRef(response.razorpay_payment_id || response.razorpay_order_id || '')
             setPlaced(true)
             setCheckingOut(false)
             setForm(emptyForm)
             setLoading(false)
-            setTimeout(() => {
-              clear()
-              setPlaced(false)
-              closeCart()
-            }, 2200)
+            clear()
           } catch (err) {
             setError(err.message)
             setLoading(false)
@@ -154,7 +162,7 @@ export default function CartDrawer() {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
-          <div className="absolute inset-0 bg-ink/40 backdrop-blur-sm" onClick={closeCart} />
+          <div className="absolute inset-0 bg-ink/40 backdrop-blur-sm" onClick={dismiss} />
 
           <motion.aside
             initial={{ x: '100%' }}
@@ -173,7 +181,7 @@ export default function CartDrawer() {
                   {checkingOut ? 'Shipping details' : `${count} ${count === 1 ? 'item' : 'items'}`}
                 </h2>
               </div>
-              <button onClick={closeCart} className="text-2xl leading-none text-ink/50 hover:text-ink" aria-label="Close cart">×</button>
+              <button onClick={dismiss} className="text-2xl leading-none text-ink/50 hover:text-ink" aria-label="Close cart">×</button>
             </div>
 
             {/* Body */}
@@ -184,12 +192,32 @@ export default function CartDrawer() {
                 <p className="max-w-xs font-mono text-[11px] text-ink/50">
                   Your order is confirmed. A receipt is on its way to your email.
                 </p>
+                {orderRef ? (
+                  <p className="font-mono text-[10px] text-ink/40">
+                    Reference: <span className="text-ink/70">{orderRef}</span>
+                  </p>
+                ) : null}
+                <div className="mt-2 flex items-center gap-2">
+                  <Link
+                    to="/track"
+                    onClick={dismiss}
+                    className="rounded-full bg-ink px-5 py-2 font-mono text-[11px] uppercase tracking-[0.16em] text-white transition-colors hover:bg-flame-500"
+                  >
+                    Track order
+                  </Link>
+                  <button
+                    onClick={dismiss}
+                    className="rounded-full bg-silver-200 px-5 py-2 font-mono text-[11px] uppercase tracking-[0.16em] text-ink transition-colors hover:bg-ink hover:text-white"
+                  >
+                    Done
+                  </button>
+                </div>
               </div>
             ) : items.length === 0 ? (
               <div className="flex flex-1 flex-col items-center justify-center gap-2 px-6 text-center">
                 <p className="font-display text-xl font-black uppercase text-ink/70">Bag is empty</p>
-                <p className="font-mono text-[11px] text-ink/40">Add a case to get started.</p>
-                <button onClick={closeCart} className="mt-3 rounded-full bg-ink px-5 py-2 font-mono text-[11px] uppercase tracking-[0.16em] text-white hover:bg-flame-500">
+                <p className="font-mono text-[11px] text-ink/40">Add something to get started.</p>
+                <button onClick={dismiss} className="mt-3 rounded-full bg-ink px-5 py-2 font-mono text-[11px] uppercase tracking-[0.16em] text-white hover:bg-flame-500">
                   Keep browsing
                 </button>
               </div>
