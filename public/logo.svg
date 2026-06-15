@@ -1,0 +1,14 @@
+<svg viewBox="0 0 120 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="MetTel">
+  <!--
+    Navbar mark — a recreation of the MetTel angular "m" (slanted-top red field
+    with two arch cut-outs). Icon only and transparent so it sits cleanly on the
+    silver nav. Replace this file with your own trimmed/transparent logo to swap.
+  -->
+  <path
+    fill="#e2231a"
+    fill-rule="evenodd"
+    d="M14 82 L106 82 L106 20 L14 46 Z
+       M30 82 L30 58 C30 47 52 47 52 58 L52 82 Z
+       M64 82 L64 50 C64 39 86 39 86 50 L86 82 Z"
+  />
+</svg>
