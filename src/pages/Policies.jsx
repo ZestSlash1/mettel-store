@@ -48,12 +48,12 @@ export function Returns() {
       seoTitle="Returns"
       seoDescription="MetTel's 14-day return window, how to start a return, and refund timelines."
       title={<>Returns</>}
-      intro="Coverage you can change your mind about. A 14-day, no-drama return window."
+      intro="Bought something you can change your mind about. A 14-day, no-drama return window."
       sections={[
         {
           h: '14-day window',
           body: [
-            'If a case isn’t right for you, return it within 14 days of delivery for a full refund. Items must be unused and in their original packaging.',
+            'If a product isn’t right for you, return it within 14 days of delivery for a full refund. Items must be unused and in their original packaging.',
           ],
         },
         {
@@ -86,18 +86,18 @@ export function Warranty() {
       seoTitle="Warranty"
       seoDescription="MetTel's 12-month limited warranty: what's covered and how to make a claim."
       title={<>Warranty</>}
-      intro="Built to outlive the device it protects. Backed by a 12-month warranty."
+      intro="Built to last. Every MetTel product is backed by a 12-month warranty."
       sections={[
         {
           h: 'What’s covered',
           body: [
-            'Every MetTel case carries a 12-month limited warranty against manufacturing defects — delamination, button failure, cracked frames under normal use, and finish defects.',
+            'Every MetTel product carries a 12-month limited warranty against manufacturing defects — material failure, finish defects, and component faults under normal use.',
           ],
         },
         {
           h: 'What’s not',
           body: [
-            'Normal cosmetic wear, accidental damage, and damage to your device are not covered. The warranty protects the case, not the phone inside it.',
+            'Normal cosmetic wear and accidental damage are not covered, and for protective products the warranty covers the product itself, not the device or items used with it.',
           ],
         },
         {

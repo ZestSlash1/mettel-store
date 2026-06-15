@@ -40,8 +40,8 @@ export default function Footer() {
               METTEL
             </Link>
             <p className="mt-3 font-mono text-[11px] leading-relaxed text-silver/60">
-              Engineered coverage for the device you carry everywhere. Built in India. Shipped
-              worldwide.
+              Engineered objects for everyday life — coverage, audio, accessories, and more.
+              Designed in India. Shipped worldwide.
             </p>
           </div>
 

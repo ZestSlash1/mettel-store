@@ -19,9 +19,9 @@ export default function Shop() {
     <PageShell
       eyebrow="Catalogue"
       seoTitle="Shop"
-      seoDescription="Browse the full MetTel lineup of engineered phone covers and accessories."
+      seoDescription="Browse the full MetTel lineup — coverage, audio, accessories, and lifestyle goods."
       title={<>The<br />Lineup</>}
-      intro="Engineered coverage and accessories. Filter by category, or browse the lot."
+      intro="Engineered objects across categories. Filter by genre, or browse the lot."
     >
       {/* Category filter */}
       <div className="mb-8 flex flex-wrap gap-2">

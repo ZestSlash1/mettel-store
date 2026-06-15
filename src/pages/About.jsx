@@ -6,33 +6,33 @@ export default function About() {
     <PageShell
       eyebrow="Company / About"
       seoTitle="About"
-      seoDescription="MetTel makes engineered phone covers and accessories — designed in India, shipped worldwide."
+      seoDescription="MetTel makes designed objects for everyday life — coverage, audio, accessories, and lifestyle goods, built in India and shipped worldwide."
       title={<>Built<br />to last</>}
-      intro="MetTel makes engineered coverage for the device you carry everywhere — high-end phone covers and accessories, designed in India and shipped worldwide."
+      intro="MetTel makes engineered objects for everyday life — phone coverage, audio, accessories, and lifestyle goods, designed in India and shipped worldwide."
     >
       <div className="grid gap-12 lg:grid-cols-3">
         <div className="space-y-4 font-mono text-[12px] leading-relaxed text-ink/65 lg:col-span-2">
           <p>
-            We started MetTel with one frustration: protective cases that treat your phone like a
-            billboard. Loud prints, soft plastic, landfill in twelve months. We wanted the opposite —
-            a single, honest object that does its job and gets out of the way.
+            We started MetTel with one frustration: everyday products designed like billboards —
+            loud branding, cheap materials, landfill in twelve months. We wanted the opposite — honest
+            objects that do their job and get out of the way.
           </p>
           <p>
-            Every case is a single-piece monocoque in woven aramid fiber, 0.95&nbsp;mm thick, with shock
-            channels routed into the corners and machined button cutouts. No printed graphics. No bulk.
-            Built to outlive the device it protects, not the trend cycle.
+            That standard now spans categories: phone coverage, audio, accessories, and lifestyle
+            goods. Whatever the product, the rule is the same — considered design, materials chosen
+            to last, and zero filler. Built to outlive the trend cycle, not chase it.
           </p>
           <p>
-            We design in-house, prototype relentlessly, and ship direct so the price reflects the
-            product — not a retail markup. That’s the whole company.
+            We curate and design with the same eye across every category, and ship direct so the
+            price reflects the product — not a retail markup. That’s the whole company.
           </p>
         </div>
 
         <aside className="space-y-6 rounded-3xl bg-white p-6 ring-1 ring-ink/5">
           {[
             ['Founded', '2024 · India'],
-            ['Material', '600D woven aramid'],
-            ['Standard', 'MIL-STD 3 m drop'],
+            ['Range', 'Coverage · Audio · More'],
+            ['Standard', 'Built to last'],
             ['Shipping', 'Worldwide, tracked'],
           ].map(([k, v]) => (
             <div key={k} className="flex items-center justify-between border-b border-dashed border-ink/15 pb-2 font-mono text-[11px] uppercase tracking-wider last:border-0">

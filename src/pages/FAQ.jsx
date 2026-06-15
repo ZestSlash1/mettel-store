@@ -4,8 +4,12 @@ import PageShell from '../components/PageShell'
 
 const FAQS = [
   {
-    q: 'Which devices do your cases fit?',
-    a: 'Each product page lists its compatible devices in the spec sheet. We currently support recent iPhone and Pixel models, with more added regularly.',
+    q: 'What kind of products do you sell?',
+    a: 'MetTel carries engineered everyday objects across categories — phone coverage, audio, accessories, and lifestyle goods — all held to the same design standard. Browse the Shop to filter by category.',
+  },
+  {
+    q: 'How do I know an item fits my device or needs?',
+    a: 'Each product page lists its full spec sheet — compatible devices, sizes, or variants where relevant. If anything’s unclear, ask us on the Contact page before you buy.',
   },
   {
     q: 'How long does delivery take?',
@@ -25,7 +29,7 @@ const FAQS = [
   },
   {
     q: 'How does the warranty work?',
-    a: 'Every case carries a 12-month limited warranty against manufacturing defects. See the Warranty page, or email warranty@mettel.in to make a claim.',
+    a: 'Every product carries a 12-month limited warranty against manufacturing defects. See the Warranty page, or email warranty@mettel.in to make a claim.',
   },
 ]
 

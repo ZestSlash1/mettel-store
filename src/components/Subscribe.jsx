@@ -25,7 +25,7 @@ export default function Subscribe() {
               Drops,<br />first.
             </h2>
             <p className="mt-3 font-mono text-[11px] leading-relaxed text-ink/55">
-              Restocks, new devices, and the occasional workshop note. No spam — unsubscribe anytime.
+              Restocks, new arrivals, and the occasional workshop note. No spam — unsubscribe anytime.
             </p>
           </div>
 

@@ -113,7 +113,7 @@ export default function ProductDetail() {
             {/* Model selector */}
             {product.models?.length ? (
               <div className="mt-8">
-                <div className="eyebrow mb-2">Device</div>
+                <div className="eyebrow mb-2">Variant</div>
                 <div className="flex flex-wrap gap-2">
                   {product.models.map((m) => (
                     <button

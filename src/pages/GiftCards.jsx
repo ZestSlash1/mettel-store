@@ -21,7 +21,7 @@ export default function GiftCards() {
       seoTitle="Gift Cards"
       seoDescription="Digital MetTel gift cards, delivered by email and redeemable on the full lineup."
       title={<>Gift<br />cards</>}
-      intro="Give engineered coverage. Digital gift cards delivered by email, redeemable on anything in the lineup."
+      intro="Give a well-made object. Digital gift cards delivered by email, redeemable on anything in the lineup."
     >
       <div className="grid gap-12 lg:grid-cols-2">
         {/* Visual card */}

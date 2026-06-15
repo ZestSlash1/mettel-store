@@ -84,7 +84,7 @@ export function Terms() {
         {
           h: 'Liability',
           body: [
-            'MetTel’s liability for any order is limited to the amount you paid for it. Our products protect your device but we are not liable for damage to the device itself.',
+            'MetTel’s liability for any order is limited to the amount you paid for it. Where a product is protective, it guards what it covers but we are not liable for damage to the device or items used with it.',
           ],
         },
         {

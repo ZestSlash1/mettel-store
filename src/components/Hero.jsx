@@ -65,7 +65,7 @@ export default function Hero() {
       </div>
 
       {/* ---- Visible accessible heading (screen readers + SEO) ---- */}
-      <h2 className="sr-only">MetTel — engineered phone covers and accessories</h2>
+      <h2 className="sr-only">MetTel — engineered everyday objects across categories</h2>
 
       {/* ---- Foreground content grid ---- */}
       <motion.div
@@ -76,20 +76,23 @@ export default function Hero() {
       >
         {/* Left column — material spec + product story */}
         <div className="order-2 flex flex-col gap-10 lg:order-1 lg:col-span-4">
-          <SpecBlock eyebrow="01 / Material">
-            Woven aramid fiber shell at <span className="text-ink">0.95 mm</span>. Machined
-            buttons, bare-metal port cutouts, zero printed graphics.
+          <SpecBlock eyebrow="01 / Approach">
+            Considered objects, stripped to function. No noise, no filler —
+            <span className="text-ink"> the thing, done right.</span>
           </SpecBlock>
-          <SpecBlock eyebrow="02 / Construction">
-            Single-piece monocoque. Shock channels routed into the corners. Built to outlive the
-            device it protects, not the trend cycle.
+          <SpecBlock eyebrow="02 / Range">
+            Coverage, audio, accessories, and lifestyle goods. One standard across every
+            category — chosen to outlast the trend cycle, not chase it.
           </SpecBlock>
 
-          <motion.div variants={rise} className="flex flex-wrap items-center gap-3 pt-2">
-            <span className="font-pixel text-2xl text-flame-600">2499</span>
-            <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink/50">
-              ₹ / INR — in stock
-            </span>
+          <motion.div
+            variants={rise}
+            className="flex flex-wrap items-center gap-x-4 gap-y-1 pt-2 font-mono text-[11px] uppercase tracking-[0.2em] text-ink/50"
+          >
+            <span className="text-flame-600">Coverage</span>
+            <span>Audio</span>
+            <span>Accessories</span>
+            <span>Lifestyle</span>
           </motion.div>
         </div>
 
@@ -107,11 +110,11 @@ export default function Hero() {
           </motion.div>
         </div>
 
-        {/* Right column — connectivity / device spec */}
+        {/* Right column — brand standard */}
         <div className="order-3 flex flex-col gap-10 lg:col-span-4 lg:items-end lg:text-right">
-          <SpecBlock eyebrow="03 / Compatibility" className="lg:ml-auto">
-            iPhone 16 Pro · iPhone 16 · Pixel 9 Pro. MagSafe-aligned magnet array. Wireless
-            charging passthrough, no cutout.
+          <SpecBlock eyebrow="03 / Standard" className="lg:ml-auto">
+            Every object held to one bar — materials chosen to last, finishes that age well,
+            and direct pricing with no retail markup.
           </SpecBlock>
 
           <motion.ul
@@ -119,11 +122,11 @@ export default function Hero() {
             className="flex flex-col gap-2 font-mono text-[11px] uppercase tracking-wider text-ink/70 lg:items-end"
           >
             {[
-              '600D aramid weave',
-              'MIL-STD 3 m drop',
-              '14 g total weight',
-              'CNC button array',
-              'Anti-yellow coating',
+              'Designed in-house',
+              'Built to last',
+              'Direct-to-you pricing',
+              'Worldwide shipping',
+              'A growing range',
             ].map((spec) => (
               <li key={spec} className="flex items-center gap-2">
                 <span className="text-flame-500">+</span> {spec}
@@ -140,11 +143,11 @@ export default function Hero() {
         animate="show"
         className="relative z-10 mt-12 flex flex-wrap items-center justify-between gap-y-2 rule pt-4 font-mono text-[10px] uppercase tracking-[0.22em] text-ink/45"
       >
-        <span>MT-CASE-ARAMID-001</span>
-        <span>Now available</span>
+        <span>MetTel — est. 2024</span>
+        <span>Now shipping</span>
         <span className="hidden sm:inline">Designed in IN</span>
-        <span className="hidden sm:inline">One of a kind</span>
-        <span>Coverage / Device</span>
+        <span className="hidden sm:inline">Multi-category</span>
+        <span>Everyday / Objects</span>
       </motion.div>
     </section>
   )

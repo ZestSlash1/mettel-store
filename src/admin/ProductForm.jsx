@@ -180,11 +180,11 @@ export default function ProductForm({ product, categories, existingIds, onSave, 
         {/* Core fields */}
         <div className="grid grid-cols-2 gap-4">
           <Field label="Name *" className="col-span-2">
-            <input className={inputClass} value={form.name} onChange={(e) => set({ name: e.target.value })} placeholder="Aramid Shell 01" />
+            <input className={inputClass} value={form.name} onChange={(e) => set({ name: e.target.value })} placeholder="e.g. Aramid Shell 01 · Studio Tumbler 500" />
           </Field>
 
           <Field label="SKU *">
-            <input className={inputClass} value={form.sku} onChange={(e) => set({ sku: e.target.value.toUpperCase() })} placeholder="MT-CASE-ARAMID-001" />
+            <input className={inputClass} value={form.sku} onChange={(e) => set({ sku: e.target.value.toUpperCase() })} placeholder="MT-0001" />
           </Field>
 
           <Field label="Category *">
@@ -196,7 +196,7 @@ export default function ProductForm({ product, categories, existingIds, onSave, 
           </Field>
 
           <Field label="Tagline" className="col-span-2">
-            <input className={inputClass} value={form.tagline} onChange={(e) => set({ tagline: e.target.value })} placeholder="0.95 mm woven aramid. No bulk." />
+            <input className={inputClass} value={form.tagline} onChange={(e) => set({ tagline: e.target.value })} placeholder="A short, punchy product line." />
           </Field>
 
           <Field label="Price">
@@ -224,7 +224,7 @@ export default function ProductForm({ product, categories, existingIds, onSave, 
             <input type="number" className={inputClass} value={form.rank} onChange={(e) => set({ rank: e.target.value })} />
           </Field>
 
-          <Field label="Shell color">
+          <Field label="Primary color">
             <div className="flex items-center gap-2">
               <input type="color" value={form.color_hex} onChange={(e) => set({ color_hex: e.target.value })} className="h-9 w-12 cursor-pointer rounded-lg border border-ink/15" />
               <input className={inputClass} value={form.color_hex} onChange={(e) => set({ color_hex: e.target.value })} />
@@ -238,8 +238,8 @@ export default function ProductForm({ product, categories, existingIds, onSave, 
           </Field>
 
           <div className="col-span-2">
-            <Field label="Image" hint="Upload a file, or paste a URL. Leave blank to use the vector case.">
-              <input className={inputClass} value={form.image || ''} onChange={(e) => set({ image: e.target.value })} placeholder="/aramid.png or https://…" />
+            <Field label="Image" hint="Upload a file, or paste a URL. Leave blank to use the default vector graphic.">
+              <input className={inputClass} value={form.image || ''} onChange={(e) => set({ image: e.target.value })} placeholder="/product.png or https://…" />
             </Field>
             <div className="mt-2 flex flex-wrap items-center gap-2">
               <input
@@ -264,8 +264,8 @@ export default function ProductForm({ product, categories, existingIds, onSave, 
             ) : null}
           </div>
 
-          <Field label="Compatible models" hint="Comma-separated" className="col-span-2">
-            <input className={inputClass} value={modelsText} onChange={(e) => setModelsText(e.target.value)} placeholder="iPhone 16 Pro, Pixel 9 Pro" />
+          <Field label="Variants / models" hint="Comma-separated — devices, sizes, or options. Shown as the buyer’s selector." className="col-span-2">
+            <input className={inputClass} value={modelsText} onChange={(e) => setModelsText(e.target.value)} placeholder="iPhone 16 Pro, Pixel 9 Pro  ·  or  ·  500 ml, 1 L" />
           </Field>
 
           <label className="col-span-2 flex items-center gap-3 rounded-xl bg-white px-3 py-2.5 ring-1 ring-ink/5">
@@ -284,7 +284,7 @@ export default function ProductForm({ product, categories, existingIds, onSave, 
             {form.specs.map((s, i) => (
               <div key={i} className="flex items-center gap-2">
                 <input className={`${inputClass} flex-1`} placeholder="KEY (e.g. MATERIAL)" value={s.k} onChange={(e) => setSpec(i, 'k', e.target.value.toUpperCase())} />
-                <input className={`${inputClass} flex-1`} placeholder="VALUE (e.g. 600D ARAMID)" value={s.v} onChange={(e) => setSpec(i, 'v', e.target.value)} />
+                <input className={`${inputClass} flex-1`} placeholder="VALUE (e.g. STAINLESS STEEL)" value={s.v} onChange={(e) => setSpec(i, 'v', e.target.value)} />
                 <button onClick={() => removeSpec(i)} className="shrink-0 rounded-lg px-2 py-2 text-ink/40 hover:text-flame-700" aria-label="Remove spec">×</button>
               </div>
             ))}

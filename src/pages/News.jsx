@@ -3,21 +3,21 @@ import PageShell from '../components/PageShell'
 const POSTS = [
   {
     date: '2026-05-28',
-    tag: 'Product',
-    title: 'Aramid Shell 01 restocked',
-    body: 'Our flagship woven-aramid case is back in stock across all supported devices after a three-week production run.',
+    tag: 'Range',
+    title: 'The range is expanding',
+    body: 'MetTel is growing beyond coverage — audio, accessories, and lifestyle goods are joining the lineup, held to the same standard.',
   },
   {
     date: '2026-04-15',
     tag: 'Company',
     title: 'Now shipping worldwide',
-    body: 'Tracked international delivery is live. Same engineered coverage, now reaching doorsteps outside India in 7–14 days.',
+    body: 'Tracked international delivery is live. The full catalogue now reaches doorsteps outside India in 7–14 days.',
   },
   {
     date: '2026-03-02',
     tag: 'Design',
-    title: 'The case for no graphics',
-    body: 'Why every MetTel shell ships bare — the thinking behind a single, honest object with zero printed branding.',
+    title: 'The case for no noise',
+    body: 'Why every MetTel object ships understated — the thinking behind honest products with zero printed branding.',
   },
 ]
 

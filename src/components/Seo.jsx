@@ -6,9 +6,9 @@ import { useEffect } from 'react'
  * into any page. Keeps share previews and browser tabs accurate in an SPA.
  */
 const SITE = 'MetTel'
-const DEFAULT_TITLE = 'MetTel — Engineered Coverage'
+const DEFAULT_TITLE = 'MetTel — Engineered Everyday Objects'
 const DEFAULT_DESC =
-  'High-end phone covers and accessories. Engineered objects for the device you carry everywhere.'
+  'Designed objects for everyday life — phone coverage, audio, accessories, and lifestyle goods. Built in India, shipped worldwide.'
 
 function setMeta(selector, attr, key, value) {
   let tag = document.head.querySelector(selector)
