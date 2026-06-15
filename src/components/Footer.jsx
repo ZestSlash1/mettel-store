@@ -1,16 +1,10 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { listCategories, subscribe } from '../lib/dataStore'
 
-// Each footer link points at a real route. Phone Covers/Accessories deep-link
-// to the Shop page pre-filtered by category id (cases / accessories).
-const COLUMNS = [
-  {
-    h: 'Shop',
-    items: [
-      { label: 'Phone Covers', to: '/shop?category=cases' },
-      { label: 'Accessories', to: '/shop?category=accessories' },
-      { label: 'Gift Cards', to: '/gift-cards' },
-    ],
-  },
+// Company/Support are fixed routes. The Shop column is built live from the
+// categories table so new genres (audio, lifestyle, …) appear automatically.
+const STATIC_COLUMNS = [
   {
     h: 'Company',
     items: [
@@ -31,6 +25,31 @@ const COLUMNS = [
 ]
 
 export default function Footer() {
+  const [categories, setCategories] = useState([])
+
+  useEffect(() => {
+    let active = true
+    const load = () =>
+      listCategories().then((cats) => {
+        if (active) setCategories(cats)
+      })
+    load()
+    const unsub = subscribe(load) // re-render if an admin edits categories
+    return () => {
+      active = false
+      unsub()
+    }
+  }, [])
+
+  // Active categories first, then the static Gift Cards link.
+  const shopItems = [
+    ...categories
+      .filter((c) => c.active !== false)
+      .map((c) => ({ label: c.label, to: `/shop?category=${c.id}` })),
+    { label: 'Gift Cards', to: '/gift-cards' },
+  ]
+  const columns = [{ h: 'Shop', items: shopItems }, ...STATIC_COLUMNS]
+
   return (
     <footer id="info" className="mx-auto max-w-[1400px] px-4 pb-12 pt-8 sm:px-6">
       <div className="rounded-3xl bg-ink p-8 text-silver sm:p-12">
@@ -46,7 +65,7 @@ export default function Footer() {
           </div>
 
           <div className="grid grid-cols-2 gap-10 font-mono text-[11px] uppercase tracking-wider sm:grid-cols-3">
-            {COLUMNS.map((col) => (
+            {columns.map((col) => (
               <div key={col.h}>
                 <div className="mb-3 text-flame-500">{col.h}</div>
                 <ul className="space-y-2 text-silver/55">

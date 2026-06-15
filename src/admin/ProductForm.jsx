@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import { makeProductId, slugify } from '../lib/dataStore'
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient'
 import { formatPrice } from '../hooks/useProducts'
-import PhoneCase from '../components/PhoneCase'
+import ProductGraphic from '../components/ProductGraphic'
 import { Field, Btn, inputClass, labelClass } from './ui'
 
 const ACCEPTED_IMAGE_TYPES = ['image/png', 'image/webp', 'image/jpeg']
@@ -165,7 +165,7 @@ export default function ProductForm({ product, categories, existingIds, onSave, 
                 <img src={form.image} alt="" className="h-full w-full object-contain" />
               </div>
             ) : (
-              <PhoneCase className="h-auto w-full" shell={form.color_hex} accent={form.accent_hex} />
+              <ProductGraphic className="h-auto w-full" shell={form.color_hex} accent={form.accent_hex} />
             )}
           </div>
           <div className="min-w-0">

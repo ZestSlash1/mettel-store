@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import Navigation from '../components/Navigation'
 import Footer from '../components/Footer'
 import Seo from '../components/Seo'
-import PhoneCase from '../components/PhoneCase'
+import ProductGraphic from '../components/ProductGraphic'
 import ProductCard from '../components/ProductCard'
 import { useProducts, formatPrice } from '../hooks/useProducts'
 import { useCart } from '../context/CartContext'
@@ -90,7 +90,7 @@ export default function ProductDetail() {
                   <img src={product.image} alt={product.name} className="h-full w-full object-contain" />
                 </div>
               ) : (
-                <PhoneCase className="h-auto w-full" shell={product.color_hex} accent={product.accent_hex} />
+                <ProductGraphic className="h-auto w-full" shell={product.color_hex} accent={product.accent_hex} />
               )}
             </motion.div>
           </div>

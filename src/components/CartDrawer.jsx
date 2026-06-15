@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useCart } from '../context/CartContext'
 import { formatPrice } from '../hooks/useProducts'
-import PhoneCase from './PhoneCase'
+import ProductGraphic from './ProductGraphic'
 
 const RZP_SCRIPT = 'https://checkout.razorpay.com/v1/checkout.js'
 const emptyForm = { name: '', email: '', phone: '', address: '', city: '', state: '', pincode: '' }
@@ -221,7 +221,7 @@ export default function CartDrawer() {
                         {l.image ? (
                           <img src={l.image} alt="" className="h-auto w-full" />
                         ) : (
-                          <PhoneCase className="h-auto w-full" shell={l.color_hex} accent={l.accent_hex} />
+                          <ProductGraphic className="h-auto w-full" shell={l.color_hex} accent={l.accent_hex} />
                         )}
                       </div>
                       <div className="min-w-0 flex-1">

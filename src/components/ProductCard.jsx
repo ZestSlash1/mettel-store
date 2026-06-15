@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
-import PhoneCase from './PhoneCase'
+import ProductGraphic from './ProductGraphic'
 import { formatPrice } from '../hooks/useProducts'
 import { useCart } from '../context/CartContext'
 
@@ -53,7 +53,7 @@ export default function ProductCard({ product, index = 0 }) {
               <img src={image} alt={name} className="h-full w-full object-contain" loading="lazy" />
             </div>
           ) : (
-            <PhoneCase className="h-auto w-full" shell={color_hex} accent={accent_hex} />
+            <ProductGraphic className="h-auto w-full" shell={color_hex} accent={accent_hex} />
           )}
         </motion.div>
 
