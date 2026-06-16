@@ -6,6 +6,8 @@ import Footer from '../components/Footer'
 import Seo from '../components/Seo'
 import ProductGraphic from '../components/ProductGraphic'
 import ProductCard from '../components/ProductCard'
+import WishlistButton from '../components/WishlistButton'
+import ProductReviews from '../components/ProductReviews'
 import { useProducts, formatPrice } from '../hooks/useProducts'
 import { useCart } from '../context/CartContext'
 import { isSoldOut } from '../lib/product'
@@ -202,6 +204,10 @@ export default function ProductDetail() {
                   {product.status === 'preorder' ? 'Pre-order' : 'Add to bag'}
                 </motion.button>
               )}
+              <WishlistButton
+                productId={product.id}
+                className="h-14 w-14 shrink-0 rounded-full bg-silver-100 hover:bg-silver-200"
+              />
             </div>
 
             {/* Spec sheet */}
@@ -218,6 +224,9 @@ export default function ProductDetail() {
             </div>
           </div>
         </div>
+
+        {/* Reviews */}
+        <ProductReviews productId={product.id} />
 
         {/* Related */}
         {related.length ? (

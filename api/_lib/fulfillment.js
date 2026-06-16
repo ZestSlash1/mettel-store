@@ -52,6 +52,9 @@ export async function fulfillPaidOrder(supabase, { razorpayOrderId, paymentId })
     }
   }
 
+  // Notify admin about new order (best-effort, never blocks fulfilment).
+  sendAdminNotification(finalOrder).catch(() => {})
+
   return { ok: true, order: finalOrder }
 }
 
@@ -111,6 +114,39 @@ async function sendOrderConfirmation(order) {
   } catch (e) {
     console.warn('[fulfillment] confirmation email error:', e?.message)
     return false
+  }
+}
+
+async function sendAdminNotification(order) {
+  const { RESEND_API_KEY, MAIL_FROM, ADMIN_EMAIL } = process.env
+  if (!RESEND_API_KEY || !MAIL_FROM || !ADMIN_EMAIL) return
+
+  const rupees = Math.round((order.amount || 0) / 100)
+  const itemCount = Array.isArray(order.items)
+    ? order.items.reduce((n, it) => n + (Number(it.qty) || 0), 0)
+    : 0
+
+  const html = `
+    <div style="font-family:monospace;color:#111;max-width:480px">
+      <h2 style="text-transform:uppercase;letter-spacing:1px">New order received</h2>
+      <p><strong>${escapeHtml(order.invoice_number || order.razorpay_order_id || '')}</strong></p>
+      <p>Customer: ${escapeHtml(order.customer_name || '')} &lt;${escapeHtml(order.customer_email || '')}&gt;</p>
+      <p>Items: ${itemCount} · Total: ₹${rupees.toLocaleString('en-IN')}</p>
+    </div>`
+
+  try {
+    await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from: MAIL_FROM,
+        to: ADMIN_EMAIL,
+        subject: `New order · ${order.invoice_number || ''} · ₹${rupees.toLocaleString('en-IN')}`,
+        html,
+      }),
+    })
+  } catch {
+    // Admin notification is fire-and-forget.
   }
 }
 

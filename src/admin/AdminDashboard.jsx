@@ -18,6 +18,7 @@ import CategoryManager from './CategoryManager'
 import OrdersTable from './OrdersTable'
 import Overview from './Overview'
 import CouponManager from './CouponManager'
+import ReviewsManager from './ReviewsManager'
 import { Btn } from './ui'
 import { useAuth } from '../context/AuthContext'
 
@@ -128,6 +129,7 @@ export default function AdminDashboard() {
             ['categories', `Categories (${categories.length})`],
             ['orders', 'Orders'],
             ['coupons', 'Coupons'],
+            ['reviews', 'Reviews'],
           ].map(([key, label]) => (
             <button
               key={key}
@@ -176,6 +178,8 @@ export default function AdminDashboard() {
           />
         ) : tab === 'coupons' ? (
           <CouponManager />
+        ) : tab === 'reviews' ? (
+          <ReviewsManager />
         ) : (
           <OrdersTable />
         )}

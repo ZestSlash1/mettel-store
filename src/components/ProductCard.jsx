@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import ProductGraphic from './ProductGraphic'
+import WishlistButton from './WishlistButton'
 import { formatPrice } from '../hooks/useProducts'
 import { useCart } from '../context/CartContext'
 import { isSoldOut } from '../lib/product'
@@ -63,6 +64,11 @@ export default function ProductCard({ product, index = 0 }) {
         <span className="absolute left-4 top-4 rounded-full bg-ink px-3 py-1 font-mono text-[9px] uppercase tracking-[0.18em] text-white">
           {soldOut ? 'Sold out' : STATUS_LABEL[status] ?? status}
         </span>
+
+        {/* Wishlist */}
+        <div className="absolute right-3 top-3">
+          <WishlistButton productId={product.id} className="h-8 w-8 bg-white/80 hover:bg-white" />
+        </div>
       </Link>
 
       {/* Spec body */}

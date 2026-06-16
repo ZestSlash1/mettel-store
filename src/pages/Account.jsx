@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabaseClient'
 import { formatPrice } from '../hooks/useProducts'
 import { statusStyle, statusCopy } from '../lib/orderStatus'
 import { inputClass, labelClass, Btn } from '../admin/ui'
+import WishlistButton from '../components/WishlistButton'
 
 export default function Account() {
   const { user, authEnabled } = useAuth()
@@ -33,6 +34,7 @@ function SignedIn() {
   const { user, signOut } = useAuth()
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
+  const [wishlist, setWishlist] = useState([])
 
   useEffect(() => {
     let active = true
@@ -46,6 +48,17 @@ function SignedIn() {
           setLoading(false)
         }
       })
+
+    // Load wishlist with basic product info (product_id only; we join manually).
+    supabase
+      .from('wishlists')
+      .select('product_id, created_at')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .then(({ data }) => {
+        if (active) setWishlist(data ?? [])
+      })
+
     return () => {
       active = false
     }
@@ -87,6 +100,29 @@ function SignedIn() {
                   <span className="text-ink/45">{itemCount(o.items)} item(s)</span>
                   <span className="font-pixel text-sm text-flame-600">{formatPrice(Math.round((o.amount || 0) / 100), o.currency || 'INR')}</span>
                 </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      {/* Wishlist */}
+      <div>
+        <div className="mb-3 font-mono text-[9px] uppercase tracking-[0.2em] text-ink/40">Saved items</div>
+        {wishlist.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-ink/15 p-8 text-center">
+            <p className="font-mono text-[11px] text-ink/45">
+              No saved items yet. Tap the heart on any product to save it.
+            </p>
+          </div>
+        ) : (
+          <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {wishlist.map((w) => (
+              <li key={w.product_id} className="flex items-center justify-between gap-3 rounded-2xl bg-white p-4 ring-1 ring-ink/5">
+                <Link to={`/product/${w.product_id}`} className="font-mono text-[12px] text-ink hover:text-flame-600">
+                  {w.product_id}
+                </Link>
+                <WishlistButton productId={w.product_id} className="h-8 w-8 text-flame-500" />
               </li>
             ))}
           </ul>
