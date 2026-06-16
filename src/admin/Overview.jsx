@@ -65,7 +65,7 @@ export default function Overview() {
       </div>
 
       {/* 14-day revenue bars */}
-      <div className="rounded-2xl border border-ink/10 bg-white p-6">
+      <div className="card-soft p-6">
         <div className="mb-4 font-mono text-[9px] uppercase tracking-[0.2em] text-ink/40">Revenue · last 14 days</div>
         {m.daily.some((d) => d.total > 0) ? (
           <div className="flex h-40 items-end gap-1.5">
@@ -85,7 +85,7 @@ export default function Overview() {
       </div>
 
       {/* Top products */}
-      <div className="rounded-2xl border border-ink/10 bg-white p-6">
+      <div className="card-soft p-6">
         <div className="mb-4 font-mono text-[9px] uppercase tracking-[0.2em] text-ink/40">Top products (by units sold)</div>
         {m.topProducts.length ? (
           <ul className="space-y-2">
@@ -151,7 +151,7 @@ function computeMetrics(orders) {
 
 function Stat({ label, value, hint, accent }) {
   return (
-    <div className={`rounded-2xl border p-5 ${accent ? 'border-flame-500/30 bg-flame-50' : 'border-ink/10 bg-white'}`}>
+    <div className={`rounded-4xl p-5 shadow-soft ring-1 ${accent ? 'bg-flame-50 ring-flame-500/20' : 'bg-white ring-ink/[0.04]'}`}>
       <div className="font-mono text-[9px] uppercase tracking-[0.2em] text-ink/40">{label}</div>
       <div className="mt-1 font-display text-2xl font-black tracking-tight">{value}</div>
       <div className="mt-1 font-mono text-[10px] text-ink/40">{hint}</div>
