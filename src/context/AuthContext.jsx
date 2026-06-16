@@ -4,30 +4,41 @@ import { supabase, isSupabaseConfigured } from '../lib/supabaseClient'
 const AuthContext = createContext(null)
 
 /**
- * Wraps Supabase Auth.
- *
- * - If Supabase is configured, tracks the real session and exposes
- *   email/password sign-in + sign-out.
- * - If not configured (local dev), auth is "disabled": there's no backend to
- *   authenticate against, so the admin stays reachable but clearly unprotected.
- *   AuthGate surfaces a warning banner in that case.
+ * One Supabase Auth session powers both customers and admins. `isAdmin` comes
+ * from the server-side is_admin() function (admins allowlist) — the real
+ * security is RLS; this flag just drives the UI (admin panel access).
  */
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
+  const [isAdmin, setIsAdmin] = useState(false)
   const [loading, setLoading] = useState(isSupabaseConfigured)
 
   useEffect(() => {
     if (!isSupabaseConfigured) return
+    let active = true
 
-    supabase.auth.getSession().then(({ data }) => {
-      setUser(data.session?.user ?? null)
-      setLoading(false)
-    })
+    const resolve = async (session) => {
+      const u = session?.user ?? null
+      if (active) setUser(u)
+      if (u) {
+        try {
+          const { data } = await supabase.rpc('is_admin')
+          if (active) setIsAdmin(!!data)
+        } catch {
+          if (active) setIsAdmin(false)
+        }
+      } else if (active) {
+        setIsAdmin(false)
+      }
+      if (active) setLoading(false)
+    }
 
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
-    })
-    return () => sub.subscription.unsubscribe()
+    supabase.auth.getSession().then(({ data }) => resolve(data.session))
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => resolve(session))
+    return () => {
+      active = false
+      sub.subscription.unsubscribe()
+    }
   }, [])
 
   const signIn = async (email, password) => {
@@ -36,12 +47,19 @@ export function AuthProvider({ children }) {
     if (error) throw error
   }
 
+  const signUp = async (email, password) => {
+    if (!isSupabaseConfigured) throw new Error('Auth backend not configured.')
+    const { error } = await supabase.auth.signUp({ email, password })
+    if (error) throw error
+  }
+
   const signOut = async () => {
     if (isSupabaseConfigured) await supabase.auth.signOut()
     setUser(null)
+    setIsAdmin(false)
   }
 
-  const value = { user, loading, signIn, signOut, authEnabled: isSupabaseConfigured }
+  const value = { user, isAdmin, loading, signIn, signUp, signOut, authEnabled: isSupabaseConfigured }
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 

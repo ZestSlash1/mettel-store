@@ -19,6 +19,7 @@ import { Shipping, Returns, Warranty } from './pages/Policies'
 import { Privacy, Terms } from './pages/Legal'
 import FAQ from './pages/FAQ'
 import Track from './pages/Track'
+import Account from './pages/Account'
 import NotFound from './pages/NotFound'
 import AuthGate from './admin/AuthGate'
 
@@ -68,6 +69,7 @@ export default function App() {
           <Route path="/terms" element={<Terms />} />
           <Route path="/faq" element={<FAQ />} />
           <Route path="/track" element={<Track />} />
+          <Route path="/account" element={<Account />} />
           <Route
             path="/admin/*"
             element={

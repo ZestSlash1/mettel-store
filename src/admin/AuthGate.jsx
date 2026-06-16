@@ -10,7 +10,7 @@ import { Field, Btn, inputClass } from './ui'
  *  - auth disabled (local dev) -> children, with an "unprotected" banner
  */
 export default function AuthGate({ children }) {
-  const { user, loading, authEnabled } = useAuth()
+  const { user, isAdmin, loading, authEnabled, signOut } = useAuth()
 
   if (loading) {
     return (
@@ -32,6 +32,22 @@ export default function AuthGate({ children }) {
   }
 
   if (!user) return <LoginScreen />
+
+  // Signed in but not on the admin allowlist (e.g. a customer account).
+  if (!isAdmin) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-silver px-4 text-center">
+        <h1 className="font-display text-3xl font-black uppercase tracking-tight">Staff only</h1>
+        <p className="max-w-xs font-mono text-[11px] text-ink/50">
+          This area is for MetTel staff. You’re signed in, but this account isn’t an admin.
+        </p>
+        <div className="flex gap-2">
+          <Link to="/" className="rounded-full bg-ink px-5 py-2 font-mono text-[11px] uppercase tracking-[0.16em] text-white hover:bg-flame-500">Back to store</Link>
+          <Btn variant="ghost" onClick={signOut}>Sign out</Btn>
+        </div>
+      </div>
+    )
+  }
 
   return children
 }

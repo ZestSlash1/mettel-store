@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useCart } from '../context/CartContext'
+import { useAuth } from '../context/AuthContext'
 import { formatPrice } from '../hooks/useProducts'
 import ProductGraphic from './ProductGraphic'
 
@@ -65,9 +66,18 @@ export default function CartDrawer() {
   const [couponOk, setCouponOk] = useState(false)
   const [applyingCoupon, setApplyingCoupon] = useState(false)
 
+  const { user } = useAuth()
   const currency = items[0]?.currency || 'INR'
   const setField = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }))
   const total = Math.max(0, subtotal - couponDiscount)
+
+  // Prefill the checkout email from the signed-in account so the order links
+  // to it (and shows up in their order history).
+  useEffect(() => {
+    if (checkingOut && user?.email) {
+      setForm((f) => (f.email ? f : { ...f, email: user.email }))
+    }
+  }, [checkingOut, user])
 
   const resetCheckout = () => {
     setCheckingOut(false)
