@@ -439,7 +439,7 @@ export default function CartDrawer() {
                     <button
                       onClick={paymentMethod === 'cod' ? codOrder : pay}
                       disabled={loading}
-                      className="w-full rounded-full bg-flame-500 py-3.5 font-mono text-[12px] uppercase tracking-[0.18em] text-white transition-colors hover:bg-flame-600 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="btn btn-flame w-full py-3.5 text-[12px] tracking-[0.18em]"
                     >
                       {loading
                         ? 'Processing…'
@@ -460,7 +460,7 @@ export default function CartDrawer() {
                     <p className="mb-4 font-mono text-[10px] text-ink/40">Shipping calculated at checkout.</p>
                     <button
                       onClick={() => { setError(''); setCheckingOut(true) }}
-                      className="w-full rounded-full bg-flame-500 py-3.5 font-mono text-[12px] uppercase tracking-[0.18em] text-white transition-colors hover:bg-flame-600"
+                      className="btn btn-flame w-full py-3.5 text-[12px] tracking-[0.18em]"
                     >
                       Checkout
                     </button>

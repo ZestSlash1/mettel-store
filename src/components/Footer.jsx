@@ -53,7 +53,7 @@ export default function Footer() {
 
   return (
     <footer id="info" className="mx-auto max-w-[1400px] px-4 pb-12 pt-8 sm:px-6">
-      <div className="rounded-3xl bg-ink p-8 text-silver sm:p-12">
+      <div className="rounded-5xl bg-ink p-8 text-silver shadow-soft-lg sm:p-12">
         <div className="flex flex-col gap-10 sm:flex-row sm:items-start sm:justify-between">
           <div className="max-w-sm">
             <Link to="/" className="font-display text-4xl font-black tracking-tight transition-colors hover:text-flame-500">

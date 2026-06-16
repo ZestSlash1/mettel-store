@@ -48,6 +48,15 @@ export default {
         // 3D drop for the floating product
         product: '0 40px 80px -20px rgba(0,0,0,0.45), 0 12px 24px -12px rgba(0,0,0,0.3)',
         panel: '0 1px 0 rgba(0,0,0,0.04), 0 18px 40px -24px rgba(0,0,0,0.35)',
+        // Soft, diffuse elevation system (minimal / frosted aesthetic)
+        soft: '0 2px 8px -2px rgba(17,17,17,0.05), 0 10px 28px -10px rgba(17,17,17,0.10)',
+        'soft-lg': '0 4px 16px -6px rgba(17,17,17,0.07), 0 22px 50px -16px rgba(17,17,17,0.14)',
+        'soft-xl': '0 8px 30px -10px rgba(17,17,17,0.10), 0 40px 80px -28px rgba(17,17,17,0.20)',
+        lift: '0 18px 40px -16px rgba(17,17,17,0.22)',
+      },
+      borderRadius: {
+        '4xl': '2rem',
+        '5xl': '2.5rem',
       },
       keyframes: {
         'dash-march': {

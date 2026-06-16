@@ -61,29 +61,20 @@ export default function Hero() {
       id="features"
       className="relative mx-auto min-h-[100svh] max-w-[1400px] overflow-hidden px-4 pb-16 pt-28 sm:px-6 sm:pt-32"
     >
-      {/* ---- Background layer: mega type ---- */}
+      {/* ---- Background layer: faint mega-type watermark ---- */}
       <motion.h1
         initial={{ opacity: 0, scale: 1.04 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-        className="pointer-events-none absolute left-1/2 top-[32%] z-0 -translate-x-1/2 -translate-y-1/2 select-none font-display text-mega font-black text-ink"
+        transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+        className="pointer-events-none absolute left-1/2 top-[32%] z-0 -translate-x-1/2 -translate-y-1/2 select-none font-display text-mega font-black text-ink/[0.035]"
         aria-hidden="true"
       >
         MT
       </motion.h1>
 
-      {/* ---- Background layer: orange gradient slash + pixel accent ---- */}
+      {/* ---- Background layer: soft warm light pool ---- */}
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
-        <div className="absolute -right-24 top-10 h-[140%] w-[55%] rotate-[18deg] bg-flame-gradient opacity-90 blur-[1px]" />
-        {/* Pixel-block accent, echoing the TE question-mark blocks */}
-        <div className="absolute right-[14%] top-[18%] grid grid-cols-4 gap-1.5 opacity-90">
-          {[1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1, 1].map((on, i) => (
-            <span
-              key={i}
-              className={`h-3 w-3 ${on ? 'bg-flame-700' : 'bg-transparent'}`}
-            />
-          ))}
-        </div>
+        <div className="absolute -right-40 -top-20 h-[120%] w-[60%] rounded-full bg-flame-gradient opacity-[0.12] blur-[90px]" />
       </div>
 
       {/* ---- Visible accessible heading (screen readers + SEO) ---- */}
@@ -124,8 +115,8 @@ export default function Hero() {
             className="relative mx-auto w-[58%] min-w-[200px] max-w-[300px]"
           >
             {/* Floor shadow */}
-            <div className="absolute -bottom-4 left-1/2 h-8 w-[70%] -translate-x-1/2 rounded-full bg-ink/25 blur-2xl" />
-            <motion.div animate={float} className="relative drop-shadow-[0_40px_60px_rgba(0,0,0,0.4)]">
+            <div className="absolute -bottom-4 left-1/2 h-8 w-[70%] -translate-x-1/2 rounded-full bg-ink/15 blur-2xl" />
+            <motion.div animate={float} className="relative drop-shadow-[0_30px_55px_rgba(0,0,0,0.25)]">
               <PhoneCase className="h-auto w-full" shell="#cfcfcf" accent="#ff6b00" />
             </motion.div>
           </motion.div>

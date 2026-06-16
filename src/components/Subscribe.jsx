@@ -29,7 +29,7 @@ export default function Subscribe() {
 
   return (
     <section id="subscribe" className="mx-auto max-w-[1400px] px-4 pb-8 sm:px-6">
-      <div className="overflow-hidden rounded-3xl bg-silver-50 p-8 ring-1 ring-ink/5 sm:p-12">
+      <div className="card-soft overflow-hidden p-8 sm:p-12">
         <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
           <div className="max-w-md">
             <div className="eyebrow mb-3">Newsletter</div>
@@ -60,7 +60,7 @@ export default function Subscribe() {
                 <button
                   type="submit"
                   disabled={busy}
-                  className="shrink-0 rounded-full bg-flame-500 px-6 py-3 font-mono text-[12px] uppercase tracking-[0.18em] text-white transition-colors hover:bg-flame-600 disabled:opacity-60"
+                  className="btn btn-flame shrink-0 px-6 py-3 text-[12px] tracking-[0.18em]"
                 >
                   {busy ? 'Saving…' : 'Subscribe'}
                 </button>

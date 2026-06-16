@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { motion } from 'framer-motion'
 import { useProducts } from '../hooks/useProducts'
 import ProductCard from './ProductCard'
 
@@ -34,16 +33,16 @@ export default function ProductGrid() {
         </div>
       </div>
 
-      {/* Data source hint (dev affordance) */}
+      {/* Item count */}
       <p className="mb-6 font-mono text-[10px] uppercase tracking-[0.2em] text-ink/30">
-        Source: {source === 'supabase' ? 'Supabase (live)' : 'Local seed'} · {products.length} items
+        {products.length} {products.length === 1 ? 'item' : 'items'}
       </p>
 
       {/* Masonry grid via CSS columns; cards avoid breaking across columns */}
       {loading ? (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="h-80 animate-pulse rounded-3xl bg-silver-200" />
+            <div key={i} className="h-80 animate-pulse rounded-4xl bg-silver-200/60" />
           ))}
         </div>
       ) : (
@@ -59,14 +58,13 @@ export default function ProductGrid() {
 
 function FilterPill({ label, active, onClick }) {
   return (
-    <motion.button
-      whileTap={{ scale: 0.96 }}
+    <button
       onClick={onClick}
-      className={`rounded-full px-5 py-2 font-mono text-[11px] uppercase tracking-[0.18em] transition-colors ${
-        active ? 'bg-flame-500 text-white' : 'bg-silver-200 text-ink hover:bg-ink hover:text-white'
+      className={`btn px-5 py-2 text-[11px] tracking-[0.18em] ${
+        active ? 'btn-flame' : 'btn-soft'
       }`}
     >
       {label}
-    </motion.button>
+    </button>
   )
 }

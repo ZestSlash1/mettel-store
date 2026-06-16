@@ -163,8 +163,8 @@ export default function ProductDetail() {
           {/* Visual + gallery */}
           <div className="flex flex-col gap-3">
             {/* Main image / video */}
-            <div className="relative flex items-center justify-center overflow-hidden rounded-3xl bg-silver-50 p-10 ring-1 ring-ink/5">
-              <div className="pointer-events-none absolute -right-20 top-0 h-full w-1/2 rotate-[18deg] bg-flame-gradient opacity-80" />
+            <div className="relative flex items-center justify-center overflow-hidden rounded-4xl bg-white p-10 shadow-soft ring-1 ring-ink/[0.04]">
+              <div className="pointer-events-none absolute -right-32 -top-10 h-[120%] w-1/2 rounded-full bg-flame-gradient opacity-[0.10] blur-3xl" />
               {activeVideo && embedUrl ? (
                 <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
                   <iframe
@@ -317,13 +317,12 @@ export default function ProductDetail() {
                         +
                       </button>
                     </div>
-                    <motion.button
-                      whileTap={{ scale: 0.97 }}
+                    <button
                       onClick={() => addItem(product, { model, qty })}
-                      className="flex-1 rounded-full bg-flame-500 py-3 font-mono text-[12px] uppercase tracking-[0.18em] text-white transition-colors hover:bg-flame-600"
+                      className="btn btn-flame flex-1 py-3 text-[12px] tracking-[0.18em]"
                     >
                       {product.status === 'preorder' ? 'Pre-order' : 'Add to bag'}
-                    </motion.button>
+                    </button>
                   </div>
                 </>
               )}

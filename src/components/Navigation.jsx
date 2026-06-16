@@ -192,7 +192,7 @@ export default function Navigation() {
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
         className="fixed inset-x-0 top-0 z-50 px-3 pt-4 sm:px-6"
       >
-        <nav className="mx-auto flex max-w-[1400px] items-center gap-2 rounded-full bg-silver-50/85 p-2 shadow-panel ring-1 ring-ink/5 backdrop-blur-md">
+        <nav className="mx-auto flex max-w-[1400px] items-center gap-2 rounded-full bg-white/70 p-2 shadow-soft ring-1 ring-white/50 backdrop-blur-xl">
           {/* Brand mark */}
           <Link to="/" className="flex shrink-0 items-center" aria-label="MetTel home">
             <Logo />
