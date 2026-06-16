@@ -9,23 +9,30 @@ import CartDrawer from './components/CartDrawer'
 import Seo from './components/Seo'
 import ScrollManager from './components/ScrollManager'
 import ErrorBoundary from './components/ErrorBoundary'
-import ProductDetail from './pages/ProductDetail'
-import Shop from './pages/Shop'
-import About from './pages/About'
-import News from './pages/News'
-import Contact from './pages/Contact'
-import GiftCards from './pages/GiftCards'
-import { Shipping, Returns, Warranty } from './pages/Policies'
-import { Privacy, Terms } from './pages/Legal'
-import FAQ from './pages/FAQ'
-import Track from './pages/Track'
-import Account from './pages/Account'
-import NotFound from './pages/NotFound'
 import AuthGate from './admin/AuthGate'
 import { BUSINESS } from './config/business'
 import CookieBanner from './components/CookieBanner'
 
-// Admin is code-split: shoppers never download it.
+// Code-split every page that isn't the storefront home.
+// Shoppers who only visit "/" never download product-detail, admin, etc.
+const ProductDetail = lazy(() => import('./pages/ProductDetail'))
+const Shop         = lazy(() => import('./pages/Shop'))
+const About        = lazy(() => import('./pages/About'))
+const News         = lazy(() => import('./pages/News'))
+const Contact      = lazy(() => import('./pages/Contact'))
+const GiftCards    = lazy(() => import('./pages/GiftCards'))
+const Track        = lazy(() => import('./pages/Track'))
+const Account      = lazy(() => import('./pages/Account'))
+const NotFound     = lazy(() => import('./pages/NotFound'))
+const FAQ          = lazy(() => import('./pages/FAQ'))
+
+const Shipping  = lazy(() => import('./pages/Policies').then((m) => ({ default: m.Shipping })))
+const Returns   = lazy(() => import('./pages/Policies').then((m) => ({ default: m.Returns })))
+const Warranty  = lazy(() => import('./pages/Policies').then((m) => ({ default: m.Warranty })))
+const Privacy   = lazy(() => import('./pages/Legal').then((m) => ({ default: m.Privacy })))
+const Terms     = lazy(() => import('./pages/Legal').then((m) => ({ default: m.Terms })))
+
+// Admin is always code-split.
 const AdminDashboard = lazy(() => import('./admin/AdminDashboard'))
 
 function Storefront() {
@@ -43,6 +50,14 @@ function Storefront() {
   )
 }
 
+function PageFallback() {
+  return (
+    <div className="flex min-h-screen items-center justify-center">
+      <div className="h-12 w-12 animate-pulse rounded-full bg-silver-200" />
+    </div>
+  )
+}
+
 function AdminFallback() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-silver font-mono text-[11px] uppercase tracking-[0.2em] text-ink/40">
@@ -56,34 +71,36 @@ export default function App() {
     <ErrorBoundary>
       <div className="min-h-screen bg-silver text-ink">
         <ScrollManager />
-        <Routes>
-          <Route path="/" element={<Storefront />} />
-          <Route path="/product/:id" element={<ProductDetail />} />
-          <Route path="/shop" element={<Shop />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/news" element={<News />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/gift-cards" element={<GiftCards />} />
-          <Route path="/shipping" element={<Shipping />} />
-          <Route path="/returns" element={<Returns />} />
-          <Route path="/warranty" element={<Warranty />} />
-          <Route path="/privacy" element={<Privacy />} />
-          <Route path="/terms" element={<Terms />} />
-          <Route path="/faq" element={<FAQ />} />
-          <Route path="/track" element={<Track />} />
-          <Route path="/account" element={<Account />} />
-          <Route
-            path="/admin/*"
-            element={
-              <AuthGate>
-                <Suspense fallback={<AdminFallback />}>
-                  <AdminDashboard />
-                </Suspense>
-              </AuthGate>
-            }
-          />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <Suspense fallback={<PageFallback />}>
+          <Routes>
+            <Route path="/" element={<Storefront />} />
+            <Route path="/product/:id" element={<ProductDetail />} />
+            <Route path="/shop" element={<Shop />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/news" element={<News />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/gift-cards" element={<GiftCards />} />
+            <Route path="/shipping" element={<Shipping />} />
+            <Route path="/returns" element={<Returns />} />
+            <Route path="/warranty" element={<Warranty />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/faq" element={<FAQ />} />
+            <Route path="/track" element={<Track />} />
+            <Route path="/account" element={<Account />} />
+            <Route
+              path="/admin/*"
+              element={
+                <AuthGate>
+                  <Suspense fallback={<AdminFallback />}>
+                    <AdminDashboard />
+                  </Suspense>
+                </AuthGate>
+              }
+            />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Suspense>
 
         {/* Cart drawer lives at app level so it's reachable from every route */}
         <CartDrawer />

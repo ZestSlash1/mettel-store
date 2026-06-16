@@ -37,10 +37,12 @@ export default function ProductDetail() {
   const product = useMemo(() => products.find((p) => p.id === id), [products, id])
   const [model, setModel] = useState(null)
   const [activeImg, setActiveImg] = useState(null)
+  const [qty, setQty] = useState(1)
 
   useEffect(() => {
     setModel(product?.models?.[0] ?? null)
-    setActiveImg(null) // reset gallery selection on product change
+    setActiveImg(null)
+    setQty(1)
     window.scrollTo(0, 0)
   }, [product?.id])
 
@@ -191,24 +193,50 @@ export default function ProductDetail() {
               </div>
             ) : null}
 
-            {/* Add to cart / sold-out notify */}
-            <div className="mt-8 flex gap-3">
+            {/* Quantity + Add to cart / sold-out notify */}
+            <div className="mt-8 flex flex-col gap-3">
               {soldout ? (
                 <NotifyForm productId={product.id} />
               ) : (
-                <motion.button
-                  whileTap={{ scale: 0.97 }}
-                  onClick={() => addItem(product, { model })}
-                  className="flex-1 rounded-full bg-flame-500 py-4 font-mono text-[12px] uppercase tracking-[0.18em] text-white transition-colors hover:bg-flame-600"
-                >
-                  {product.status === 'preorder' ? 'Pre-order' : 'Add to bag'}
-                </motion.button>
+                <>
+                  {/* Qty stepper */}
+                  <div className="flex items-center gap-3">
+                    <div className="inline-flex items-center rounded-full bg-white ring-1 ring-ink/10">
+                      <button
+                        onClick={() => setQty((q) => Math.max(1, q - 1))}
+                        className="flex h-11 w-11 items-center justify-center rounded-full font-mono text-xl text-ink/60 hover:bg-ink/5"
+                        aria-label="Decrease quantity"
+                      >
+                        −
+                      </button>
+                      <span className="w-10 text-center font-mono text-base">{qty}</span>
+                      <button
+                        onClick={() => setQty((q) => q + 1)}
+                        className="flex h-11 w-11 items-center justify-center rounded-full font-mono text-xl text-ink/60 hover:bg-ink/5"
+                        aria-label="Increase quantity"
+                      >
+                        +
+                      </button>
+                    </div>
+                    <motion.button
+                      whileTap={{ scale: 0.97 }}
+                      onClick={() => addItem(product, { model, qty })}
+                      className="flex-1 rounded-full bg-flame-500 py-3 font-mono text-[12px] uppercase tracking-[0.18em] text-white transition-colors hover:bg-flame-600"
+                    >
+                      {product.status === 'preorder' ? 'Pre-order' : 'Add to bag'}
+                    </motion.button>
+                  </div>
+                </>
               )}
-              <WishlistButton
-                productId={product.id}
-                className="h-14 w-14 shrink-0 rounded-full bg-silver-100 hover:bg-silver-200"
-              />
-              <ShareButton name={product.name} />
+
+              {/* Secondary actions */}
+              <div className="flex gap-2">
+                <WishlistButton
+                  productId={product.id}
+                  className="h-11 w-11 rounded-full bg-silver-100 hover:bg-silver-200"
+                />
+                <ShareButton name={product.name} />
+              </div>
             </div>
 
             {/* Spec sheet */}

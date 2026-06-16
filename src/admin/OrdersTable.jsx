@@ -279,8 +279,11 @@ function OrderDetail({ order, onClose, onSaved, onShowInvoice }) {
   const [saving, setSaving] = useState(false)
   const [saveMsg, setSaveMsg] = useState('')
   const [saveErr, setSaveErr] = useState('')
+  const [refundAmt, setRefundAmt] = useState('')
+  const [refunding, setRefunding] = useState(false)
+  const [refundMsg, setRefundMsg] = useState('')
+  const [refundErr, setRefundErr] = useState('')
 
-  // Sync the form whenever a different order is opened.
   useEffect(() => {
     if (!order) return
     setForm({
@@ -291,6 +294,9 @@ function OrderDetail({ order, onClose, onSaved, onShowInvoice }) {
     })
     setSaveMsg('')
     setSaveErr('')
+    setRefundAmt(Math.round((order.amount || 0) / 100).toString())
+    setRefundMsg('')
+    setRefundErr('')
   }, [order?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }))
@@ -425,6 +431,61 @@ function OrderDetail({ order, onClose, onSaved, onShowInvoice }) {
                   <Btn variant="ghost" type="button" onClick={onShowInvoice}>View / print invoice</Btn>
                 </div>
               </Section>
+
+              {/* Refund — only shown for paid orders with a payment ID */}
+              {order.razorpay_payment_id && !['refunded', 'cancelled', 'failed', 'created'].includes(order.status) && (
+                <Section title="Refund">
+                  <p className="mb-3 font-mono text-[10px] text-ink/40">
+                    Issues a Razorpay refund. Full or partial — enter the rupee amount to refund.
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center rounded-xl border border-ink/15 bg-white">
+                      <span className="pl-3 font-mono text-sm text-ink/40">₹</span>
+                      <input
+                        type="number"
+                        min="1"
+                        max={Math.round((order.amount || 0) / 100)}
+                        step="1"
+                        value={refundAmt}
+                        onChange={(e) => setRefundAmt(e.target.value)}
+                        className="w-24 bg-transparent px-2 py-2 font-mono text-sm text-ink outline-none"
+                      />
+                    </div>
+                    <Btn
+                      variant="danger"
+                      type="button"
+                      disabled={refunding || !refundAmt || Number(refundAmt) <= 0}
+                      onClick={async () => {
+                        if (!confirm(`Issue a ₹${refundAmt} refund for this order?`)) return
+                        setRefunding(true)
+                        setRefundErr('')
+                        setRefundMsg('')
+                        try {
+                          const { data: { session } } = await supabase.auth.getSession()
+                          const token = session?.access_token
+                          const r = await fetch('/api/refund', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                            body: JSON.stringify({ orderId: order.id, amount: Number(refundAmt) }),
+                          })
+                          const d = await r.json().catch(() => ({}))
+                          if (!r.ok) throw new Error(d.error || 'Refund failed.')
+                          setRefundMsg(`Refund of ₹${refundAmt} issued. ID: ${d.refundId}`)
+                          onSaved({ ...order, status: 'refunded' })
+                        } catch (e) {
+                          setRefundErr(e.message)
+                        } finally {
+                          setRefunding(false)
+                        }
+                      }}
+                    >
+                      {refunding ? 'Processing…' : 'Issue refund'}
+                    </Btn>
+                  </div>
+                  {refundMsg ? <p className="mt-2 font-mono text-[10px] text-green-700">{refundMsg}</p> : null}
+                  {refundErr ? <p className="mt-2 font-mono text-[10px] text-flame-700">{refundErr}</p> : null}
+                </Section>
+              )}
             </div>
           </motion.aside>
         </motion.div>
