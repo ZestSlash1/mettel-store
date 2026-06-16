@@ -8,6 +8,7 @@ import ProductGraphic from '../components/ProductGraphic'
 import ProductCard from '../components/ProductCard'
 import { useProducts, formatPrice } from '../hooks/useProducts'
 import { useCart } from '../context/CartContext'
+import { isSoldOut } from '../lib/product'
 
 const STATUS_COPY = {
   available: 'In stock · ships in 2–4 days',
@@ -59,7 +60,7 @@ export default function ProductDetail() {
     )
   }
 
-  const soldout = product.status === 'soldout'
+  const soldout = isSoldOut(product)
 
   return (
     <>
@@ -106,7 +107,7 @@ export default function ProductDetail() {
             <div className="mt-6 flex items-baseline gap-3">
               <span className="font-display text-4xl font-black">{formatPrice(product.price, product.currency)}</span>
               <span className={`font-mono text-[11px] uppercase tracking-wider ${soldout ? 'text-ink/40' : 'text-flame-600'}`}>
-                {STATUS_COPY[product.status]}
+                {soldout ? 'Sold out' : STATUS_COPY[product.status]}
               </span>
             </div>
 

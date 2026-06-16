@@ -66,11 +66,27 @@ export default async function handler(req, res) {
     // ---- recompute the total from real DB prices ----
     const { data: products, error: prodErr } = await supabase
       .from('products')
-      .select('id, name, price, currency')
+      .select('id, name, price, currency, stock, status')
       .in('id', ids)
     if (prodErr) throw prodErr
     if (!products || products.length === 0) {
       res.status(400).json({ error: 'Items could not be found.' })
+      return
+    }
+
+    // ---- enforce availability (no overselling) ----
+    // Sold-out products are blocked; available products must have enough stock.
+    // Preorder items are allowed regardless of stock.
+    const unavailable = []
+    for (const p of products) {
+      const qty = qtyById.get(p.id) || 0
+      if (p.status === 'soldout') unavailable.push(`${p.name} (sold out)`)
+      else if (p.status !== 'preorder' && (Number(p.stock) || 0) < qty) {
+        unavailable.push(`${p.name} (only ${Number(p.stock) || 0} left)`)
+      }
+    }
+    if (unavailable.length) {
+      res.status(409).json({ error: `Some items are unavailable: ${unavailable.join(', ')}.` })
       return
     }
 

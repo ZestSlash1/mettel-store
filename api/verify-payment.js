@@ -11,7 +11,7 @@
 //   RAZORPAY_KEY_SECRET, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
 
 import crypto from 'crypto'
-import { createClient } from '@supabase/supabase-js'
+import { adminClient, fulfillPaidOrder, markOrderFailed } from './_lib/fulfillment.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -45,25 +45,21 @@ export default async function handler(req, res) {
       expectedBuf.length === givenBuf.length &&
       crypto.timingSafeEqual(expectedBuf, givenBuf)
 
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
-      auth: { persistSession: false },
-    })
+    const supabase = adminClient()
 
     if (!valid) {
       // Record the failure but never mark it paid.
-      await supabase
-        .from('orders')
-        .update({ status: 'failed', razorpay_payment_id })
-        .eq('razorpay_order_id', razorpay_order_id)
+      await markOrderFailed(supabase, { razorpayOrderId: razorpay_order_id, paymentId: razorpay_payment_id })
       res.status(400).json({ verified: false, error: 'Signature verification failed.' })
       return
     }
 
-    const { error } = await supabase
-      .from('orders')
-      .update({ status: 'paid', razorpay_payment_id })
-      .eq('razorpay_order_id', razorpay_order_id)
-    if (error) throw error
+    // Mark paid + commit stock + email — idempotent, shared with the webhook.
+    const result = await fulfillPaidOrder(supabase, {
+      razorpayOrderId: razorpay_order_id,
+      paymentId: razorpay_payment_id,
+    })
+    if (!result.ok) throw new Error(result.reason || 'fulfilment failed')
 
     res.status(200).json({ verified: true })
   } catch (e) {

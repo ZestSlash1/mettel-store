@@ -1,10 +1,25 @@
 import { formatPrice } from '../hooks/useProducts'
+import { isSoldOut, isLowStock } from '../lib/product'
 import { Btn } from './ui'
 
 const STATUS_DOT = {
   available: 'bg-green-500',
   preorder: 'bg-flame-500',
   soldout: 'bg-ink/30',
+}
+
+function StockBadge({ product }) {
+  if (product.status === 'preorder') {
+    return <span className="font-mono text-[10px] text-ink/40">preorder</span>
+  }
+  const stock = Number(product.stock) || 0
+  if (isSoldOut(product)) {
+    return <span className="rounded bg-ink/10 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-wide text-ink/50">Out</span>
+  }
+  if (isLowStock(product)) {
+    return <span className="rounded bg-amber-100 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-wide text-amber-700">Low · {stock}</span>
+  }
+  return <span className="font-mono text-[10px] text-ink/50">{stock}</span>
 }
 
 export default function ProductsTable({ products, categories, onEdit, onDuplicate, onDelete }) {
@@ -27,6 +42,7 @@ export default function ProductsTable({ products, categories, onEdit, onDuplicat
             <th className="px-4 py-3 font-normal">Product</th>
             <th className="hidden px-4 py-3 font-normal sm:table-cell">Category</th>
             <th className="hidden px-4 py-3 font-normal md:table-cell">Status</th>
+            <th className="hidden px-4 py-3 font-normal sm:table-cell">Stock</th>
             <th className="px-4 py-3 text-right font-normal">Price</th>
             <th className="px-4 py-3 text-right font-normal">Actions</th>
           </tr>
@@ -53,6 +69,7 @@ export default function ProductsTable({ products, categories, onEdit, onDuplicat
                   {p.status}
                 </span>
               </td>
+              <td className="hidden px-4 py-3 sm:table-cell"><StockBadge product={p} /></td>
               <td className="px-4 py-3 text-right font-pixel text-sm text-flame-600">{formatPrice(p.price, p.currency)}</td>
               <td className="px-4 py-3">
                 <div className="flex items-center justify-end gap-2">

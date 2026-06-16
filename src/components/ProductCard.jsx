@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import ProductGraphic from './ProductGraphic'
 import { formatPrice } from '../hooks/useProducts'
 import { useCart } from '../context/CartContext'
+import { isSoldOut } from '../lib/product'
 
 const STATUS_LABEL = {
   available: 'In stock',
@@ -24,6 +25,7 @@ export default function ProductCard({ product, index = 0 }) {
     image,
   } = product
   const { addItem } = useCart()
+  const soldOut = isSoldOut(product)
 
   return (
     <motion.article
@@ -59,7 +61,7 @@ export default function ProductCard({ product, index = 0 }) {
 
         {/* Status chip */}
         <span className="absolute left-4 top-4 rounded-full bg-ink px-3 py-1 font-mono text-[9px] uppercase tracking-[0.18em] text-white">
-          {STATUS_LABEL[status] ?? status}
+          {soldOut ? 'Sold out' : STATUS_LABEL[status] ?? status}
         </span>
       </Link>
 
@@ -91,11 +93,11 @@ export default function ProductCard({ product, index = 0 }) {
           <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-ink/35">{sku}</span>
           <motion.button
             whileTap={{ scale: 0.96 }}
-            disabled={status === 'soldout'}
+            disabled={soldOut}
             onClick={() => addItem(product, { model: product.models?.[0] ?? null })}
             className="rounded-full bg-ink px-5 py-2 font-mono text-[10px] uppercase tracking-[0.18em] text-white transition-colors hover:bg-flame-500 disabled:cursor-not-allowed disabled:opacity-40"
           >
-            {status === 'soldout' ? 'Sold' : status === 'preorder' ? 'Pre-order' : 'Add'}
+            {soldOut ? 'Sold' : status === 'preorder' ? 'Pre-order' : 'Add'}
           </motion.button>
         </div>
       </div>
