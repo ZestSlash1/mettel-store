@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS stock_notifications (
 ALTER TABLE stock_notifications ENABLE ROW LEVEL SECURITY;
 
 -- Anyone (including guests) can insert their email; only service_role reads.
+DROP POLICY IF EXISTS "public insert stock_notifications" ON stock_notifications;
 CREATE POLICY "public insert stock_notifications" ON stock_notifications
   FOR INSERT TO anon, authenticated
   WITH CHECK (true);

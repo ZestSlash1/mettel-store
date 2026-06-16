@@ -65,6 +65,7 @@ export default function CartDrawer() {
   const [couponDiscount, setCouponDiscount] = useState(0) // rupees off (preview)
   const [couponOk, setCouponOk] = useState(false)
   const [applyingCoupon, setApplyingCoupon] = useState(false)
+  const [paymentMethod, setPaymentMethod] = useState('razorpay') // 'razorpay' | 'cod'
 
   const { user } = useAuth()
   const currency = items[0]?.currency || 'INR'
@@ -83,6 +84,34 @@ export default function CartDrawer() {
     setCheckingOut(false)
     setLoading(false)
     setError('')
+    setPaymentMethod('razorpay')
+  }
+
+  const codOrder = async () => {
+    setError('')
+    if (!form.name || !form.email || !form.phone || !form.address || !form.city || !form.pincode) {
+      setError('Please fill in name, email, phone, address, city and PIN code.')
+      return
+    }
+    setLoading(true)
+    try {
+      const data = await postJSON('/api/cod-order', {
+        items: items.map((l) => ({ id: l.productId, qty: l.qty })),
+        customer: { name: form.name, email: form.email, phone: form.phone },
+        shipping: { address: form.address, city: form.city, state: form.state, pincode: form.pincode },
+        couponCode: couponOk ? coupon.trim().toUpperCase() : undefined,
+      })
+      setOrderRef(data.orderId || '')
+      setPlaced(true)
+      setCheckingOut(false)
+      setForm(emptyForm)
+      setLoading(false)
+      clear()
+      if (form.email) fetch('/api/sync-cart', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: form.email, items: [], convert: true }) }).catch(() => {})
+    } catch (e) {
+      setError(e.message)
+      setLoading(false)
+    }
   }
 
   // Preview a coupon: server recomputes the discount from DB prices.
@@ -170,6 +199,8 @@ export default function CartDrawer() {
             setForm(emptyForm)
             setLoading(false)
             clear()
+            // Mark cart converted so abandoned-cart cron skips this email.
+            if (form.email) fetch('/api/sync-cart', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: form.email, items: [], convert: true }) }).catch(() => {})
           } catch (err) {
             setError(err.message)
             setLoading(false)
@@ -227,9 +258,11 @@ export default function CartDrawer() {
             {placed ? (
               <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 text-center">
                 <div className="flex h-14 w-14 items-center justify-center rounded-full bg-flame-500 text-2xl text-white">✓</div>
-                <p className="font-display text-xl font-black uppercase">Payment received</p>
+                <p className="font-display text-xl font-black uppercase">Order confirmed</p>
                 <p className="max-w-xs font-mono text-[11px] text-ink/50">
-                  Your order is confirmed. A receipt is on its way to your email.
+                  {paymentMethod === 'cod'
+                    ? 'Your order is placed. Pay in cash when it arrives.'
+                    : 'Payment received. A receipt is on its way to your email.'}
                 </p>
                 {orderRef ? (
                   <p className="font-mono text-[10px] text-ink/40">
@@ -265,7 +298,22 @@ export default function CartDrawer() {
               <div className="flex-1 overflow-y-auto px-6 py-4">
                 <div className="space-y-3">
                   <CheckoutField label="Full name" value={form.name} onChange={setField('name')} placeholder="Aarav Sharma" autoComplete="name" />
-                  <CheckoutField label="Email" type="email" value={form.email} onChange={setField('email')} placeholder="you@email.com" autoComplete="email" />
+                  <CheckoutField
+                    label="Email"
+                    type="email"
+                    value={form.email}
+                    onChange={setField('email')}
+                    placeholder="you@email.com"
+                    autoComplete="email"
+                    onBlur={() => {
+                      if (!form.email.includes('@') || items.length === 0) return
+                      fetch('/api/sync-cart', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: form.email.trim(), items: items.map((l) => ({ productId: l.productId, name: l.name, qty: l.qty })) }),
+                      }).catch(() => {})
+                    }}
+                  />
                   <CheckoutField label="Phone" type="tel" value={form.phone} onChange={setField('phone')} placeholder="98xxxxxxxx" autoComplete="tel" />
                   <CheckoutField label="Address" value={form.address} onChange={setField('address')} placeholder="House / street / area" autoComplete="street-address" />
                   <div className="grid grid-cols-2 gap-3">
@@ -273,6 +321,27 @@ export default function CartDrawer() {
                     <CheckoutField label="State" value={form.state} onChange={setField('state')} placeholder="MH" autoComplete="address-level1" />
                   </div>
                   <CheckoutField label="PIN code" value={form.pincode} onChange={setField('pincode')} placeholder="400001" autoComplete="postal-code" />
+                </div>
+
+                {/* Payment method */}
+                <div className="mt-4">
+                  <span className="mb-2 block font-mono text-[10px] uppercase tracking-[0.18em] text-ink/45">Payment</span>
+                  <div className="flex gap-2">
+                    {[['razorpay', 'Pay online'], ['cod', 'Cash on delivery']].map(([method, label]) => (
+                      <button
+                        key={method}
+                        type="button"
+                        onClick={() => setPaymentMethod(method)}
+                        className={`flex-1 rounded-xl border py-2.5 font-mono text-[11px] uppercase tracking-wider transition-colors ${
+                          paymentMethod === method
+                            ? 'border-flame-500 bg-flame-500/10 text-flame-700'
+                            : 'border-ink/15 bg-white text-ink/60 hover:border-ink/30'
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Coupon */}
@@ -368,11 +437,15 @@ export default function CartDrawer() {
                 {checkingOut ? (
                   <>
                     <button
-                      onClick={pay}
+                      onClick={paymentMethod === 'cod' ? codOrder : pay}
                       disabled={loading}
                       className="w-full rounded-full bg-flame-500 py-3.5 font-mono text-[12px] uppercase tracking-[0.18em] text-white transition-colors hover:bg-flame-600 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      {loading ? 'Processing…' : `Pay ${formatPrice(total, currency)}`}
+                      {loading
+                        ? 'Processing…'
+                        : paymentMethod === 'cod'
+                          ? `Place order · Pay on delivery`
+                          : `Pay ${formatPrice(total, currency)}`}
                     </button>
                     <button
                       onClick={resetCheckout}
@@ -402,7 +475,7 @@ export default function CartDrawer() {
   )
 }
 
-function CheckoutField({ label, type = 'text', value, onChange, placeholder, autoComplete }) {
+function CheckoutField({ label, type = 'text', value, onChange, onBlur, placeholder, autoComplete }) {
   return (
     <label className="block">
       <span className="mb-1 block font-mono text-[10px] uppercase tracking-[0.18em] text-ink/45">{label}</span>
@@ -410,6 +483,7 @@ function CheckoutField({ label, type = 'text', value, onChange, placeholder, aut
         type={type}
         value={value}
         onChange={onChange}
+        onBlur={onBlur}
         placeholder={placeholder}
         autoComplete={autoComplete}
         className="w-full rounded-xl border border-ink/15 bg-white px-3 py-2 font-mono text-sm text-ink outline-none transition-colors placeholder:text-ink/30 focus:border-flame-500 focus:ring-2 focus:ring-flame-500/20"

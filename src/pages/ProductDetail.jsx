@@ -11,6 +11,28 @@ import ProductReviews from '../components/ProductReviews'
 import { useProducts, formatPrice } from '../hooks/useProducts'
 import { useCart } from '../context/CartContext'
 import { isSoldOut } from '../lib/product'
+import { BUSINESS } from '../config/business'
+
+const VIEWED_KEY = 'mettel:viewed'
+const MAX_VIEWED = 6
+
+function pushViewed(id) {
+  try {
+    const prev = JSON.parse(localStorage.getItem(VIEWED_KEY) || '[]')
+    const next = [id, ...prev.filter((x) => x !== id)].slice(0, MAX_VIEWED)
+    localStorage.setItem(VIEWED_KEY, JSON.stringify(next))
+  } catch {}
+}
+
+function getViewed() {
+  try { return JSON.parse(localStorage.getItem(VIEWED_KEY) || '[]') } catch { return [] }
+}
+
+function youtubeEmbedUrl(url) {
+  if (!url) return null
+  const m = url.match(/(?:v=|youtu\.be\/)([A-Za-z0-9_-]{11})/)
+  return m ? `https://www.youtube.com/embed/${m[1]}?autoplay=1` : null
+}
 
 const STATUS_COPY = {
   available: 'In stock · ships in 2–4 days',
@@ -37,13 +59,24 @@ export default function ProductDetail() {
   const product = useMemo(() => products.find((p) => p.id === id), [products, id])
   const [model, setModel] = useState(null)
   const [activeImg, setActiveImg] = useState(null)
+  const [activeVideo, setActiveVideo] = useState(false)
   const [qty, setQty] = useState(1)
+  const [pincode, setPincode] = useState('')
+  const [pincodeStatus, setPincodeStatus] = useState(null) // null | 'ok' | 'no'
+  const [recentIds, setRecentIds] = useState([])
 
   useEffect(() => {
     setModel(product?.models?.[0] ?? null)
     setActiveImg(null)
+    setActiveVideo(false)
     setQty(1)
+    setPincode('')
+    setPincodeStatus(null)
     window.scrollTo(0, 0)
+    if (product?.id) {
+      pushViewed(product.id)
+      setRecentIds(getViewed())
+    }
   }, [product?.id])
 
   const gallery = useMemo(() => product ? galleryOf(product) : [], [product])
@@ -53,7 +86,19 @@ export default function ProductDetail() {
     () => products.filter((p) => p.category_id === product?.category_id && p.id !== product?.id).slice(0, 3),
     [products, product],
   )
+  const recentlyViewed = useMemo(
+    () => recentIds.filter((rid) => rid !== product?.id).map((rid) => products.find((p) => p.id === rid)).filter(Boolean).slice(0, 4),
+    [recentIds, products, product?.id],
+  )
   const catLabel = categories.find((c) => c.id === product?.category_id)?.label
+
+  const checkPincode = () => {
+    const codes = BUSINESS.serviceablePincodes
+    if (!codes?.length) return
+    setPincodeStatus(codes.includes(pincode.trim()) ? 'ok' : 'no')
+  }
+
+  const embedUrl = product ? youtubeEmbedUrl(product.video_url) : null
 
   if (loading) {
     return (
@@ -117,35 +162,47 @@ export default function ProductDetail() {
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-2">
           {/* Visual + gallery */}
           <div className="flex flex-col gap-3">
-            {/* Main image */}
+            {/* Main image / video */}
             <div className="relative flex items-center justify-center overflow-hidden rounded-3xl bg-silver-50 p-10 ring-1 ring-ink/5">
               <div className="pointer-events-none absolute -right-20 top-0 h-full w-1/2 rotate-[18deg] bg-flame-gradient opacity-80" />
-              <motion.div
-                key={displayImg}
-                initial={{ y: 8, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-                className="relative w-[58%] max-w-[260px] drop-shadow-[0_40px_60px_rgba(0,0,0,0.4)]"
-              >
-                {displayImg ? (
-                  <div className="aspect-[1/2] w-full">
-                    <img src={displayImg} alt={product.name} className="h-full w-full object-contain" />
-                  </div>
-                ) : (
-                  <ProductGraphic className="h-auto w-full" shell={product.color_hex} accent={product.accent_hex} />
-                )}
-              </motion.div>
+              {activeVideo && embedUrl ? (
+                <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+                  <iframe
+                    src={embedUrl}
+                    title={`${product.name} video`}
+                    allow="autoplay; fullscreen"
+                    allowFullScreen
+                    className="absolute inset-0 h-full w-full rounded-2xl"
+                  />
+                </div>
+              ) : (
+                <motion.div
+                  key={displayImg}
+                  initial={{ y: 8, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                  className="relative w-[58%] max-w-[260px] drop-shadow-[0_40px_60px_rgba(0,0,0,0.4)]"
+                >
+                  {displayImg ? (
+                    <div className="aspect-[1/2] w-full">
+                      <img src={displayImg} alt={product.name} className="h-full w-full object-contain" />
+                    </div>
+                  ) : (
+                    <ProductGraphic className="h-auto w-full" shell={product.color_hex} accent={product.accent_hex} />
+                  )}
+                </motion.div>
+              )}
             </div>
 
-            {/* Thumbnail strip — only if there are 2+ images */}
-            {gallery.length > 1 ? (
+            {/* Thumbnail strip — images + optional video thumb */}
+            {(gallery.length > 1 || embedUrl) ? (
               <div className="flex gap-2 overflow-x-auto pb-1">
                 {gallery.map((url, i) => (
                   <button
                     key={url}
-                    onClick={() => setActiveImg(url)}
+                    onClick={() => { setActiveImg(url); setActiveVideo(false) }}
                     className={`h-16 w-16 shrink-0 overflow-hidden rounded-xl ring-2 transition-all ${
-                      (displayImg === url || (i === 0 && !activeImg))
+                      !activeVideo && (displayImg === url || (i === 0 && !activeImg))
                         ? 'ring-flame-500'
                         : 'ring-ink/10 hover:ring-ink/30'
                     }`}
@@ -154,6 +211,17 @@ export default function ProductDetail() {
                     <img src={url} alt="" className="h-full w-full object-contain bg-silver-50" />
                   </button>
                 ))}
+                {embedUrl ? (
+                  <button
+                    onClick={() => setActiveVideo(true)}
+                    className={`relative h-16 w-16 shrink-0 overflow-hidden rounded-xl ring-2 transition-all ${activeVideo ? 'ring-flame-500' : 'ring-ink/10 hover:ring-ink/30'}`}
+                    aria-label="Play video"
+                  >
+                    <div className="flex h-full w-full items-center justify-center bg-ink">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="white" aria-hidden="true"><polygon points="5,3 19,12 5,21"/></svg>
+                    </div>
+                  </button>
+                ) : null}
               </div>
             ) : null}
           </div>
@@ -190,6 +258,37 @@ export default function ProductDetail() {
                     </button>
                   ))}
                 </div>
+              </div>
+            ) : null}
+
+            {/* Pincode serviceability */}
+            {BUSINESS.serviceablePincodes?.length ? (
+              <div className="mt-6">
+                <div className="eyebrow mb-2">Check delivery</div>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={6}
+                    value={pincode}
+                    onChange={(e) => { setPincode(e.target.value.replace(/\D/g, '')); setPincodeStatus(null) }}
+                    placeholder="Enter pincode"
+                    className="w-36 rounded-full border border-ink/15 bg-white px-4 py-2.5 font-mono text-sm text-ink outline-none placeholder:text-ink/30 focus:border-flame-500"
+                  />
+                  <button
+                    onClick={checkPincode}
+                    disabled={pincode.length < 6}
+                    className="rounded-full bg-ink px-5 py-2.5 font-mono text-[11px] uppercase tracking-[0.16em] text-white transition-colors hover:bg-flame-500 disabled:opacity-40"
+                  >
+                    Check
+                  </button>
+                </div>
+                {pincodeStatus === 'ok' && (
+                  <p className="mt-2 font-mono text-[11px] text-green-600">Delivery available to {pincode}</p>
+                )}
+                {pincodeStatus === 'no' && (
+                  <p className="mt-2 font-mono text-[11px] text-flame-600">Sorry, we don't deliver to {pincode} yet</p>
+                )}
               </div>
             ) : null}
 
@@ -263,6 +362,18 @@ export default function ProductDetail() {
             <h2 className="mb-8 font-display text-3xl font-black uppercase tracking-tight">More in {catLabel}</h2>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {related.map((p, i) => (
+                <ProductCard key={p.id} product={p} index={i} />
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        {/* Recently viewed */}
+        {recentlyViewed.length ? (
+          <section className="mt-20">
+            <h2 className="mb-8 font-display text-3xl font-black uppercase tracking-tight">Recently viewed</h2>
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+              {recentlyViewed.map((p, i) => (
                 <ProductCard key={p.id} product={p} index={i} />
               ))}
             </div>

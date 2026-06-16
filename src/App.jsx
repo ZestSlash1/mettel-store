@@ -12,6 +12,7 @@ import ErrorBoundary from './components/ErrorBoundary'
 import AuthGate from './admin/AuthGate'
 import { BUSINESS } from './config/business'
 import CookieBanner from './components/CookieBanner'
+import AnnouncementBar from './components/AnnouncementBar'
 
 // Code-split every page that isn't the storefront home.
 // Shoppers who only visit "/" never download product-detail, admin, etc.
@@ -70,6 +71,7 @@ export default function App() {
   return (
     <ErrorBoundary>
       <div className="min-h-screen bg-silver text-ink">
+        <AnnouncementBar />
         <ScrollManager />
         <Suspense fallback={<PageFallback />}>
           <Routes>

@@ -14,4 +14,16 @@ export const BUSINESS = {
   // WhatsApp number in international format without +/spaces (e.g. '919876543210').
   // Set to '' to hide the floating WhatsApp button.
   whatsapp: '',
+
+  // Slim announcement bar shown at the top of every page.
+  // Set active: false (or remove text) to hide it entirely.
+  announcement: {
+    active: false,
+    text: 'Free shipping on orders above ₹999',
+    link: '',      // optional — makes the whole bar clickable
+  },
+
+  // Pincode serviceability check on product pages.
+  // Empty array = disabled (show no check). Otherwise list valid pincodes as strings.
+  serviceablePincodes: [],
 }

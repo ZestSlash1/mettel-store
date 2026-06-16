@@ -32,6 +32,7 @@ const BLANK = {
   models: [],
   stock: 0,
   rank: 0,
+  video_url: '',
 }
 
 export default function ProductForm({ product, categories, existingIds, onSave, onCancel }) {
@@ -223,6 +224,10 @@ export default function ProductForm({ product, categories, existingIds, onSave, 
 
           <Field label="Tagline" className="col-span-2">
             <input className={inputClass} value={form.tagline} onChange={(e) => set({ tagline: e.target.value })} placeholder="A short, punchy product line." />
+          </Field>
+
+          <Field label="Video URL (YouTube)" className="col-span-2">
+            <input className={inputClass} value={form.video_url || ''} onChange={(e) => set({ video_url: e.target.value })} placeholder="https://www.youtube.com/watch?v=..." />
           </Field>
 
           <Field label="Price">
