@@ -62,9 +62,28 @@ export default function ProductDetail() {
 
   const soldout = isSoldOut(product)
 
+  // Product structured data for rich results in search engines.
+  const productSchema = {
+    '@context': 'https://schema.org/',
+    '@type': 'Product',
+    name: product.name,
+    description: product.tagline || undefined,
+    sku: product.sku,
+    image: product.image || undefined,
+    brand: { '@type': 'Brand', name: 'MetTel' },
+    offers: {
+      '@type': 'Offer',
+      priceCurrency: product.currency || 'INR',
+      price: product.price,
+      availability: soldout ? 'https://schema.org/OutOfStock' : 'https://schema.org/InStock',
+      url: `https://www.mettel.in/product/${product.id}`,
+    },
+  }
+
   return (
     <>
       <Seo title={product.name} description={product.tagline} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }} />
       <Navigation />
       <main className="mx-auto max-w-[1200px] px-4 pb-24 pt-28 sm:px-6 sm:pt-32">
         {/* Breadcrumb */}
