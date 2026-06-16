@@ -23,6 +23,7 @@ import Account from './pages/Account'
 import NotFound from './pages/NotFound'
 import AuthGate from './admin/AuthGate'
 import { BUSINESS } from './config/business'
+import CookieBanner from './components/CookieBanner'
 
 // Admin is code-split: shoppers never download it.
 const AdminDashboard = lazy(() => import('./admin/AdminDashboard'))
@@ -86,6 +87,7 @@ export default function App() {
 
         {/* Cart drawer lives at app level so it's reachable from every route */}
         <CartDrawer />
+        <CookieBanner />
 
         {/* WhatsApp floating button — only shown when a number is configured */}
         {BUSINESS.whatsapp ? (
