@@ -19,6 +19,8 @@ import OrdersTable from './OrdersTable'
 import Overview from './Overview'
 import CouponManager from './CouponManager'
 import ReviewsManager from './ReviewsManager'
+import SubscribersManager from './SubscribersManager'
+import StockNotificationsManager from './StockNotificationsManager'
 import { Btn } from './ui'
 import { useAuth } from '../context/AuthContext'
 
@@ -130,6 +132,8 @@ export default function AdminDashboard() {
             ['orders', 'Orders'],
             ['coupons', 'Coupons'],
             ['reviews', 'Reviews'],
+            ['subscribers', 'Subscribers'],
+            ['stock-alerts', 'Stock alerts'],
           ].map(([key, label]) => (
             <button
               key={key}
@@ -180,6 +184,10 @@ export default function AdminDashboard() {
           <CouponManager />
         ) : tab === 'reviews' ? (
           <ReviewsManager />
+        ) : tab === 'subscribers' ? (
+          <SubscribersManager />
+        ) : tab === 'stock-alerts' ? (
+          <StockNotificationsManager />
         ) : (
           <OrdersTable />
         )}
