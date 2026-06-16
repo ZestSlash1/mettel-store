@@ -16,13 +16,14 @@ import ProductsTable from './ProductsTable'
 import ProductForm from './ProductForm'
 import CategoryManager from './CategoryManager'
 import OrdersTable from './OrdersTable'
+import Overview from './Overview'
 import { Btn } from './ui'
 import { useAuth } from '../context/AuthContext'
 
 export default function AdminDashboard() {
   const { products, categories, loading } = useProducts()
   const { user, signOut, authEnabled } = useAuth()
-  const [tab, setTab] = useState('products') // products | categories | orders
+  const [tab, setTab] = useState('overview') // overview | products | categories | orders
   const [filter, setFilter] = useState('all')
   const [editing, setEditing] = useState(null) // product | {} (new) | null (closed)
   const fileRef = useRef(null)
@@ -121,6 +122,7 @@ export default function AdminDashboard() {
         {/* Tabs */}
         <div className="mx-auto flex max-w-[1200px] gap-2 px-4 pb-3 sm:px-6">
           {[
+            ['overview', 'Overview'],
             ['products', `Products (${products.length})`],
             ['categories', `Categories (${categories.length})`],
             ['orders', 'Orders'],
@@ -142,6 +144,8 @@ export default function AdminDashboard() {
       <main className="mx-auto max-w-[1200px] px-4 py-8 sm:px-6">
         {loading ? (
           <div className="h-64 animate-pulse rounded-2xl bg-silver-200" />
+        ) : tab === 'overview' ? (
+          <Overview />
         ) : tab === 'products' ? (
           <>
             <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
