@@ -59,14 +59,42 @@ export default function CartDrawer() {
   const [form, setForm] = useState(emptyForm)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [coupon, setCoupon] = useState('') // code being typed
+  const [couponMsg, setCouponMsg] = useState('')
+  const [couponDiscount, setCouponDiscount] = useState(0) // rupees off (preview)
+  const [couponOk, setCouponOk] = useState(false)
+  const [applyingCoupon, setApplyingCoupon] = useState(false)
 
   const currency = items[0]?.currency || 'INR'
   const setField = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }))
+  const total = Math.max(0, subtotal - couponDiscount)
 
   const resetCheckout = () => {
     setCheckingOut(false)
     setLoading(false)
     setError('')
+  }
+
+  // Preview a coupon: server recomputes the discount from DB prices.
+  const applyCoupon = async () => {
+    setCouponMsg('')
+    if (!coupon.trim()) return
+    setApplyingCoupon(true)
+    try {
+      const data = await postJSON('/api/validate-coupon', {
+        code: coupon,
+        items: items.map((l) => ({ id: l.productId, qty: l.qty })),
+      })
+      setCouponOk(!!data.valid)
+      setCouponDiscount(data.valid ? data.discountRupees || 0 : 0)
+      setCouponMsg(data.message || (data.valid ? 'Applied.' : 'Invalid code.'))
+    } catch (e) {
+      setCouponOk(false)
+      setCouponDiscount(0)
+      setCouponMsg(e.message)
+    } finally {
+      setApplyingCoupon(false)
+    }
   }
 
   // Close the drawer and clear the post-payment confirmation state.
@@ -96,6 +124,7 @@ export default function CartDrawer() {
           state: form.state,
           pincode: form.pincode,
         },
+        couponCode: couponOk ? coupon.trim().toUpperCase() : undefined,
       })
 
       // 2. Load the gateway and open Checkout.
@@ -235,6 +264,31 @@ export default function CartDrawer() {
                   </div>
                   <CheckoutField label="PIN code" value={form.pincode} onChange={setField('pincode')} placeholder="400001" autoComplete="postal-code" />
                 </div>
+
+                {/* Coupon */}
+                <div className="mt-4">
+                  <span className="mb-1 block font-mono text-[10px] uppercase tracking-[0.18em] text-ink/45">Coupon code</span>
+                  <div className="flex gap-2">
+                    <input
+                      value={coupon}
+                      onChange={(e) => { setCoupon(e.target.value.toUpperCase()); setCouponOk(false); setCouponDiscount(0); setCouponMsg('') }}
+                      placeholder="WELCOME10"
+                      className="w-full rounded-xl border border-ink/15 bg-white px-3 py-2 font-mono text-sm uppercase text-ink outline-none transition-colors placeholder:text-ink/30 focus:border-flame-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={applyCoupon}
+                      disabled={applyingCoupon || !coupon.trim()}
+                      className="shrink-0 rounded-xl bg-ink px-4 py-2 font-mono text-[11px] uppercase tracking-[0.16em] text-white transition-colors hover:bg-flame-500 disabled:opacity-40"
+                    >
+                      {applyingCoupon ? '…' : 'Apply'}
+                    </button>
+                  </div>
+                  {couponMsg ? (
+                    <p className={`mt-1 font-mono text-[10px] ${couponOk ? 'text-green-700' : 'text-flame-700'}`}>{couponMsg}</p>
+                  ) : null}
+                </div>
+
                 {error ? (
                   <p className="mt-4 rounded-xl bg-flame-100 px-3 py-2 font-mono text-[11px] text-flame-700">{error}</p>
                 ) : null}
@@ -281,11 +335,17 @@ export default function CartDrawer() {
             {/* Footer */}
             {!placed && items.length > 0 ? (
               <div className="border-t border-ink/10 px-6 py-5">
+                {checkingOut && couponOk && couponDiscount > 0 ? (
+                  <div className="mb-2 flex items-center justify-between font-mono text-[11px]">
+                    <span className="uppercase tracking-[0.16em] text-ink/45">Discount {coupon.trim().toUpperCase()}</span>
+                    <span className="text-green-700">− {formatPrice(couponDiscount, currency)}</span>
+                  </div>
+                ) : null}
                 <div className="mb-4 flex items-center justify-between">
                   <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink/50">
                     {checkingOut ? 'Total' : 'Subtotal'}
                   </span>
-                  <span className="font-display text-2xl font-black">{formatPrice(subtotal, currency)}</span>
+                  <span className="font-display text-2xl font-black">{formatPrice(checkingOut ? total : subtotal, currency)}</span>
                 </div>
 
                 {checkingOut ? (
@@ -295,7 +355,7 @@ export default function CartDrawer() {
                       disabled={loading}
                       className="w-full rounded-full bg-flame-500 py-3.5 font-mono text-[12px] uppercase tracking-[0.18em] text-white transition-colors hover:bg-flame-600 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      {loading ? 'Processing…' : `Pay ${formatPrice(subtotal, currency)}`}
+                      {loading ? 'Processing…' : `Pay ${formatPrice(total, currency)}`}
                     </button>
                     <button
                       onClick={resetCheckout}

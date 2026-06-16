@@ -17,6 +17,7 @@ import ProductForm from './ProductForm'
 import CategoryManager from './CategoryManager'
 import OrdersTable from './OrdersTable'
 import Overview from './Overview'
+import CouponManager from './CouponManager'
 import { Btn } from './ui'
 import { useAuth } from '../context/AuthContext'
 
@@ -126,6 +127,7 @@ export default function AdminDashboard() {
             ['products', `Products (${products.length})`],
             ['categories', `Categories (${categories.length})`],
             ['orders', 'Orders'],
+            ['coupons', 'Coupons'],
           ].map(([key, label]) => (
             <button
               key={key}
@@ -172,6 +174,8 @@ export default function AdminDashboard() {
             onSave={upsertCategory}
             onDelete={deleteCategory}
           />
+        ) : tab === 'coupons' ? (
+          <CouponManager />
         ) : (
           <OrdersTable />
         )}

@@ -11,6 +11,7 @@
 
 import Razorpay from 'razorpay'
 import { createClient } from '@supabase/supabase-js'
+import { evaluateCoupon } from './_lib/coupons.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -32,7 +33,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { items, customer, shipping } = req.body || {}
+    const { items, customer, shipping, couponCode } = req.body || {}
 
     // ---- validate input ----
     if (!Array.isArray(items) || items.length === 0) {
@@ -107,10 +108,24 @@ export default async function handler(req, res) {
       return
     }
 
+    // ---- apply coupon server-side (authoritative; client can't forge it) ----
+    let discountPaise = 0
+    let appliedCoupon = null
+    if (couponCode) {
+      const result = await evaluateCoupon(supabase, { code: couponCode, subtotalRupees: amountPaise / 100 })
+      if (!result.valid) {
+        res.status(400).json({ error: result.message || 'That coupon could not be applied.' })
+        return
+      }
+      discountPaise = result.discountPaise
+      appliedCoupon = result.code
+    }
+    const finalAmount = Math.max(100, amountPaise - discountPaise)
+
     // ---- create the Razorpay order ----
     const razorpay = new Razorpay({ key_id: RAZORPAY_KEY_ID, key_secret: RAZORPAY_KEY_SECRET })
     const rzpOrder = await razorpay.orders.create({
-      amount: amountPaise,
+      amount: finalAmount,
       currency,
       receipt: `rcpt_${Date.now()}`,
     })
@@ -123,7 +138,7 @@ export default async function handler(req, res) {
     const { error: insErr } = await supabase.from('orders').insert({
       razorpay_order_id: rzpOrder.id,
       status: 'created',
-      amount: amountPaise,
+      amount: finalAmount,
       currency,
       customer_name: customer.name,
       customer_email: customer.email,
@@ -131,15 +146,24 @@ export default async function handler(req, res) {
       shipping_address: shipping || null,
       items: orderItems,
       invoice_number: invoiceNumber,
+      coupon_code: appliedCoupon,
+      discount: discountPaise,
     })
     if (insErr) throw insErr
+
+    // Count the redemption (best-effort).
+    if (appliedCoupon) {
+      await supabase.rpc('increment_coupon_use', { p_code: appliedCoupon }).catch(() => {})
+    }
 
     // keyId is the PUBLIC Razorpay key — safe to return to the browser.
     res.status(200).json({
       razorpayOrderId: rzpOrder.id,
-      amount: amountPaise,
+      amount: finalAmount,
       currency,
       keyId: RAZORPAY_KEY_ID,
+      discount: discountPaise,
+      couponCode: appliedCoupon,
     })
   } catch (e) {
     console.error('[create-order]', e)
