@@ -21,6 +21,10 @@ export default function OrdersTable() {
   const [invoiceOrder, setInvoiceOrder] = useState(null) // order in the invoice modal
   const [query, setQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
+  const [checkedIds, setCheckedIds] = useState(new Set())
+  const [bulkStatus, setBulkStatus] = useState('')
+  const [bulkBusy, setBulkBusy] = useState(false)
+  const [bulkMsg, setBulkMsg] = useState('')
 
   useEffect(() => {
     let active = true
@@ -56,6 +60,55 @@ export default function OrdersTable() {
   const applyUpdate = (updated) => {
     setOrders((prev) => prev.map((o) => (o.id === updated.id ? { ...o, ...updated } : o)))
     setSelected((s) => (s && s.id === updated.id ? { ...s, ...updated } : s))
+  }
+
+  const toggleCheck = (id) => {
+    setCheckedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id); else next.add(id)
+      return next
+    })
+    setBulkMsg('')
+  }
+
+  const toggleAll = (ids) => {
+    setCheckedIds((prev) => {
+      if (ids.every((id) => prev.has(id))) return new Set()
+      return new Set(ids)
+    })
+    setBulkMsg('')
+  }
+
+  const applyBulk = async () => {
+    if (!bulkStatus || checkedIds.size === 0) return
+    setBulkBusy(true)
+    setBulkMsg('')
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const token = session?.access_token
+      if (!token) throw new Error('Session expired.')
+
+      const ids = [...checkedIds]
+      await Promise.all(
+        ids.map((id) =>
+          fetch('/api/update-order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({ id, status: bulkStatus }),
+          }),
+        ),
+      )
+      setOrders((prev) =>
+        prev.map((o) => (checkedIds.has(o.id) ? { ...o, status: bulkStatus } : o)),
+      )
+      setBulkMsg(`Updated ${ids.length} order${ids.length !== 1 ? 's' : ''} to "${bulkStatus}".`)
+      setCheckedIds(new Set())
+      setBulkStatus('')
+    } catch (e) {
+      setBulkMsg(e.message)
+    } finally {
+      setBulkBusy(false)
+    }
   }
 
   if (!isSupabaseConfigured) {
@@ -124,10 +177,41 @@ export default function OrdersTable() {
         </Btn>
       </div>
 
+      {/* Bulk action toolbar — visible when any rows are checked */}
+      {checkedIds.size > 0 && (
+        <div className="mb-3 flex flex-wrap items-center gap-2 rounded-xl bg-ink/5 px-4 py-3">
+          <span className="font-mono text-[11px] text-ink/60">{checkedIds.size} selected</span>
+          <select
+            value={bulkStatus}
+            onChange={(e) => setBulkStatus(e.target.value)}
+            className={`${inputClass} max-w-[180px]`}
+          >
+            <option value="">Set status…</option>
+            {ORDER_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+          </select>
+          <Btn variant="flame" onClick={applyBulk} disabled={bulkBusy || !bulkStatus}>
+            {bulkBusy ? 'Updating…' : 'Apply'}
+          </Btn>
+          <button onClick={() => setCheckedIds(new Set())} className="font-mono text-[10px] text-ink/40 hover:text-ink">
+            Clear
+          </button>
+          {bulkMsg ? <span className="font-mono text-[10px] text-green-700">{bulkMsg}</span> : null}
+        </div>
+      )}
+
       <div className="overflow-x-auto rounded-2xl border border-ink/10 bg-white">
         <table className="w-full min-w-[720px] border-collapse">
           <thead>
             <tr className="border-b border-ink/10 text-left">
+              <Th>
+                <input
+                  type="checkbox"
+                  checked={filtered.length > 0 && filtered.every((o) => checkedIds.has(o.id))}
+                  onChange={() => toggleAll(filtered.map((o) => o.id))}
+                  className="h-4 w-4 cursor-pointer accent-flame-500"
+                  aria-label="Select all"
+                />
+              </Th>
               <Th>Date</Th>
               <Th>Customer</Th>
               <Th>Items</Th>
@@ -142,22 +226,33 @@ export default function OrdersTable() {
               return (
                 <tr
                   key={o.id}
-                  onClick={() => setSelected(o)}
-                  className="cursor-pointer border-b border-ink/5 last:border-0 hover:bg-silver-50"
+                  className={`border-b border-ink/5 last:border-0 hover:bg-silver-50 ${checkedIds.has(o.id) ? 'bg-flame-50/40' : ''}`}
                 >
-                  <Td><span className="font-mono text-[11px] text-ink/70">{formatDate(o.created_at)}</span></Td>
                   <Td>
+                    <input
+                      type="checkbox"
+                      checked={checkedIds.has(o.id)}
+                      onChange={() => toggleCheck(o.id)}
+                      onClick={(e) => e.stopPropagation()}
+                      className="h-4 w-4 cursor-pointer accent-flame-500"
+                      aria-label="Select order"
+                    />
+                  </Td>
+                  <Td onClick={() => setSelected(o)} className="cursor-pointer">
+                    <span className="font-mono text-[11px] text-ink/70">{formatDate(o.created_at)}</span>
+                  </Td>
+                  <Td onClick={() => setSelected(o)} className="cursor-pointer">
                     <div className="font-mono text-[12px] text-ink">{o.customer_name || '—'}</div>
                     <div className="font-mono text-[10px] text-ink/40">{o.customer_email || ''}</div>
                   </Td>
-                  <Td><span className="font-mono text-[12px] text-ink/70">{itemCount}</span></Td>
-                  <Td>
+                  <Td onClick={() => setSelected(o)} className="cursor-pointer"><span className="font-mono text-[12px] text-ink/70">{itemCount}</span></Td>
+                  <Td onClick={() => setSelected(o)} className="cursor-pointer">
                     <span className="font-pixel text-sm text-flame-600">
                       {formatPrice(Math.round((o.amount || 0) / 100), o.currency || 'INR')}
                     </span>
                   </Td>
-                  <Td><StatusChip status={o.status} /></Td>
-                  <Td><span className="font-mono text-[10px] uppercase tracking-wider text-ink/35">View →</span></Td>
+                  <Td onClick={() => setSelected(o)} className="cursor-pointer"><StatusChip status={o.status} /></Td>
+                  <Td onClick={() => setSelected(o)} className="cursor-pointer"><span className="font-mono text-[10px] uppercase tracking-wider text-ink/35">View →</span></Td>
                 </tr>
               )
             })}
@@ -439,10 +534,10 @@ function formatDate(ts) {
   }
 }
 
-function Th({ children }) {
-  return <th className="px-4 py-3 font-mono text-[9px] uppercase tracking-[0.18em] text-ink/40">{children}</th>
+function Th({ children, className = '' }) {
+  return <th className={`px-4 py-3 font-mono text-[9px] uppercase tracking-[0.18em] text-ink/40 ${className}`}>{children}</th>
 }
 
-function Td({ children }) {
-  return <td className="px-4 py-3 align-top">{children}</td>
+function Td({ children, onClick, className = '' }) {
+  return <td onClick={onClick} className={`px-4 py-3 align-top ${className}`}>{children}</td>
 }

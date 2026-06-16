@@ -208,6 +208,7 @@ export default function ProductDetail() {
                 productId={product.id}
                 className="h-14 w-14 shrink-0 rounded-full bg-silver-100 hover:bg-silver-200"
               />
+              <ShareButton name={product.name} />
             </div>
 
             {/* Spec sheet */}
@@ -242,6 +243,51 @@ export default function ProductDetail() {
       </main>
       <Footer />
     </>
+  )
+}
+
+/** Web Share API button with copy-URL fallback. */
+function ShareButton({ name }) {
+  const [copied, setCopied] = useState(false)
+
+  const share = async () => {
+    const url = window.location.href
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: name, url })
+      } catch {
+        // User cancelled — no-op
+      }
+      return
+    }
+    // Fallback: copy to clipboard
+    try {
+      await navigator.clipboard.writeText(url)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      /* clipboard blocked */
+    }
+  }
+
+  return (
+    <button
+      onClick={share}
+      className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-silver-100 text-ink/40 transition-colors hover:bg-silver-200 hover:text-ink"
+      aria-label="Share product"
+      title={copied ? 'Link copied!' : 'Share'}
+    >
+      {copied ? (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+      ) : (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
+          <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+        </svg>
+      )}
+    </button>
   )
 }
 
