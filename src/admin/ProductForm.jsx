@@ -28,6 +28,7 @@ const BLANK = {
   accent_hex: '#ff6b00',
   specs: [{ k: '', v: '' }],
   image: null,
+  images: [],
   models: [],
   stock: 0,
   rank: 0,
@@ -35,12 +36,21 @@ const BLANK = {
 
 export default function ProductForm({ product, categories, existingIds, onSave, onCancel }) {
   const isNew = !product
-  const [form, setForm] = useState(() => ({
-    ...BLANK,
-    ...product,
-    specs: product?.specs?.length ? product.specs : [{ k: '', v: '' }],
-    category_id: product?.category_id || categories[0]?.id || '',
-  }))
+  const [form, setForm] = useState(() => {
+    // Initialise images: if an existing product has none, seed from image.
+    const existingImages = product?.images?.length
+      ? product.images
+      : product?.image
+        ? [product.image]
+        : []
+    return {
+      ...BLANK,
+      ...product,
+      images: existingImages,
+      specs: product?.specs?.length ? product.specs : [{ k: '', v: '' }],
+      category_id: product?.category_id || categories[0]?.id || '',
+    }
+  })
   const [modelsText, setModelsText] = useState((product?.models || []).join(', '))
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
@@ -50,43 +60,57 @@ export default function ProductForm({ product, categories, existingIds, onSave, 
 
   const set = (patch) => setForm((f) => ({ ...f, ...patch }))
 
-  // Upload a chosen image to Supabase Storage and store its public URL in
-  // form.image. Requires an authenticated admin session (enforced by the
-  // bucket's RLS policy — see supabase/storage.sql).
+  async function uploadImageFile(file) {
+    if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) throw new Error('Use a PNG, WEBP or JPEG image.')
+    if (file.size > MAX_IMAGE_BYTES) throw new Error('Image must be under 2 MB.')
+    if (!isSupabaseConfigured) throw new Error('Connect Supabase to upload images.')
+
+    const ext = EXT_BY_TYPE[file.type] || 'png'
+    const base = slugify(form.sku || form.name) || 'product'
+    const path = `${base}-${Date.now()}.${ext}`
+
+    const { error: upErr } = await supabase.storage
+      .from('product-images')
+      .upload(path, file, { upsert: true, contentType: file.type })
+    if (upErr) throw upErr
+
+    const { data } = supabase.storage.from('product-images').getPublicUrl(path)
+    return data.publicUrl
+  }
+
   async function handleImageFile(e) {
     const file = e.target.files?.[0]
-    e.target.value = '' // allow re-selecting the same file later
+    e.target.value = ''
     if (!file) return
     setUploadError('')
-
-    if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
-      return setUploadError('Use a PNG, WEBP or JPEG image.')
-    }
-    if (file.size > MAX_IMAGE_BYTES) {
-      return setUploadError('Image must be under 2 MB.')
-    }
-    if (!isSupabaseConfigured) {
-      return setUploadError('Connect Supabase to upload images (local mode can paste a URL instead).')
-    }
-
     setUploading(true)
     try {
-      const ext = EXT_BY_TYPE[file.type] || 'png'
-      const base = slugify(form.sku || form.name) || 'product'
-      const path = `${base}-${Date.now()}.${ext}`
-
-      const { error: upErr } = await supabase.storage
-        .from('product-images')
-        .upload(path, file, { upsert: true, contentType: file.type })
-      if (upErr) throw upErr
-
-      const { data } = supabase.storage.from('product-images').getPublicUrl(path)
-      set({ image: data.publicUrl })
+      const url = await uploadImageFile(file)
+      setForm((f) => {
+        const images = [...(f.images || []), url]
+        return { ...f, images, image: images[0] }
+      })
     } catch (err) {
       setUploadError(err?.message || 'Upload failed.')
     } finally {
       setUploading(false)
     }
+  }
+
+  function removeImage(idx) {
+    setForm((f) => {
+      const images = f.images.filter((_, i) => i !== idx)
+      return { ...f, images, image: images[0] || null }
+    })
+  }
+
+  function moveImage(from, to) {
+    setForm((f) => {
+      const images = [...f.images]
+      const [item] = images.splice(from, 1)
+      images.splice(to, 0, item)
+      return { ...f, images, image: images[0] || null }
+    })
   }
 
   const setSpec = (i, key, value) =>
@@ -116,13 +140,15 @@ export default function ProductForm({ product, categories, existingIds, onSave, 
         .map((m) => m.trim())
         .filter(Boolean)
 
+      const cleanImages = (form.images || []).filter((u) => u?.trim())
       const payload = {
         ...form,
         id: form.id || makeProductId(form.sku || form.name, existingIds),
         price: Number(form.price) || 0,
         stock: Number(form.stock) || 0,
         rank: Number(form.rank) || 0,
-        image: form.image?.trim() ? form.image.trim() : null,
+        image: cleanImages[0] || null,
+        images: cleanImages,
         specs: cleanSpecs,
         models,
       }
@@ -160,9 +186,9 @@ export default function ProductForm({ product, categories, existingIds, onSave, 
         {/* Live preview strip */}
         <div className="mb-6 flex items-center gap-4 rounded-2xl bg-white p-4 ring-1 ring-ink/5">
           <div className="w-16 shrink-0">
-            {form.image ? (
+            {(form.images?.[0] || form.image) ? (
               <div className="aspect-[1/2] w-full">
-                <img src={form.image} alt="" className="h-full w-full object-contain" />
+                <img src={form.images?.[0] || form.image} alt="" className="h-full w-full object-contain" />
               </div>
             ) : (
               <ProductGraphic className="h-auto w-full" shell={form.color_hex} accent={form.accent_hex} />
@@ -238,10 +264,37 @@ export default function ProductForm({ product, categories, existingIds, onSave, 
           </Field>
 
           <div className="col-span-2">
-            <Field label="Image" hint="Upload a file, or paste a URL. Leave blank to use the default vector graphic.">
-              <input className={inputClass} value={form.image || ''} onChange={(e) => set({ image: e.target.value })} placeholder="/product.png or https://…" />
-            </Field>
-            <div className="mt-2 flex flex-wrap items-center gap-2">
+            <div className="mb-2 flex items-center justify-between">
+              <span className={labelClass}>Images <span className="normal-case text-ink/35">(first = primary · PNG/WEBP/JPEG · max 2 MB each)</span></span>
+              <span className="font-mono text-[10px] text-ink/35">{form.images?.length || 0} image{form.images?.length !== 1 ? 's' : ''}</span>
+            </div>
+
+            {/* Gallery grid */}
+            {form.images?.length ? (
+              <div className="mb-3 flex flex-wrap gap-2">
+                {form.images.map((url, i) => (
+                  <div key={url} className="relative h-20 w-20 overflow-hidden rounded-xl bg-silver-100 ring-2 ring-ink/10">
+                    <img src={url} alt="" className="h-full w-full object-contain" />
+                    {i === 0 && (
+                      <span className="absolute left-1 top-1 rounded-full bg-flame-500 px-1.5 py-0.5 font-mono text-[8px] uppercase tracking-wide text-white">
+                        Primary
+                      </span>
+                    )}
+                    <div className="absolute inset-x-0 bottom-0 flex justify-between bg-ink/60 px-1 py-0.5">
+                      {i > 0 ? (
+                        <button onClick={() => moveImage(i, i - 1)} className="font-mono text-[10px] text-white/80 hover:text-white" title="Move left">←</button>
+                      ) : <span />}
+                      <button onClick={() => removeImage(i)} className="font-mono text-[10px] text-white/80 hover:text-flame-400" title="Remove">×</button>
+                      {i < form.images.length - 1 ? (
+                        <button onClick={() => moveImage(i, i + 1)} className="font-mono text-[10px] text-white/80 hover:text-white" title="Move right">→</button>
+                      ) : <span />}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+
+            <div className="flex flex-wrap items-center gap-2">
               <input
                 ref={fileRef}
                 type="file"
@@ -250,14 +303,8 @@ export default function ProductForm({ product, categories, existingIds, onSave, 
                 className="hidden"
               />
               <Btn variant="ghost" type="button" onClick={() => fileRef.current?.click()} disabled={uploading}>
-                {uploading ? 'Uploading…' : 'Upload image'}
+                {uploading ? 'Uploading…' : '+ Add image'}
               </Btn>
-              {form.image ? (
-                <Btn variant="danger" type="button" onClick={() => set({ image: null })} disabled={uploading}>
-                  Remove image
-                </Btn>
-              ) : null}
-              <span className="font-mono text-[10px] text-ink/35">PNG · WEBP · JPEG · max 2 MB</span>
             </div>
             {uploadError ? (
               <p className="mt-2 rounded-xl bg-flame-50 px-3 py-2 font-mono text-[10px] text-flame-700">{uploadError}</p>

@@ -358,6 +358,13 @@ export default function CartDrawer() {
                   <span className="font-display text-2xl font-black">{formatPrice(checkingOut ? total : subtotal, currency)}</span>
                 </div>
 
+                {/* Trust signals */}
+                <div className="mb-3 flex items-center justify-center gap-4 rounded-xl bg-white/60 px-3 py-2 ring-1 ring-ink/5">
+                  <TrustBadge icon={<LockIcon />} text="Secure checkout" />
+                  <TrustBadge icon={<ReturnIcon />} text="30-day returns" />
+                  <TrustBadge icon={<ShieldIcon />} text="Razorpay" />
+                </div>
+
                 {checkingOut ? (
                   <>
                     <button
@@ -377,7 +384,7 @@ export default function CartDrawer() {
                   </>
                 ) : (
                   <>
-                    <p className="mb-4 font-mono text-[10px] text-ink/40">Shipping & taxes calculated at checkout.</p>
+                    <p className="mb-4 font-mono text-[10px] text-ink/40">Shipping calculated at checkout.</p>
                     <button
                       onClick={() => { setError(''); setCheckingOut(true) }}
                       className="w-full rounded-full bg-flame-500 py-3.5 font-mono text-[12px] uppercase tracking-[0.18em] text-white transition-colors hover:bg-flame-600"
@@ -416,5 +423,40 @@ function Stepper({ onClick, label }) {
     <button onClick={onClick} className="flex h-7 w-7 items-center justify-center rounded-full font-mono text-base text-ink/70 hover:bg-ink hover:text-white" aria-label={label === '+' ? 'Increase' : 'Decrease'}>
       {label}
     </button>
+  )
+}
+
+function TrustBadge({ icon, text }) {
+  return (
+    <div className="flex items-center gap-1 text-ink/50">
+      <span className="text-ink/40">{icon}</span>
+      <span className="font-mono text-[9px] uppercase tracking-[0.12em]">{text}</span>
+    </div>
+  )
+}
+
+function LockIcon() {
+  return (
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    </svg>
+  )
+}
+
+function ReturnIcon() {
+  return (
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+      <path d="M3 3v5h5" />
+    </svg>
+  )
+}
+
+function ShieldIcon() {
+  return (
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+    </svg>
   )
 }

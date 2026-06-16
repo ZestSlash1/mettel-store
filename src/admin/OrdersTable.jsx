@@ -104,7 +104,7 @@ export default function OrdersTable() {
 
   return (
     <>
-      {/* Search + status filter */}
+      {/* Search + status filter + CSV export */}
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <input
           value={query}
@@ -119,6 +119,9 @@ export default function OrdersTable() {
           ))}
         </select>
         <span className="font-mono text-[10px] uppercase tracking-wider text-ink/35">{filtered.length} of {orders.length}</span>
+        <Btn variant="ghost" type="button" onClick={() => exportCsv(filtered)} className="ml-auto">
+          Export CSV
+        </Btn>
       </div>
 
       <div className="overflow-x-auto rounded-2xl border border-ink/10 bg-white">
@@ -371,6 +374,38 @@ function renderAddress(addr) {
       ) : null}
     </div>
   )
+}
+
+function exportCsv(orders) {
+  const esc = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`
+  const headers = ['Invoice', 'Date', 'Name', 'Email', 'Phone', 'Items', 'Amount (INR)', 'Status', 'Carrier', 'Tracking', 'Coupon', 'Discount']
+  const rows = orders.map((o) => {
+    const addr = o.shipping_address ? (typeof o.shipping_address === 'string' ? safeParse(o.shipping_address) : o.shipping_address) : {}
+    return [
+      o.invoice_number || '',
+      o.created_at ? new Date(o.created_at).toISOString().slice(0, 10) : '',
+      o.customer_name || '',
+      o.customer_email || '',
+      o.customer_phone || '',
+      itemTotalQty(o.items),
+      Math.round((o.amount || 0) / 100),
+      o.status || '',
+      o.carrier || '',
+      o.tracking_number || '',
+      o.coupon_code || '',
+      Math.round((o.discount || 0) / 100),
+    ]
+  })
+  const csv = [headers, ...rows].map((r) => r.map(esc).join(',')).join('\r\n')
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `mettel-orders-${new Date().toISOString().slice(0, 10)}.csv`
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
 }
 
 function safeParse(s) {
