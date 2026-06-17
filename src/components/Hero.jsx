@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
-import { listCategories, subscribe } from '../lib/dataStore'
+import { listCategories, subscribe, getSetting } from '../lib/dataStore'
 import PhoneCase from './PhoneCase'
 
 const FALLBACK_CATEGORIES = ['Coverage', 'Audio', 'Accessories', 'Lifestyle']
@@ -33,6 +33,8 @@ export default function Hero() {
   // Category strip is built live from active categories (falls back to a
   // default set before they load or if none are configured).
   const [categories, setCategories] = useState([])
+  const [heroImage, setHeroImage] = useState(null)
+
   useEffect(() => {
     let active = true
     const load = () =>
@@ -40,7 +42,11 @@ export default function Hero() {
         if (active) setCategories(cats.filter((c) => c.active !== false))
       })
     load()
-    const unsub = subscribe(load)
+    getSetting('hero_image').then((v) => { if (active && v) setHeroImage(v) })
+    const unsub = subscribe(() => {
+      load()
+      getSetting('hero_image').then((v) => { if (active) setHeroImage(v || null) })
+    })
     return () => {
       active = false
       unsub()
@@ -117,7 +123,11 @@ export default function Hero() {
             {/* Floor shadow */}
             <div className="absolute -bottom-4 left-1/2 h-8 w-[70%] -translate-x-1/2 rounded-full bg-ink/15 blur-2xl" />
             <motion.div animate={float} className="relative drop-shadow-[0_30px_55px_rgba(0,0,0,0.25)]">
-              <PhoneCase className="h-auto w-full" shell="#cfcfcf" accent="#ff6b00" />
+              {heroImage ? (
+                <img src={heroImage} alt="MetTel product" className="h-auto w-full object-contain" />
+              ) : (
+                <PhoneCase className="h-auto w-full" shell="#cfcfcf" accent="#ff6b00" />
+              )}
             </motion.div>
           </motion.div>
         </div>

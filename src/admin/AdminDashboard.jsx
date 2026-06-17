@@ -21,12 +21,14 @@ import CouponManager from './CouponManager'
 import ReviewsManager from './ReviewsManager'
 import SubscribersManager from './SubscribersManager'
 import StockNotificationsManager from './StockNotificationsManager'
+import StorefrontSettings from './StorefrontSettings'
 import { Btn } from './ui'
 import { useAuth } from '../context/AuthContext'
 
 // Sidebar navigation, grouped like a modern store admin. Each item carries a
 // small inline icon. Counts are injected at render time.
 const ICONS = {
+  storefront: 'M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M9 22V12h6v10',
   overview: 'M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z',
   products: 'M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z M3.3 7 12 12l8.7-5 M12 22V12',
   categories: 'M4 6h16M4 12h16M4 18h16',
@@ -42,6 +44,7 @@ const NAV_GROUPS = [
     heading: 'Catalogue',
     items: [
       ['overview', 'Dashboard'],
+      ['storefront', 'Storefront'],
       ['products', 'Products'],
       ['categories', 'Categories'],
     ],
@@ -65,6 +68,7 @@ const NAV_GROUPS = [
 
 const TAB_TITLES = {
   overview: 'Dashboard',
+  storefront: 'Storefront',
   products: 'Products',
   categories: 'Categories',
   orders: 'Orders',
@@ -283,6 +287,8 @@ export default function AdminDashboard() {
               onSave={upsertCategory}
               onDelete={deleteCategory}
             />
+          ) : tab === 'storefront' ? (
+            <StorefrontSettings />
           ) : tab === 'coupons' ? (
             <CouponManager />
           ) : tab === 'reviews' ? (

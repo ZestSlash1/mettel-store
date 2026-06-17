@@ -189,6 +189,31 @@ export function resetToSeed() {
   saveLocal({ products: clone(seed.products), categories: clone(seed.categories) })
 }
 
+/* ---------------- storefront settings ---------------- */
+
+export async function getSetting(key) {
+  if (isSupabaseConfigured) {
+    try {
+      const { data } = await supabase.from('settings').select('value').eq('key', key).single()
+      return data?.value ?? null
+    } catch {
+      return null
+    }
+  }
+  try { return localStorage.getItem(`mettel:setting:${key}`) } catch { return null }
+}
+
+export async function setSetting(key, value) {
+  if (isSupabaseConfigured) {
+    const { error } = await supabase.from('settings').upsert({ key, value })
+    if (error) throw error
+    emit()
+    return
+  }
+  try { localStorage.setItem(`mettel:setting:${key}`, value) } catch {}
+  emit()
+}
+
 /* ---------------- helpers ---------------- */
 
 export function slugify(text) {
