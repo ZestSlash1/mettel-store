@@ -25,8 +25,8 @@ export default function GiftCards() {
     >
       <div className="grid gap-12 lg:grid-cols-2">
         {/* Visual card */}
-        <div className="relative flex aspect-[16/10] flex-col justify-between overflow-hidden rounded-3xl bg-ink p-8 text-silver">
-          <div className="pointer-events-none absolute -right-16 top-0 h-full w-2/3 rotate-[18deg] bg-flame-gradient opacity-80" />
+        <div className="relative flex aspect-[16/10] flex-col justify-between overflow-hidden rounded-4xl bg-ink p-8 text-silver shadow-soft-lg">
+          <div className="pointer-events-none absolute -right-24 -top-10 h-[120%] w-2/3 rounded-full bg-flame-gradient opacity-30 blur-2xl" />
           <div className="relative font-display text-3xl font-black tracking-tight">METTEL</div>
           <div className="relative">
             <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-silver/50">Gift card</div>
@@ -42,8 +42,8 @@ export default function GiftCards() {
               <button
                 key={d}
                 onClick={() => setAmount(d)}
-                className={`rounded-full px-5 py-2.5 font-mono text-[11px] uppercase tracking-[0.18em] transition-colors ${
-                  amount === d ? 'bg-flame-500 text-white' : 'bg-silver-200 text-ink hover:bg-ink hover:text-white'
+                className={`btn px-5 py-2.5 text-[11px] tracking-[0.18em] ${
+                  amount === d ? 'btn-flame' : 'btn-soft'
                 }`}
               >
                 {formatPrice(d)}
@@ -53,7 +53,7 @@ export default function GiftCards() {
 
           <a
             href={mailto}
-            className="mt-8 rounded-full bg-ink py-4 text-center font-mono text-[12px] uppercase tracking-[0.18em] text-white transition-colors hover:bg-flame-500"
+            className="btn btn-dark mt-8 w-full py-4 text-[12px] tracking-[0.18em]"
           >
             Buy {formatPrice(amount)} gift card →
           </a>

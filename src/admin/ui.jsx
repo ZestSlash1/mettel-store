@@ -18,14 +18,14 @@ export function Field({ label, hint, children, className = '' }) {
 
 export function Btn({ children, variant = 'solid', className = '', ...props }) {
   const variants = {
-    solid: 'bg-ink text-white hover:bg-flame-500',
-    flame: 'bg-flame-500 text-white hover:bg-flame-600',
-    ghost: 'bg-transparent text-ink ring-1 ring-ink/15 hover:bg-ink/[0.05]',
+    solid: 'btn-dark',
+    flame: 'btn-flame',
+    ghost: 'btn-soft',
     danger: 'bg-transparent text-flame-700 ring-1 ring-flame-700/30 hover:bg-flame-700 hover:text-white',
   }
   return (
     <button
-      className={`inline-flex items-center justify-center gap-2 rounded-full px-4 py-2 font-mono text-[11px] uppercase tracking-[0.16em] transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${variants[variant]} ${className}`}
+      className={`btn px-4 py-2 text-[11px] ${variants[variant]} ${className}`}
       {...props}
     >
       {children}

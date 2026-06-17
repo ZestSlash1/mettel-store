@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react'
-import { motion } from 'framer-motion'
 import { useSearchParams } from 'react-router-dom'
 import PageShell from '../components/PageShell'
 import { useProducts } from '../hooks/useProducts'
@@ -82,11 +81,11 @@ export default function Shop() {
       {loading ? (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="h-80 animate-pulse rounded-3xl bg-silver-200" />
+            <div key={i} className="h-80 animate-pulse rounded-4xl bg-silver-200/60" />
           ))}
         </div>
       ) : visible.length === 0 ? (
-        <div className="rounded-3xl border border-ink/10 bg-silver-50 p-12 text-center">
+        <div className="card-soft p-12 text-center">
           <p className="font-display text-xl font-black uppercase text-ink/70">Nothing here</p>
           <p className="mt-2 font-mono text-[11px] text-ink/45">
             {query ? 'No products match your search.' : 'No products in this category.'}
@@ -105,14 +104,11 @@ export default function Shop() {
 
 function FilterPill({ label, active, onClick }) {
   return (
-    <motion.button
-      whileTap={{ scale: 0.96 }}
+    <button
       onClick={onClick}
-      className={`rounded-full px-5 py-2 font-mono text-[11px] uppercase tracking-[0.18em] transition-colors ${
-        active ? 'bg-flame-500 text-white' : 'bg-silver-200 text-ink hover:bg-ink hover:text-white'
-      }`}
+      className={`btn px-5 py-2 text-[11px] tracking-[0.18em] ${active ? 'btn-flame' : 'btn-soft'}`}
     >
       {label}
-    </motion.button>
+    </button>
   )
 }

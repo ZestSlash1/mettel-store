@@ -66,7 +66,7 @@ function SignedIn() {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white p-5 ring-1 ring-ink/5">
+      <div className="card-soft flex flex-wrap items-center justify-between gap-3 p-5">
         <div>
           <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink/40">Signed in as</div>
           <div className="font-mono text-sm text-ink">{user.email}</div>
@@ -79,7 +79,7 @@ function SignedIn() {
         {loading ? (
           <div className="h-32 animate-pulse rounded-2xl bg-silver-200" />
         ) : orders.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-ink/15 p-8 text-center">
+          <div className="rounded-4xl bg-white/50 p-8 text-center ring-1 ring-ink/[0.04]">
             <p className="font-mono text-[11px] text-ink/45">
               No orders yet. Orders placed with <span className="text-ink/70">{user.email}</span> will appear here.
             </p>
@@ -87,7 +87,7 @@ function SignedIn() {
         ) : (
           <ul className="space-y-3">
             {orders.map((o, i) => (
-              <li key={i} className="rounded-2xl bg-white p-5 ring-1 ring-ink/5">
+              <li key={i} className="card-soft p-5">
                 <div className="flex items-center justify-between gap-3">
                   <span className="font-mono text-[11px] text-ink/60">{o.invoice_number || formatDate(o.created_at)}</span>
                   <span className={`rounded-full px-2.5 py-1 font-mono text-[9px] uppercase tracking-wider ${statusStyle(o.status)}`}>{o.status}</span>
@@ -110,7 +110,7 @@ function SignedIn() {
       <div>
         <div className="mb-3 font-mono text-[9px] uppercase tracking-[0.2em] text-ink/40">Saved items</div>
         {wishlist.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-ink/15 p-8 text-center">
+          <div className="rounded-4xl bg-white/50 p-8 text-center ring-1 ring-ink/[0.04]">
             <p className="font-mono text-[11px] text-ink/45">
               No saved items yet. Tap the heart on any product to save it.
             </p>
@@ -118,7 +118,7 @@ function SignedIn() {
         ) : (
           <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {wishlist.map((w) => (
-              <li key={w.product_id} className="flex items-center justify-between gap-3 rounded-2xl bg-white p-4 ring-1 ring-ink/5">
+              <li key={w.product_id} className="card-soft flex items-center justify-between gap-3 p-4">
                 <Link to={`/product/${w.product_id}`} className="font-mono text-[12px] text-ink hover:text-flame-600">
                   {w.product_id}
                 </Link>
@@ -167,7 +167,7 @@ function AuthForm() {
         <Toggle active={mode === 'signin'} onClick={() => setMode('signin')}>Sign in</Toggle>
         <Toggle active={mode === 'signup'} onClick={() => setMode('signup')}>Create account</Toggle>
       </div>
-      <form onSubmit={submit} className="space-y-4 rounded-3xl bg-white p-6 ring-1 ring-ink/5">
+      <form onSubmit={submit} className="card-soft space-y-4 p-6">
         <label className="block">
           <span className={labelClass}>Email</span>
           <input type="email" className={inputClass} value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@email.com" required />

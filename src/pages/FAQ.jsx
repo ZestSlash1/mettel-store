@@ -36,10 +36,10 @@ const FAQS = [
 function Item({ q, a }) {
   const [open, setOpen] = useState(false)
   return (
-    <div className="rounded-2xl bg-white ring-1 ring-ink/5">
+    <div className="card-soft overflow-hidden">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left"
+        className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition-colors hover:bg-silver-50/60"
         aria-expanded={open}
       >
         <span className="font-display text-base font-black uppercase tracking-tight">{q}</span>
@@ -67,11 +67,11 @@ export default function FAQ() {
         ))}
       </div>
 
-      <div className="mt-10 rounded-2xl bg-ink p-6 text-center text-silver">
+      <div className="mt-10 rounded-4xl bg-ink p-6 text-center text-silver shadow-soft">
         <p className="font-mono text-[12px] text-silver/70">Didn’t find your answer?</p>
         <Link
           to="/contact"
-          className="mt-3 inline-block rounded-full bg-flame-500 px-6 py-3 font-mono text-[11px] uppercase tracking-[0.16em] text-white transition-colors hover:bg-flame-600"
+          className="btn btn-flame mt-3 inline-flex px-6 py-3 text-[11px]"
         >
           Contact us →
         </Link>

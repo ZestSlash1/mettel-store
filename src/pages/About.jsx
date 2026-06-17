@@ -28,21 +28,21 @@ export default function About() {
           </p>
         </div>
 
-        <aside className="space-y-6 rounded-3xl bg-white p-6 ring-1 ring-ink/5">
+        <aside className="card-soft space-y-6 p-6">
           {[
             ['Founded', '2024 · India'],
             ['Range', 'Coverage · Audio · More'],
             ['Standard', 'Built to last'],
             ['Shipping', 'Worldwide, tracked'],
           ].map(([k, v]) => (
-            <div key={k} className="flex items-center justify-between border-b border-dashed border-ink/15 pb-2 font-mono text-[11px] uppercase tracking-wider last:border-0">
+            <div key={k} className="flex items-center justify-between border-b border-ink/[0.06] pb-2 font-mono text-[11px] uppercase tracking-wider last:border-0">
               <span className="text-ink/40">{k}</span>
               <span className="text-ink/80">{v}</span>
             </div>
           ))}
           <Link
             to="/shop"
-            className="block rounded-full bg-ink py-3 text-center font-mono text-[11px] uppercase tracking-[0.18em] text-white transition-colors hover:bg-flame-500"
+            className="btn btn-dark w-full py-3 text-[11px] tracking-[0.18em]"
           >
             Shop the lineup →
           </Link>

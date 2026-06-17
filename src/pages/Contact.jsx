@@ -47,7 +47,7 @@ export default function Contact() {
             ['Returns', 'returns@mettel.in'],
             ['Warranty', 'warranty@mettel.in'],
           ].map(([k, v]) => (
-            <div key={k} className="border-b border-dashed border-ink/15 pb-3">
+            <div key={k} className="border-b border-ink/[0.06] pb-3">
               <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink/40">{k}</div>
               <a href={`mailto:${v}`} className="font-mono text-sm text-ink transition-colors hover:text-flame-600">
                 {v}
@@ -61,7 +61,7 @@ export default function Contact() {
 
         {/* Form */}
         {done ? (
-          <div className="flex flex-col items-start gap-3 rounded-3xl bg-white p-8 ring-1 ring-ink/5">
+          <div className="card-soft flex flex-col items-start gap-3 p-8">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-flame-500 text-xl text-white">✓</div>
             <p className="font-display text-xl font-black uppercase">Message sent</p>
             <p className="font-mono text-[11px] text-ink/55">We'll get back to you within one business day.</p>
@@ -73,7 +73,7 @@ export default function Contact() {
             </button>
           </div>
         ) : (
-          <form onSubmit={submit} className="space-y-4 rounded-3xl bg-white p-6 ring-1 ring-ink/5">
+          <form onSubmit={submit} className="card-soft space-y-4 p-6">
             <label className="block">
               <span className={labelClass}>Name</span>
               <input className={inputClass} value={form.name} onChange={set('name')} placeholder="Your name" required />

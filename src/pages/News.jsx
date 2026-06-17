@@ -42,7 +42,7 @@ export default function News() {
         {POSTS.map((p) => (
           <article
             key={p.title}
-            className="flex flex-col gap-3 rounded-3xl bg-white p-6 ring-1 ring-ink/5 sm:flex-row sm:items-baseline sm:justify-between"
+            className="card-soft flex flex-col gap-3 p-6 sm:flex-row sm:items-baseline sm:justify-between"
           >
             <div className="max-w-xl">
               <div className="mb-2 flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.18em] text-ink/40">

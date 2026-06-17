@@ -44,7 +44,7 @@ export default function Track() {
       intro="Enter your order reference (from your confirmation or Razorpay receipt) and the email you used at checkout."
     >
       <div className="grid gap-12 lg:grid-cols-2">
-        <form onSubmit={submit} className="space-y-4 rounded-3xl bg-white p-6 ring-1 ring-ink/5">
+        <form onSubmit={submit} className="card-soft space-y-4 p-6">
           <label className="block">
             <span className={labelClass}>Order reference</span>
             <input className={inputClass} value={form.reference} onChange={set('reference')} placeholder="order_… or pay_…" required />
@@ -64,7 +64,7 @@ export default function Track() {
         {/* Result */}
         <div>
           {result && result.found ? (
-            <div className="rounded-3xl bg-white p-6 ring-1 ring-ink/5">
+            <div className="card-soft p-6">
               <div className="flex items-center justify-between gap-3">
                 <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink/40">
                   {result.invoiceNumber || formatDate(result.createdAt)}
@@ -93,7 +93,7 @@ export default function Track() {
               </div>
             </div>
           ) : result && !result.found ? (
-            <div className="rounded-3xl border border-ink/10 bg-silver-50 p-8 text-center">
+            <div className="card-soft p-8 text-center">
               <p className="font-display text-lg font-black uppercase text-ink/70">No match</p>
               <p className="mx-auto mt-2 max-w-xs font-mono text-[11px] text-ink/45">
                 We couldn’t find an order for that reference and email. Double-check both, or
@@ -101,7 +101,7 @@ export default function Track() {
               </p>
             </div>
           ) : (
-            <div className="rounded-3xl border border-dashed border-ink/15 p-8 text-center">
+            <div className="rounded-4xl bg-white/50 p-8 text-center ring-1 ring-ink/[0.04]">
               <p className="font-mono text-[11px] text-ink/40">Your order status will appear here.</p>
             </div>
           )}
