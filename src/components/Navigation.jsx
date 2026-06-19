@@ -78,6 +78,7 @@ function MobileMenu({ onClose }) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
+      data-lenis-prevent
       className="fixed inset-0 z-[55] flex flex-col overflow-y-auto bg-silver/97 backdrop-blur-xl"
     >
       {/* Top bar mirrors the nav */}

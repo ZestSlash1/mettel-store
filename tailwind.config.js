@@ -37,6 +37,22 @@ export default {
       fontSize: {
         // Oversized hero scale
         mega: ['clamp(7rem, 28vw, 26rem)', { lineHeight: '0.78', letterSpacing: '-0.04em' }],
+        // Considered display scale (fluid, tight tracking) — use instead of eyeballing.
+        'display-xl': ['clamp(3.5rem, 8vw, 7rem)', { lineHeight: '0.9', letterSpacing: '-0.03em' }],
+        'display-lg': ['clamp(2.75rem, 6vw, 5rem)', { lineHeight: '0.92', letterSpacing: '-0.025em' }],
+        'display-md': ['clamp(2rem, 4vw, 3.25rem)', { lineHeight: '0.95', letterSpacing: '-0.02em' }],
+      },
+      // Motion tokens (mirror src/lib/motion.js + index.css custom properties).
+      transitionTimingFunction: {
+        out: 'cubic-bezier(0.22, 1, 0.36, 1)',
+        'out-expo': 'cubic-bezier(0.16, 1, 0.3, 1)',
+        'in-out': 'cubic-bezier(0.65, 0, 0.35, 1)',
+        'out-back': 'cubic-bezier(0.34, 1.56, 0.64, 1)',
+      },
+      transitionDuration: {
+        fast: '180ms',
+        base: '320ms',
+        slow: '600ms',
       },
       backgroundImage: {
         'flame-gradient':

@@ -13,6 +13,7 @@ import AuthGate from './admin/AuthGate'
 import { BUSINESS } from './config/business'
 import CookieBanner from './components/CookieBanner'
 import AnnouncementBar from './components/AnnouncementBar'
+import SmoothScroll from './lib/smoothScroll'
 
 // Code-split every page that isn't the storefront home.
 // Shoppers who only visit "/" never download product-detail, admin, etc.
@@ -70,6 +71,7 @@ function AdminFallback() {
 export default function App() {
   return (
     <ErrorBoundary>
+      <SmoothScroll>
       <div className="min-h-screen bg-silver text-ink">
         <AnnouncementBar />
         <ScrollManager />
@@ -123,6 +125,7 @@ export default function App() {
           </a>
         ) : null}
       </div>
+      </SmoothScroll>
     </ErrorBoundary>
   )
 }

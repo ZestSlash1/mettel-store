@@ -295,7 +295,7 @@ export default function CartDrawer() {
               </div>
             ) : checkingOut ? (
               /* ---- Checkout form ---- */
-              <div className="flex-1 overflow-y-auto px-6 py-4">
+              <div data-lenis-prevent className="flex-1 overflow-y-auto px-6 py-4">
                 <div className="space-y-3">
                   <CheckoutField label="Full name" value={form.name} onChange={setField('name')} placeholder="Aarav Sharma" autoComplete="name" />
                   <CheckoutField
@@ -374,7 +374,7 @@ export default function CartDrawer() {
               </div>
             ) : (
               /* ---- Cart line items ---- */
-              <div className="flex-1 overflow-y-auto px-6 py-4">
+              <div data-lenis-prevent className="flex-1 overflow-y-auto px-6 py-4">
                 <ul className="space-y-4">
                   {items.map((l) => (
                     <li key={l.lineId} className="flex gap-4 border-b border-ink/10 pb-4 last:border-0">
