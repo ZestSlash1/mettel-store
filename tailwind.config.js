@@ -78,9 +78,23 @@ export default {
         'dash-march': {
           to: { strokeDashoffset: '-16' },
         },
+        // Satisfying squash-and-pop for add-to-cart + cart badge.
+        addpop: {
+          '0%': { transform: 'scale(1)' },
+          '35%': { transform: 'scale(0.9)' },
+          '70%': { transform: 'scale(1.06)' },
+          '100%': { transform: 'scale(1)' },
+        },
+        badgepop: {
+          '0%': { transform: 'scale(0.6)' },
+          '60%': { transform: 'scale(1.25)' },
+          '100%': { transform: 'scale(1)' },
+        },
       },
       animation: {
         'dash-march': 'dash-march 0.6s linear infinite',
+        addpop: 'addpop 0.45s cubic-bezier(0.22, 1, 0.36, 1)',
+        badgepop: 'badgepop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
       },
     },
   },

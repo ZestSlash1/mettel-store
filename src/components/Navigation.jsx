@@ -232,7 +232,10 @@ export default function Navigation() {
                 <path d="M16 10a4 4 0 0 1-8 0" />
               </svg>
               {count > 0 ? (
-                <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-flame-500 px-1 font-mono text-[10px] font-bold text-white ring-2 ring-silver-50">
+                <span
+                  key={count}
+                  className="absolute -right-1 -top-1 flex h-5 min-w-5 animate-badgepop items-center justify-center rounded-full bg-flame-500 px-1 font-mono text-[10px] font-bold text-white ring-2 ring-silver-50"
+                >
                   {count}
                 </span>
               ) : null}
