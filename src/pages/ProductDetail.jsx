@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { AnimatePresence, motion, useMotionValue, useSpring, useReducedMotion } from 'framer-motion'
 import Navigation from '../components/Navigation'
 import Footer from '../components/Footer'
 import Seo from '../components/Seo'
@@ -12,6 +12,7 @@ import { useProducts, formatPrice } from '../hooks/useProducts'
 import { useCart } from '../context/CartContext'
 import { isSoldOut } from '../lib/product'
 import { BUSINESS } from '../config/business'
+import { EASE } from '../lib/motion'
 
 const VIEWED_KEY = 'mettel:viewed'
 const MAX_VIEWED = 6
@@ -51,10 +52,26 @@ function galleryOf(product) {
   return [...new Map(arr.map((u) => [u, u])).values()]
 }
 
+/** Section wrapper that fades + rises into view (no-op under reduced motion). */
+function Reveal({ children, className = '', as: Tag = motion.section }) {
+  return (
+    <Tag
+      initial={{ opacity: 0, y: 28 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-80px' }}
+      transition={{ duration: 0.6, ease: EASE.out }}
+      className={className}
+    >
+      {children}
+    </Tag>
+  )
+}
+
 export default function ProductDetail() {
   const { id } = useParams()
   const { products, categories, loading } = useProducts()
   const { addItem } = useCart()
+  const reduce = useReducedMotion()
 
   const product = useMemo(() => products.find((p) => p.id === id), [products, id])
   const [model, setModel] = useState(null)
@@ -64,6 +81,37 @@ export default function ProductDetail() {
   const [pincode, setPincode] = useState('')
   const [pincodeStatus, setPincodeStatus] = useState(null) // null | 'ok' | 'no'
   const [recentIds, setRecentIds] = useState([])
+  const [justAdded, setJustAdded] = useState(false)
+  const [showBar, setShowBar] = useState(false)
+  // The sticky buy bar waits for the cookie banner to be dismissed so the two
+  // fixed-bottom elements never overlap on a first mobile visit.
+  const [cookieClear, setCookieClear] = useState(() => {
+    try { return !!localStorage.getItem('mettel:cookies:v1') } catch { return true }
+  })
+
+  const buyRef = useRef(null)
+
+  useEffect(() => {
+    const onConsent = () => setCookieClear(true)
+    window.addEventListener('mettel:cookie', onConsent)
+    return () => window.removeEventListener('mettel:cookie', onConsent)
+  }, [])
+
+  // Pointer tilt for the main visual (desktop, motion only).
+  const rx = useMotionValue(0)
+  const ry = useMotionValue(0)
+  const rxS = useSpring(rx, { stiffness: 150, damping: 18 })
+  const ryS = useSpring(ry, { stiffness: 150, damping: 18 })
+  const onTilt = (e) => {
+    if (reduce) return
+    const r = e.currentTarget.getBoundingClientRect()
+    ry.set(((e.clientX - r.left) / r.width - 0.5) * 16)
+    rx.set(-((e.clientY - r.top) / r.height - 0.5) * 16)
+  }
+  const resetTilt = () => {
+    rx.set(0)
+    ry.set(0)
+  }
 
   useEffect(() => {
     setModel(product?.models?.[0] ?? null)
@@ -77,6 +125,17 @@ export default function ProductDetail() {
       pushViewed(product.id)
       setRecentIds(getViewed())
     }
+  }, [product?.id])
+
+  // Show the sticky mobile buy bar once the main buy block scrolls out of view.
+  useEffect(() => {
+    const el = buyRef.current
+    if (!el) return
+    const io = new IntersectionObserver(([e]) => setShowBar(!e.isIntersecting), {
+      rootMargin: '0px 0px -10% 0px',
+    })
+    io.observe(el)
+    return () => io.disconnect()
   }, [product?.id])
 
   const gallery = useMemo(() => product ? galleryOf(product) : [], [product])
@@ -127,6 +186,12 @@ export default function ProductDetail() {
 
   const soldout = isSoldOut(product)
 
+  const doAdd = () => {
+    addItem(product, { model, qty })
+    setJustAdded(true)
+    setTimeout(() => setJustAdded(false), 1400)
+  }
+
   const productSchema = {
     '@context': 'https://schema.org/',
     '@type': 'Product',
@@ -154,7 +219,7 @@ export default function ProductDetail() {
         <nav className="mb-8 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.18em] text-ink/40">
           <Link to="/" className="hover:text-ink">Store</Link>
           <span>/</span>
-          <Link to="/#products" className="hover:text-ink">{catLabel}</Link>
+          <Link to="/shop" className="hover:text-ink">{catLabel}</Link>
           <span>/</span>
           <span className="text-ink/70">{product.name}</span>
         </nav>
@@ -163,8 +228,14 @@ export default function ProductDetail() {
           {/* Visual + gallery */}
           <div className="flex flex-col gap-3">
             {/* Main image / video */}
-            <div className="relative flex items-center justify-center overflow-hidden rounded-4xl bg-white p-10 shadow-soft ring-1 ring-ink/[0.04]">
+            <div
+              onPointerMove={onTilt}
+              onPointerLeave={resetTilt}
+              className="relative flex items-center justify-center overflow-hidden rounded-4xl bg-white p-10 shadow-soft ring-1 ring-ink/[0.04] [perspective:1100px]"
+            >
               <div className="pointer-events-none absolute -right-32 -top-10 h-[120%] w-1/2 rounded-full bg-flame-gradient opacity-[0.10] blur-3xl" />
+              {/* corner registration marks — technical detail */}
+              <span className="pointer-events-none absolute left-4 top-4 font-mono text-[9px] uppercase tracking-[0.2em] text-ink/25">{product.sku}</span>
               {activeVideo && embedUrl ? (
                 <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
                   <iframe
@@ -177,19 +248,23 @@ export default function ProductDetail() {
                 </div>
               ) : (
                 <motion.div
-                  key={displayImg}
-                  initial={{ y: 8, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                  style={{ rotateX: rxS, rotateY: ryS, transformPerspective: 1100 }}
                   className="relative w-[58%] max-w-[260px] drop-shadow-[0_40px_60px_rgba(0,0,0,0.4)]"
                 >
-                  {displayImg ? (
-                    <div className="aspect-[1/2] w-full">
-                      <img src={displayImg} alt={product.name} className="h-full w-full object-contain" />
-                    </div>
-                  ) : (
-                    <ProductGraphic className="h-auto w-full" shell={product.color_hex} accent={product.accent_hex} />
-                  )}
+                  <motion.div
+                    key={displayImg}
+                    initial={{ y: 8, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ duration: 0.35, ease: EASE.out }}
+                  >
+                    {displayImg ? (
+                      <div className="aspect-[1/2] w-full">
+                        <img src={displayImg} alt={product.name} className="h-full w-full object-contain" />
+                      </div>
+                    ) : (
+                      <ProductGraphic className="h-auto w-full" shell={product.color_hex} accent={product.accent_hex} />
+                    )}
+                  </motion.div>
                 </motion.div>
               )}
             </div>
@@ -229,7 +304,7 @@ export default function ProductDetail() {
           {/* Info */}
           <div className="flex flex-col">
             <div className="eyebrow mb-3">{catLabel} · {product.sku}</div>
-            <h1 className="font-display text-5xl font-black uppercase leading-[0.85] tracking-tight sm:text-6xl">
+            <h1 className="font-display text-display-md font-black uppercase leading-[0.85] tracking-tight">
               {product.name}
             </h1>
             <p className="mt-4 font-mono text-sm text-ink/60">{product.tagline}</p>
@@ -250,7 +325,7 @@ export default function ProductDetail() {
                     <button
                       key={m}
                       onClick={() => setModel(m)}
-                      className={`rounded-full px-4 py-2 font-mono text-[11px] uppercase tracking-wider transition-colors ${
+                      className={`rounded-full px-4 py-2.5 font-mono text-[11px] uppercase tracking-wider transition-colors ${
                         model === m ? 'bg-ink text-white' : 'bg-silver-200 text-ink hover:bg-ink/10'
                       }`}
                     >
@@ -293,7 +368,7 @@ export default function ProductDetail() {
             ) : null}
 
             {/* Quantity + Add to cart / sold-out notify */}
-            <div className="mt-8 flex flex-col gap-3">
+            <div ref={buyRef} className="mt-8 flex flex-col gap-3">
               {soldout ? (
                 <NotifyForm productId={product.id} />
               ) : (
@@ -318,10 +393,10 @@ export default function ProductDetail() {
                       </button>
                     </div>
                     <button
-                      onClick={() => addItem(product, { model, qty })}
-                      className="btn btn-flame flex-1 py-3 text-[12px] tracking-[0.18em]"
+                      onClick={doAdd}
+                      className={`btn flex-1 py-3 text-[12px] tracking-[0.18em] ${justAdded ? 'btn-dark animate-addpop' : 'btn-flame'}`}
                     >
-                      {product.status === 'preorder' ? 'Pre-order' : 'Add to bag'}
+                      {justAdded ? 'Added ✓' : product.status === 'preorder' ? 'Pre-order' : 'Add to bag'}
                     </button>
                   </div>
                 </>
@@ -357,29 +432,62 @@ export default function ProductDetail() {
 
         {/* Related */}
         {related.length ? (
-          <section className="mt-24">
-            <h2 className="mb-8 font-display text-3xl font-black uppercase tracking-tight">More in {catLabel}</h2>
+          <Reveal className="mt-24">
+            <h2 className="mb-8 font-display text-display-md font-black uppercase tracking-tight">More in {catLabel}</h2>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {related.map((p, i) => (
                 <ProductCard key={p.id} product={p} index={i} />
               ))}
             </div>
-          </section>
+          </Reveal>
         ) : null}
 
         {/* Recently viewed */}
         {recentlyViewed.length ? (
-          <section className="mt-20">
+          <Reveal className="mt-20">
             <h2 className="mb-8 font-display text-3xl font-black uppercase tracking-tight">Recently viewed</h2>
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
               {recentlyViewed.map((p, i) => (
                 <ProductCard key={p.id} product={p} index={i} />
               ))}
             </div>
-          </section>
+          </Reveal>
         ) : null}
       </main>
       <Footer />
+
+      {/* Sticky mobile buy bar */}
+      <AnimatePresence>
+        {showBar && cookieClear ? (
+          <motion.div
+            initial={{ y: '110%' }}
+            animate={{ y: 0 }}
+            exit={{ y: '110%' }}
+            transition={{ duration: 0.3, ease: EASE.out }}
+            className="frost fixed inset-x-0 bottom-0 z-40 border-t border-ink/10 px-4 py-3 lg:hidden"
+            style={{ paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom))' }}
+          >
+            <div className="mx-auto flex max-w-[1200px] items-center gap-3">
+              <div className="min-w-0">
+                <div className="truncate font-display text-sm font-black uppercase leading-none">{product.name}</div>
+                <div className="mt-0.5 font-pixel text-sm text-flame-600">{formatPrice(product.price, product.currency)}</div>
+              </div>
+              {soldout ? (
+                <button
+                  onClick={() => buyRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
+                  className="btn btn-dark ml-auto px-6 py-3 text-[12px]"
+                >
+                  Notify me
+                </button>
+              ) : (
+                <button onClick={doAdd} className={`btn btn-flame ml-auto px-6 py-3 text-[12px] ${justAdded ? 'animate-addpop' : ''}`}>
+                  {justAdded ? 'Added ✓' : 'Add to bag'}
+                </button>
+              )}
+            </div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </>
   )
 }
@@ -411,7 +519,7 @@ function ShareButton({ name }) {
   return (
     <button
       onClick={share}
-      className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-silver-100 text-ink/40 transition-colors hover:bg-silver-200 hover:text-ink"
+      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-silver-100 text-ink/40 transition-colors hover:bg-silver-200 hover:text-ink"
       aria-label="Share product"
       title={copied ? 'Link copied!' : 'Share'}
     >

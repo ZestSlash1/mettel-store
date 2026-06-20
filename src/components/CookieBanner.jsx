@@ -23,8 +23,15 @@ export default function CookieBanner() {
     return () => clearTimeout(id)
   }, [])
 
-  const accept = () => { localStorage.setItem(LS_KEY, 'accepted'); setVisible(false) }
-  const decline = () => { localStorage.setItem(LS_KEY, 'declined'); setVisible(false) }
+  // Notify same-tab listeners (e.g. the product page's sticky buy bar, which
+  // waits for this to clear before claiming the bottom of the screen).
+  const dismiss = (choice) => {
+    localStorage.setItem(LS_KEY, choice)
+    setVisible(false)
+    window.dispatchEvent(new Event('mettel:cookie'))
+  }
+  const accept = () => dismiss('accepted')
+  const decline = () => dismiss('declined')
 
   return (
     <AnimatePresence>
