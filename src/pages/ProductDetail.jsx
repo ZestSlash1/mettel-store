@@ -10,7 +10,8 @@ import WishlistButton from '../components/WishlistButton'
 import ProductReviews from '../components/ProductReviews'
 import { useProducts, formatPrice } from '../hooks/useProducts'
 import { useCart } from '../context/CartContext'
-import { isSoldOut } from '../lib/product'
+import { useSetting } from '../hooks/useSetting'
+import { isSoldOut, isLowStock } from '../lib/product'
 import { listPhoneModels } from '../lib/dataStore'
 import { webglSupported } from '../lib/webgl'
 import { BUSINESS } from '../config/business'
@@ -78,6 +79,10 @@ export default function ProductDetail() {
   const { products, categories, loading } = useProducts()
   const { addItem } = useCart()
   const reduce = useReducedMotion()
+  const lowStockThreshold = Number(useSetting('low_stock_threshold', '5')) || 5
+  const trustSecureText = useSetting('trust_secure_text', 'Secure checkout')
+  const trustReturnsText = useSetting('trust_returns_text', '30-day returns')
+  const trustMadeInText = useSetting('trust_madein_text', 'Made in India')
 
   const product = useMemo(() => products.find((p) => p.id === id), [products, id])
   const [model, setModel] = useState(null)
@@ -243,6 +248,7 @@ export default function ProductDetail() {
   }
 
   const soldout = isSoldOut(product)
+  const lowStock = !soldout && isLowStock(product, lowStockThreshold)
 
   const doAdd = () => {
     addItem(product, { model, qty })
@@ -402,7 +408,7 @@ export default function ProductDetail() {
             <div className="mt-6 flex items-baseline gap-3">
               <span className="font-display text-4xl font-black">{formatPrice(product.price, product.currency)}</span>
               <span className={`font-mono text-[11px] uppercase tracking-wider ${soldout ? 'text-ink/40' : 'text-flame-600'}`}>
-                {soldout ? 'Sold out' : STATUS_COPY[product.status]}
+                {soldout ? 'Sold out' : lowStock ? `Only ${product.stock} left in stock` : STATUS_COPY[product.status]}
               </span>
             </div>
 
@@ -528,6 +534,13 @@ export default function ProductDetail() {
                 />
                 <ShareButton name={product.name} />
               </div>
+
+              {/* Trust block */}
+              <div className="mt-2 flex items-center justify-center gap-4 rounded-2xl bg-silver-100/60 px-3 py-2.5 ring-1 ring-ink/[0.04]">
+                <TrustBadge icon={<LockIcon />} text={trustSecureText} />
+                <TrustBadge icon={<ReturnIcon />} text={trustReturnsText} />
+                <TrustBadge icon={<MadeInIcon />} text={trustMadeInText} />
+              </div>
             </div>
 
             {/* Spec sheet */}
@@ -609,6 +622,43 @@ export default function ProductDetail() {
         ) : null}
       </AnimatePresence>
     </>
+  )
+}
+
+function TrustBadge({ icon, text }) {
+  if (!text) return null
+  return (
+    <div className="flex items-center gap-1.5 text-ink/50">
+      <span className="text-ink/40">{icon}</span>
+      <span className="font-mono text-[9px] uppercase tracking-[0.12em]">{text}</span>
+    </div>
+  )
+}
+
+function LockIcon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    </svg>
+  )
+}
+
+function ReturnIcon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+      <path d="M3 3v5h5" />
+    </svg>
+  )
+}
+
+function MadeInIcon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 3v18M3 12h18" />
+    </svg>
   )
 }
 

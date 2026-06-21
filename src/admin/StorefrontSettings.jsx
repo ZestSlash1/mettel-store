@@ -5,18 +5,31 @@ import { Btn } from './ui'
 export default function StorefrontSettings() {
   const [heroImage, setHeroImage] = useState('')
   const [freeShipping, setFreeShipping] = useState('')
+  const [lowStockThreshold, setLowStockThreshold] = useState('')
+  const [trustSecureText, setTrustSecureText] = useState('')
+  const [trustReturnsText, setTrustReturnsText] = useState('')
+  const [trustMadeInText, setTrustMadeInText] = useState('')
   const [saved, setSaved] = useState(false)
   const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    Promise.all([getSetting('hero_image'), getSetting('free_shipping_threshold')]).then(
-      ([hero, threshold]) => {
-        if (hero) setHeroImage(hero)
-        if (threshold) setFreeShipping(threshold)
-        setLoading(false)
-      },
-    )
+    Promise.all([
+      getSetting('hero_image'),
+      getSetting('free_shipping_threshold'),
+      getSetting('low_stock_threshold'),
+      getSetting('trust_secure_text'),
+      getSetting('trust_returns_text'),
+      getSetting('trust_madein_text'),
+    ]).then(([hero, threshold, lowStock, secure, returns, madein]) => {
+      if (hero) setHeroImage(hero)
+      if (threshold) setFreeShipping(threshold)
+      if (lowStock) setLowStockThreshold(lowStock)
+      if (secure) setTrustSecureText(secure)
+      if (returns) setTrustReturnsText(returns)
+      if (madein) setTrustMadeInText(madein)
+      setLoading(false)
+    })
   }, [])
 
   const save = async () => {
@@ -25,6 +38,10 @@ export default function StorefrontSettings() {
       await Promise.all([
         setSetting('hero_image', heroImage.trim()),
         setSetting('free_shipping_threshold', String(Math.max(0, Number(freeShipping) || 0))),
+        setSetting('low_stock_threshold', String(Math.max(1, Number(lowStockThreshold) || 5))),
+        setSetting('trust_secure_text', trustSecureText.trim()),
+        setSetting('trust_returns_text', trustReturnsText.trim()),
+        setSetting('trust_madein_text', trustMadeInText.trim()),
       ])
       setSaved(true)
       setTimeout(() => setSaved(false), 2500)
@@ -108,6 +125,66 @@ export default function StorefrontSettings() {
           <p className="font-mono text-[10px] text-ink/35 leading-relaxed">
             Leave blank or set to 0 to hide the free-shipping bar entirely.
           </p>
+        </div>
+        <Btn variant="flame" onClick={save} disabled={saving}>
+          {saving ? 'Saving…' : 'Save'}
+        </Btn>
+      </div>
+
+      <div className="card-soft p-6 space-y-5">
+        <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink/40">Low stock</div>
+        <div className="space-y-2">
+          <label className="font-mono text-[11px] uppercase tracking-[0.14em] text-ink/50">
+            Threshold (units) — products at or below this show "Only X left" on the storefront
+          </label>
+          <input
+            type="number"
+            min="1"
+            value={lowStockThreshold}
+            onChange={(e) => { setLowStockThreshold(e.target.value); setSaved(false) }}
+            placeholder="5"
+            className="w-full rounded-2xl border border-ink/10 bg-white px-4 py-3 font-mono text-[12px] text-ink outline-none transition-colors placeholder:text-ink/25 focus:border-flame-500"
+          />
+        </div>
+        <Btn variant="flame" onClick={save} disabled={saving}>
+          {saving ? 'Saving…' : 'Save'}
+        </Btn>
+      </div>
+
+      <div className="card-soft p-6 space-y-5">
+        <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink/40">Trust block copy</div>
+        <p className="font-mono text-[10px] text-ink/35 leading-relaxed">
+          Shown on the product page and in the cart drawer.
+        </p>
+        <div className="space-y-2">
+          <label className="font-mono text-[11px] uppercase tracking-[0.14em] text-ink/50">Secure checkout</label>
+          <input
+            type="text"
+            value={trustSecureText}
+            onChange={(e) => { setTrustSecureText(e.target.value); setSaved(false) }}
+            placeholder="Secure checkout"
+            className="w-full rounded-2xl border border-ink/10 bg-white px-4 py-3 font-mono text-[12px] text-ink outline-none transition-colors placeholder:text-ink/25 focus:border-flame-500"
+          />
+        </div>
+        <div className="space-y-2">
+          <label className="font-mono text-[11px] uppercase tracking-[0.14em] text-ink/50">Returns</label>
+          <input
+            type="text"
+            value={trustReturnsText}
+            onChange={(e) => { setTrustReturnsText(e.target.value); setSaved(false) }}
+            placeholder="30-day returns"
+            className="w-full rounded-2xl border border-ink/10 bg-white px-4 py-3 font-mono text-[12px] text-ink outline-none transition-colors placeholder:text-ink/25 focus:border-flame-500"
+          />
+        </div>
+        <div className="space-y-2">
+          <label className="font-mono text-[11px] uppercase tracking-[0.14em] text-ink/50">Made-in line</label>
+          <input
+            type="text"
+            value={trustMadeInText}
+            onChange={(e) => { setTrustMadeInText(e.target.value); setSaved(false) }}
+            placeholder="Made in India"
+            className="w-full rounded-2xl border border-ink/10 bg-white px-4 py-3 font-mono text-[12px] text-ink outline-none transition-colors placeholder:text-ink/25 focus:border-flame-500"
+          />
         </div>
         <Btn variant="flame" onClick={save} disabled={saving}>
           {saving ? 'Saving…' : 'Save'}

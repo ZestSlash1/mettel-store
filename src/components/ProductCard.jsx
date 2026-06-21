@@ -5,7 +5,8 @@ import ProductGraphic from './ProductGraphic'
 import WishlistButton from './WishlistButton'
 import { formatPrice } from '../hooks/useProducts'
 import { useCart } from '../context/CartContext'
-import { isSoldOut } from '../lib/product'
+import { useSetting } from '../hooks/useSetting'
+import { isSoldOut, isLowStock } from '../lib/product'
 import { EASE } from '../lib/motion'
 
 const STATUS_LABEL = {
@@ -19,6 +20,8 @@ export default function ProductCard({ product, index = 0 }) {
   const { addItem } = useCart()
   const reduce = useReducedMotion()
   const soldOut = isSoldOut(product)
+  const lowStockThreshold = Number(useSetting('low_stock_threshold', '5')) || 5
+  const lowStock = !soldOut && isLowStock(product, lowStockThreshold)
   const [added, setAdded] = useState(false)
 
   const handleAdd = () => {
@@ -55,8 +58,12 @@ export default function ProductCard({ product, index = 0 }) {
         </span>
 
         {/* status chip */}
-        <span className="absolute bottom-4 left-4 z-20 rounded-full bg-white/80 px-3 py-1 font-mono text-[9px] uppercase tracking-[0.18em] text-ink/70 ring-1 ring-ink/[0.04] backdrop-blur-sm">
-          {soldOut ? 'Sold out' : STATUS_LABEL[status] ?? status}
+        <span
+          className={`absolute bottom-4 left-4 z-20 rounded-full px-3 py-1 font-mono text-[9px] uppercase tracking-[0.18em] ring-1 backdrop-blur-sm ${
+            lowStock ? 'bg-flame-100/90 text-flame-700 ring-flame-500/20' : 'bg-white/80 text-ink/70 ring-ink/[0.04]'
+          }`}
+        >
+          {soldOut ? 'Sold out' : lowStock ? `Only ${product.stock} left` : STATUS_LABEL[status] ?? status}
         </span>
 
         {/* wishlist — sits above the stretched link so it isn't nested in it */}
