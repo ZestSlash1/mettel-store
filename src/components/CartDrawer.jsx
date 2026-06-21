@@ -5,6 +5,7 @@ import { useCart } from '../context/CartContext'
 import { useAuth } from '../context/AuthContext'
 import { formatPrice } from '../hooks/useProducts'
 import ProductGraphic from './ProductGraphic'
+import { EASE, DUR, STAGGER, usePrefersReducedMotion } from '../lib/motion'
 
 const RZP_SCRIPT = 'https://checkout.razorpay.com/v1/checkout.js'
 const emptyForm = { name: '', email: '', phone: '', address: '', city: '', state: '', pincode: '' }
@@ -68,6 +69,7 @@ export default function CartDrawer() {
   const [paymentMethod, setPaymentMethod] = useState('razorpay') // 'razorpay' | 'cod'
 
   const { user } = useAuth()
+  const reduced = usePrefersReducedMotion()
   const currency = items[0]?.currency || 'INR'
   const setField = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }))
   const total = Math.max(0, subtotal - couponDiscount)
@@ -238,7 +240,7 @@ export default function CartDrawer() {
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
-            transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: DUR.base, ease: EASE.out }}
             className="relative flex h-full w-full max-w-md flex-col bg-silver-50 shadow-2xl"
           >
             {/* Header */}
@@ -251,13 +253,37 @@ export default function CartDrawer() {
                   {checkingOut ? 'Shipping details' : `${count} ${count === 1 ? 'item' : 'items'}`}
                 </h2>
               </div>
-              <button onClick={dismiss} className="text-2xl leading-none text-ink/50 hover:text-ink" aria-label="Close cart">×</button>
+              <motion.button
+                onClick={dismiss}
+                whileHover={reduced ? undefined : { rotate: 90, scale: 1.15 }}
+                whileTap={{ scale: 0.9 }}
+                transition={{ duration: DUR.fast, ease: EASE.out }}
+                className="text-2xl leading-none text-ink/50 hover:text-ink"
+                aria-label="Close cart"
+              >
+                ×
+              </motion.button>
             </div>
 
             {/* Body */}
+            <AnimatePresence mode="wait" initial={false}>
             {placed ? (
-              <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 text-center">
-                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-flame-500 text-2xl text-white">✓</div>
+              <motion.div
+                key="placed"
+                initial={{ opacity: 0, y: reduced ? 0 : 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: DUR.fast, ease: EASE.out }}
+                className="flex flex-1 flex-col items-center justify-center gap-3 px-6 text-center"
+              >
+                <motion.div
+                  initial={{ scale: 0, rotate: reduced ? 0 : -45 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ duration: reduced ? DUR.fast : DUR.slow, ease: reduced ? EASE.out : EASE.outBack, delay: reduced ? 0 : 0.1 }}
+                  className="flex h-14 w-14 items-center justify-center rounded-full bg-flame-500 text-2xl text-white"
+                >
+                  ✓
+                </motion.div>
                 <p className="font-display text-xl font-black uppercase">Order confirmed</p>
                 <p className="max-w-xs font-mono text-[11px] text-ink/50">
                   {paymentMethod === 'cod'
@@ -273,29 +299,44 @@ export default function CartDrawer() {
                   <Link
                     to="/track"
                     onClick={dismiss}
-                    className="rounded-full bg-ink px-5 py-2 font-mono text-[11px] uppercase tracking-[0.16em] text-white transition-colors hover:bg-flame-500"
+                    className="btn rounded-full bg-ink px-5 py-2 font-mono text-[11px] uppercase tracking-[0.16em] text-white hover:bg-flame-500"
                   >
                     Track order
                   </Link>
                   <button
                     onClick={dismiss}
-                    className="rounded-full bg-silver-200 px-5 py-2 font-mono text-[11px] uppercase tracking-[0.16em] text-ink transition-colors hover:bg-ink hover:text-white"
+                    className="btn rounded-full bg-silver-200 px-5 py-2 font-mono text-[11px] uppercase tracking-[0.16em] text-ink hover:bg-ink hover:text-white"
                   >
                     Done
                   </button>
                 </div>
-              </div>
+              </motion.div>
             ) : items.length === 0 ? (
-              <div className="flex flex-1 flex-col items-center justify-center gap-2 px-6 text-center">
+              <motion.div
+                key="empty"
+                initial={{ opacity: 0, y: reduced ? 0 : 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: DUR.fast, ease: EASE.out }}
+                className="flex flex-1 flex-col items-center justify-center gap-2 px-6 text-center"
+              >
                 <p className="font-display text-xl font-black uppercase text-ink/70">Bag is empty</p>
                 <p className="font-mono text-[11px] text-ink/40">Add something to get started.</p>
-                <button onClick={dismiss} className="mt-3 rounded-full bg-ink px-5 py-2 font-mono text-[11px] uppercase tracking-[0.16em] text-white hover:bg-flame-500">
+                <button onClick={dismiss} className="btn mt-3 rounded-full bg-ink px-5 py-2 font-mono text-[11px] uppercase tracking-[0.16em] text-white hover:bg-flame-500">
                   Keep browsing
                 </button>
-              </div>
+              </motion.div>
             ) : checkingOut ? (
               /* ---- Checkout form ---- */
-              <div data-lenis-prevent className="flex-1 overflow-y-auto px-6 py-4">
+              <motion.div
+                key="checkout"
+                data-lenis-prevent
+                initial={{ opacity: 0, y: reduced ? 0 : 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: DUR.fast, ease: EASE.out }}
+                className="flex-1 overflow-y-auto px-6 py-4"
+              >
                 <div className="space-y-3">
                   <CheckoutField label="Full name" value={form.name} onChange={setField('name')} placeholder="Aarav Sharma" autoComplete="name" />
                   <CheckoutField
@@ -332,12 +373,19 @@ export default function CartDrawer() {
                         key={method}
                         type="button"
                         onClick={() => setPaymentMethod(method)}
-                        className={`flex-1 rounded-xl border py-2.5 font-mono text-[11px] uppercase tracking-wider transition-colors ${
+                        className={`relative flex-1 overflow-hidden rounded-xl border py-2.5 font-mono text-[11px] uppercase tracking-wider transition-colors ${
                           paymentMethod === method
-                            ? 'border-flame-500 bg-flame-500/10 text-flame-700'
+                            ? 'border-flame-500 text-flame-700'
                             : 'border-ink/15 bg-white text-ink/60 hover:border-ink/30'
                         }`}
                       >
+                        {paymentMethod === method ? (
+                          <motion.span
+                            layoutId="paymentActive"
+                            transition={{ duration: reduced ? 0 : DUR.fast, ease: EASE.out }}
+                            className="absolute inset-0 -z-10 bg-flame-500/10"
+                          />
+                        ) : null}
                         {label}
                       </button>
                     ))}
@@ -363,21 +411,59 @@ export default function CartDrawer() {
                       {applyingCoupon ? '…' : 'Apply'}
                     </button>
                   </div>
-                  {couponMsg ? (
-                    <p className={`mt-1 font-mono text-[10px] ${couponOk ? 'text-green-700' : 'text-flame-700'}`}>{couponMsg}</p>
-                  ) : null}
+                  <AnimatePresence initial={false}>
+                    {couponMsg ? (
+                      <motion.p
+                        key={couponMsg}
+                        initial={{ opacity: 0, y: reduced ? 0 : -4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: DUR.fast, ease: EASE.out }}
+                        className={`mt-1 font-mono text-[10px] ${couponOk ? 'text-green-700' : 'text-flame-700'}`}
+                      >
+                        {couponMsg}
+                      </motion.p>
+                    ) : null}
+                  </AnimatePresence>
                 </div>
 
-                {error ? (
-                  <p className="mt-4 rounded-xl bg-flame-100 px-3 py-2 font-mono text-[11px] text-flame-700">{error}</p>
-                ) : null}
-              </div>
+                <AnimatePresence initial={false}>
+                  {error ? (
+                    <motion.p
+                      key={error}
+                      initial={{ opacity: 0, y: reduced ? 0 : -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: DUR.fast, ease: EASE.out }}
+                      className="mt-4 rounded-xl bg-flame-100 px-3 py-2 font-mono text-[11px] text-flame-700"
+                    >
+                      {error}
+                    </motion.p>
+                  ) : null}
+                </AnimatePresence>
+              </motion.div>
             ) : (
               /* ---- Cart line items ---- */
-              <div data-lenis-prevent className="flex-1 overflow-y-auto px-6 py-4">
+              <motion.div
+                key="items"
+                data-lenis-prevent
+                initial={{ opacity: 0, y: reduced ? 0 : 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: DUR.fast, ease: EASE.out }}
+                className="flex-1 overflow-y-auto px-6 py-4"
+              >
                 <ul className="space-y-4">
-                  {items.map((l) => (
-                    <li key={l.lineId} className="flex gap-4 border-b border-ink/10 pb-4 last:border-0">
+                  <AnimatePresence initial={false} mode="popLayout">
+                  {items.map((l, i) => (
+                    <motion.li
+                      key={l.lineId}
+                      layout
+                      initial={{ opacity: 0, y: reduced ? 0 : 12 }}
+                      animate={{ opacity: 1, y: 0, transition: { duration: DUR.fast, ease: EASE.out, delay: reduced ? 0 : i * STAGGER.tight } }}
+                      exit={{ opacity: 0, x: reduced ? 0 : 24, transition: { duration: DUR.fast, ease: EASE.out } }}
+                      className="flex gap-4 border-b border-ink/10 pb-4 last:border-0"
+                    >
                       <div className="w-14 shrink-0">
                         {l.image ? (
                           <img src={l.image} alt="" className="h-auto w-full" />
@@ -405,26 +491,47 @@ export default function CartDrawer() {
                           <span className="font-pixel text-sm text-flame-600">{formatPrice(l.price * l.qty, l.currency)}</span>
                         </div>
                       </div>
-                    </li>
+                    </motion.li>
                   ))}
+                  </AnimatePresence>
                 </ul>
-              </div>
+              </motion.div>
             )}
+            </AnimatePresence>
 
             {/* Footer */}
             {!placed && items.length > 0 ? (
               <div className="border-t border-ink/10 px-6 py-5">
-                {checkingOut && couponOk && couponDiscount > 0 ? (
-                  <div className="mb-2 flex items-center justify-between font-mono text-[11px]">
-                    <span className="uppercase tracking-[0.16em] text-ink/45">Discount {coupon.trim().toUpperCase()}</span>
-                    <span className="text-green-700">− {formatPrice(couponDiscount, currency)}</span>
-                  </div>
-                ) : null}
+                <AnimatePresence initial={false}>
+                  {checkingOut && couponOk && couponDiscount > 0 ? (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: DUR.fast, ease: EASE.out }}
+                      className="mb-2 flex items-center justify-between font-mono text-[11px]"
+                    >
+                      <span className="uppercase tracking-[0.16em] text-ink/45">Discount {coupon.trim().toUpperCase()}</span>
+                      <span className="text-green-700">− {formatPrice(couponDiscount, currency)}</span>
+                    </motion.div>
+                  ) : null}
+                </AnimatePresence>
                 <div className="mb-4 flex items-center justify-between">
                   <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink/50">
                     {checkingOut ? 'Total' : 'Subtotal'}
                   </span>
-                  <span className="font-display text-2xl font-black">{formatPrice(checkingOut ? total : subtotal, currency)}</span>
+                  <AnimatePresence mode="popLayout" initial={false}>
+                    <motion.span
+                      key={checkingOut ? total : subtotal}
+                      initial={{ opacity: 0, y: reduced ? 0 : 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: reduced ? 0 : -6 }}
+                      transition={{ duration: DUR.fast, ease: EASE.out }}
+                      className="font-display text-2xl font-black"
+                    >
+                      {formatPrice(checkingOut ? total : subtotal, currency)}
+                    </motion.span>
+                  </AnimatePresence>
                 </div>
 
                 {/* Trust signals */}
@@ -494,9 +601,15 @@ function CheckoutField({ label, type = 'text', value, onChange, onBlur, placehol
 
 function Stepper({ onClick, label }) {
   return (
-    <button onClick={onClick} className="flex h-7 w-7 items-center justify-center rounded-full font-mono text-base text-ink/70 hover:bg-ink hover:text-white" aria-label={label === '+' ? 'Increase' : 'Decrease'}>
+    <motion.button
+      onClick={onClick}
+      whileTap={{ scale: 0.85 }}
+      transition={{ duration: DUR.fast, ease: EASE.out }}
+      className="flex h-7 w-7 items-center justify-center rounded-full font-mono text-base text-ink/70 hover:bg-ink hover:text-white"
+      aria-label={label === '+' ? 'Increase' : 'Decrease'}
+    >
       {label}
-    </button>
+    </motion.button>
   )
 }
 
