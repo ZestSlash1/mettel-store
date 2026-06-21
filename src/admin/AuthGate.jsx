@@ -23,7 +23,7 @@ export default function AuthGate({ children }) {
   if (!authEnabled) {
     return (
       <>
-        <div className="bg-flame-500 px-4 py-2 text-center font-mono text-[10px] uppercase tracking-[0.16em] text-white">
+        <div className="bg-flame-500 px-4 py-2 text-center font-mono text-[10px] uppercase tracking-[0.16em] text-[#fff]">
           Auth disabled · add Supabase keys in .env to protect /admin
         </div>
         {children}
@@ -42,7 +42,7 @@ export default function AuthGate({ children }) {
           This area is for MetTel staff. You’re signed in, but this account isn’t an admin.
         </p>
         <div className="flex gap-2">
-          <Link to="/" className="rounded-full bg-ink px-5 py-2 font-mono text-[11px] uppercase tracking-[0.16em] text-white hover:bg-flame-500">Back to store</Link>
+          <Link to="/" className="rounded-full bg-black px-5 py-2 font-mono text-[11px] uppercase tracking-[0.16em] text-[#fff] hover:bg-flame-500">Back to store</Link>
           <Btn variant="ghost" onClick={signOut}>Sign out</Btn>
         </div>
       </div>
@@ -74,7 +74,7 @@ function LoginScreen() {
     <div className="flex min-h-screen items-center justify-center bg-silver px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-ink text-white">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-black text-[#fff]">
             <span className="font-display text-sm font-black">MT</span>
           </div>
           <h1 className="font-display text-3xl font-black uppercase tracking-tight">Control</h1>

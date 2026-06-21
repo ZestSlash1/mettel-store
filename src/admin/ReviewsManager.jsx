@@ -62,7 +62,7 @@ export default function ReviewsManager() {
             key={key}
             onClick={() => setFilter(key)}
             className={`rounded-full px-4 py-1.5 font-mono text-[11px] uppercase tracking-[0.16em] transition-colors ${
-              filter === key ? 'bg-ink text-white' : 'bg-silver-200 text-ink hover:bg-ink/10'
+              filter === key ? 'bg-black text-[#fff]' : 'bg-silver-200 text-ink hover:bg-ink/10'
             }`}
           >
             {label}

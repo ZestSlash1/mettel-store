@@ -27,13 +27,13 @@ export default class ErrorBoundary extends Component {
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <button
               onClick={() => window.location.reload()}
-              className="rounded-full bg-flame-500 px-6 py-3 font-mono text-[11px] uppercase tracking-[0.16em] text-white transition-colors hover:bg-flame-600"
+              className="rounded-full bg-flame-500 px-6 py-3 font-mono text-[11px] uppercase tracking-[0.16em] text-[#fff] transition-colors hover:bg-flame-600"
             >
               Reload
             </button>
             <a
               href="/"
-              className="rounded-full bg-silver-200 px-6 py-3 font-mono text-[11px] uppercase tracking-[0.16em] text-ink transition-colors hover:bg-ink hover:text-white"
+              className="rounded-full bg-silver-200 px-6 py-3 font-mono text-[11px] uppercase tracking-[0.16em] text-ink transition-colors hover:bg-black hover:text-[#fff]"
             >
               Back to store
             </a>

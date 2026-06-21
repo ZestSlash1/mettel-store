@@ -8,9 +8,13 @@
  */
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { Flip } from 'gsap/Flip'
 
 if (!gsap.core.globals().ScrollTrigger) {
   gsap.registerPlugin(ScrollTrigger)
 }
+if (!gsap.core.globals().Flip) {
+  gsap.registerPlugin(Flip)
+}
 
-export { gsap, ScrollTrigger }
+export { gsap, ScrollTrigger, Flip }

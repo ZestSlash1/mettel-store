@@ -78,8 +78,8 @@ export default function FAQ() {
         ))}
       </div>
 
-      <div data-reveal className="mt-10 rounded-4xl bg-ink p-6 text-center text-silver shadow-soft">
-        <p className="font-mono text-[12px] text-silver/70">Didn’t find your answer?</p>
+      <div data-reveal className="mt-10 rounded-4xl bg-black p-6 text-center text-[#fff] shadow-soft">
+        <p className="font-mono text-[12px] text-[#fff]/70">Didn’t find your answer?</p>
         <Link
           to="/contact"
           className="btn btn-flame mt-3 inline-flex px-6 py-3 text-[11px]"

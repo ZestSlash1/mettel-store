@@ -43,7 +43,7 @@ export default function Subscribe() {
 
           {done ? (
             <div className="flex items-center gap-3 font-mono text-[12px] text-ink/70">
-              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-flame-500 text-white">✓</span>
+              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-flame-500 text-[#fff]">✓</span>
               You're on the list.
             </div>
           ) : (

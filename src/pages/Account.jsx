@@ -195,7 +195,7 @@ function Toggle({ active, onClick, children }) {
       onClick={onClick}
       type="button"
       className={`flex-1 rounded-full px-4 py-2 font-mono text-[11px] uppercase tracking-[0.16em] transition-colors ${
-        active ? 'bg-ink text-white' : 'bg-silver-200 text-ink hover:bg-ink/10'
+        active ? 'bg-black text-[#fff]' : 'bg-silver-200 text-ink hover:bg-ink/10'
       }`}
     >
       {children}

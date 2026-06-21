@@ -1,13 +1,17 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import ProductGraphic from './ProductGraphic'
+import ResponsiveImage from './ResponsiveImage'
+import ScrambleText from './ScrambleText'
 import WishlistButton from './WishlistButton'
 import { formatPrice } from '../hooks/useProducts'
 import { useCart } from '../context/CartContext'
 import { useSetting } from '../hooks/useSetting'
 import { isSoldOut, isLowStock } from '../lib/product'
 import { EASE } from '../lib/motion'
+import { prefetchProduct } from '../lib/dataStore'
+import { useScrollVelocityTilt } from '../lib/useScrollVelocityTilt'
 
 const STATUS_LABEL = {
   available: 'In stock',
@@ -23,6 +27,22 @@ export default function ProductCard({ product, index = 0 }) {
   const lowStockThreshold = Number(useSetting('low_stock_threshold', '5')) || 5
   const lowStock = !soldOut && isLowStock(product, lowStockThreshold)
   const [added, setAdded] = useState(false)
+  const prefetchTimer = useRef(null)
+  const tiltRef = useScrollVelocityTilt()
+
+  const handlePrefetch = () => {
+    if (prefetchTimer.current) return
+    prefetchTimer.current = setTimeout(() => {
+      prefetchProduct(product.id)
+      prefetchTimer.current = null
+    }, 150)
+  }
+  const cancelPrefetch = () => {
+    if (prefetchTimer.current) {
+      clearTimeout(prefetchTimer.current)
+      prefetchTimer.current = null
+    }
+  }
 
   const handleAdd = () => {
     if (soldOut) return
@@ -41,6 +61,10 @@ export default function ProductCard({ product, index = 0 }) {
       transition={{ duration: 0.6, delay: (index % 3) * 0.08, ease: EASE.out }}
       whileHover={reduce ? undefined : 'hover'}
       variants={{ hover: { y: -6 } }}
+      onMouseEnter={handlePrefetch}
+      onMouseLeave={cancelPrefetch}
+      onFocus={handlePrefetch}
+      onBlur={cancelPrefetch}
       className="group relative flex break-inside-avoid flex-col overflow-hidden rounded-4xl bg-white shadow-soft ring-1 ring-ink/[0.04] transition-shadow duration-500 hover:shadow-soft-lg"
     >
       {/* hover wash */}
@@ -51,7 +75,7 @@ export default function ProductCard({ product, index = 0 }) {
       />
 
       {/* ---- visual well ---- */}
-      <div className="relative flex items-center justify-center overflow-hidden bg-silver-50/60 px-8 py-12">
+      <div data-cursor="view" className="relative flex items-center justify-center overflow-hidden bg-silver-50/60 px-8 py-12">
         {/* index tag */}
         <span className="absolute left-4 top-4 z-20 font-mono text-[9px] uppercase tracking-[0.22em] text-ink/30">
           /{num}
@@ -78,8 +102,8 @@ export default function ProductCard({ product, index = 0 }) {
           className="relative z-10 w-[46%] min-w-[120px] drop-shadow-[0_20px_36px_rgba(0,0,0,0.18)]"
         >
           {image ? (
-            <div className="aspect-[1/2] w-full">
-              <img src={image} alt={name} className="h-full w-full object-contain" loading="lazy" />
+            <div ref={tiltRef} className="aspect-[1/2] w-full">
+              <ResponsiveImage src={image} alt={name} loading="lazy" sizes="(min-width: 1024px) 22vw, 45vw" />
             </div>
           ) : (
             <ProductGraphic className="h-auto w-full" shell={color_hex} accent={accent_hex} />
@@ -91,7 +115,7 @@ export default function ProductCard({ product, index = 0 }) {
           variants={{ hover: { y: 0 } }}
           initial={{ y: '101%' }}
           transition={{ duration: 0.32, ease: EASE.out }}
-          className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex items-center justify-between bg-ink/90 px-4 py-2 font-mono text-[9px] uppercase tracking-[0.22em] text-white"
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex items-center justify-between bg-black/90 px-4 py-2 font-mono text-[9px] uppercase tracking-[0.22em] text-[#fff]"
         >
           <span>View product</span>
           <span aria-hidden="true">→</span>
@@ -128,16 +152,19 @@ export default function ProductCard({ product, index = 0 }) {
           {specs.slice(0, 4).map((s) => (
             <div key={s.k} className="flex justify-between gap-2 border-b border-ink/[0.06] pb-1">
               <dt className="text-ink/40">{s.k}</dt>
-              <dd className="text-ink/80">{s.v}</dd>
+              <dd className="text-ink/80"><ScrambleText text={s.v} /></dd>
             </div>
           ))}
         </dl>
 
         <div className="mt-auto flex items-center justify-between pt-2">
-          <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-ink/35">{sku}</span>
+          <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-ink/35">
+            <ScrambleText text={sku} />
+          </span>
           <button
             disabled={soldOut}
             onClick={handleAdd}
+            data-cursor={soldOut ? undefined : 'add'}
             aria-label={soldOut ? 'Sold out' : `Add ${name} to bag`}
             className={`btn px-5 py-2 text-[10px] ${added ? 'btn-flame animate-addpop' : 'btn-dark'}`}
           >

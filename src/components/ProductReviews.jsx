@@ -154,7 +154,7 @@ function ReviewForm({ productId, onPosted }) {
       <button
         type="submit"
         disabled={busy}
-        className="rounded-full bg-ink px-5 py-2 font-mono text-[11px] uppercase tracking-[0.16em] text-white transition-colors hover:bg-flame-500 disabled:opacity-50"
+        className="rounded-full bg-black px-5 py-2 font-mono text-[11px] uppercase tracking-[0.16em] text-[#fff] transition-colors hover:bg-flame-500 disabled:opacity-50"
       >
         {busy ? 'Submitting…' : 'Submit review'}
       </button>

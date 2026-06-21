@@ -15,7 +15,7 @@ export default function Logo() {
 
   if (failed) {
     return (
-      <span className="flex h-11 w-11 items-center justify-center rounded-full bg-ink text-white">
+      <span className="flex h-11 w-11 items-center justify-center rounded-full bg-black text-[#fff]">
         <span className="font-display text-sm font-black leading-none">MT</span>
       </span>
     )

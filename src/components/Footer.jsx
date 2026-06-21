@@ -53,13 +53,13 @@ export default function Footer() {
 
   return (
     <footer id="info" className="mx-auto max-w-[1400px] px-4 pb-12 pt-8 sm:px-6">
-      <div className="rounded-5xl bg-ink p-8 text-silver shadow-soft-lg sm:p-12">
+      <div className="rounded-5xl bg-black p-8 text-[#fff] shadow-soft-lg sm:p-12">
         <div className="flex flex-col gap-10 sm:flex-row sm:items-start sm:justify-between">
           <div className="max-w-sm">
             <Link to="/" className="font-display text-4xl font-black tracking-tight transition-colors hover:text-flame-500">
               METTEL
             </Link>
-            <p className="mt-3 font-mono text-[11px] leading-relaxed text-silver/60">
+            <p className="mt-3 font-mono text-[11px] leading-relaxed text-[#fff]/60">
               Engineered objects for everyday life — coverage, audio, accessories, and more.
               Designed in India. Shipped worldwide.
             </p>
@@ -69,10 +69,10 @@ export default function Footer() {
             {columns.map((col) => (
               <div key={col.h}>
                 <div className="mb-3 text-flame-500">{col.h}</div>
-                <ul className="space-y-2 text-silver/55">
+                <ul className="space-y-2 text-[#fff]/55">
                   {col.items.map((i) => (
                     <li key={i.label}>
-                      <Link to={i.to} className="transition-colors hover:text-white">
+                      <Link to={i.to} className="transition-colors hover:text-[#fff]">
                         {i.label}
                       </Link>
                     </li>
@@ -83,11 +83,11 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-silver/10 pt-6 font-mono text-[10px] uppercase tracking-[0.2em] text-silver/40">
+        <div className="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-[#fff]/10 pt-6 font-mono text-[10px] uppercase tracking-[0.2em] text-[#fff]/40">
           <span>© {new Date().getFullYear()} MetTel · mettel.in</span>
           <div className="flex flex-wrap items-center gap-4">
-            <Link to="/privacy" className="transition-colors hover:text-white">Privacy</Link>
-            <Link to="/terms" className="transition-colors hover:text-white">Terms</Link>
+            <Link to="/privacy" className="transition-colors hover:text-[#fff]">Privacy</Link>
+            <Link to="/terms" className="transition-colors hover:text-[#fff]">Terms</Link>
             <span className="hidden sm:inline">Made for the everyday object</span>
           </div>
         </div>

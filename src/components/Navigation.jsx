@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion, useMotionValue, useReducedMotion, useSpring } from 'framer-motion'
 import { useCart } from '../context/CartContext'
 import Logo from './Logo'
+import ThemeToggle from './ThemeToggle'
 
 const LINKS = [
   { label: 'Info', to: '/about' },
@@ -24,12 +25,12 @@ const Pill = forwardRef(function Pill(
     // background — this pill only ever toggles its text color.
     ghost:
       highlighted !== undefined
-        ? highlighted ? 'text-white' : 'text-ink'
+        ? highlighted ? 'text-[#fff]' : 'text-ink'
         : active
-          ? 'bg-ink text-white'
+          ? 'bg-black text-[#fff]'
           : 'bg-transparent text-ink hover:bg-ink/[0.06]',
-    solid: 'bg-ink text-white hover:bg-flame-500',
-    flame: 'bg-flame-500 text-white hover:bg-flame-600',
+    solid: 'bg-black text-[#fff] hover:bg-flame-500',
+    flame: 'bg-flame-500 text-[#fff] hover:bg-flame-600',
   }
   const cls = `${base} ${variants[variant]} ${className}`
   const motionProps = {
@@ -84,7 +85,7 @@ function NavLinks({ location }) {
     >
       {box ? (
         <motion.span
-          className="absolute inset-y-0 left-0 z-0 rounded-full bg-ink"
+          className="absolute inset-y-0 left-0 z-0 rounded-full bg-black"
           initial={reduce ? { x: box.x, width: box.width, opacity: 1 } : false}
           animate={{ x: box.x, width: box.width, opacity: 1 }}
           transition={reduce ? { duration: 0 } : { type: 'spring', stiffness: 480, damping: 38, mass: 0.7 }}
@@ -155,7 +156,7 @@ function DiscoverPill() {
         animate={{ x: hover ? '350%' : '-150%' }}
         transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
       />
-      <span className={`relative z-10 transition-colors duration-300 ${hover ? 'text-white' : ''}`}>
+      <span className={`relative z-10 transition-colors duration-300 ${hover ? 'text-[#fff]' : ''}`}>
         Discover All Products
       </span>
       <motion.span
@@ -191,7 +192,7 @@ function MobileMenu({ onClose }) {
         </Link>
         <button
           onClick={onClose}
-          className="flex h-11 w-11 items-center justify-center rounded-full bg-silver-200 text-ink transition-colors hover:bg-ink hover:text-white"
+          className="flex h-11 w-11 items-center justify-center rounded-full bg-silver-200 text-ink transition-colors hover:bg-black hover:text-[#fff]"
           aria-label="Close menu"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
@@ -235,20 +236,20 @@ function MobileMenu({ onClose }) {
         <a
           href="/#subscribe"
           onClick={onClose}
-          className="rounded-full bg-ink px-5 py-2.5 font-mono text-[11px] uppercase tracking-[0.18em] text-white transition-colors hover:bg-flame-500"
+          className="rounded-full bg-black px-5 py-2.5 font-mono text-[11px] uppercase tracking-[0.18em] text-[#fff] transition-colors hover:bg-flame-500"
         >
           Subscribe
         </a>
         <Link
           to="/account"
           onClick={onClose}
-          className="flex items-center gap-2 rounded-full bg-silver-200 px-5 py-2.5 font-mono text-[11px] uppercase tracking-[0.18em] text-ink transition-colors hover:bg-ink hover:text-white"
+          className="flex items-center gap-2 rounded-full bg-silver-200 px-5 py-2.5 font-mono text-[11px] uppercase tracking-[0.18em] text-ink transition-colors hover:bg-black hover:text-[#fff]"
         >
           Account
         </Link>
         <button
           onClick={handleCart}
-          className="relative flex h-11 w-11 items-center justify-center rounded-full bg-silver-200 text-ink transition-colors hover:bg-flame-500 hover:text-white"
+          className="relative flex h-11 w-11 items-center justify-center rounded-full bg-silver-200 text-ink transition-colors hover:bg-flame-500 hover:text-[#fff]"
           aria-label={`Open bag, ${count} items`}
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -257,11 +258,12 @@ function MobileMenu({ onClose }) {
             <path d="M16 10a4 4 0 0 1-8 0" />
           </svg>
           {count > 0 ? (
-            <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-flame-500 px-1 font-mono text-[10px] font-bold text-white ring-2 ring-silver">
+            <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-flame-500 px-1 font-mono text-[10px] font-bold text-[#fff] ring-2 ring-silver">
               {count}
             </span>
           ) : null}
         </button>
+        <ThemeToggle className="flex h-11 w-11 items-center justify-center rounded-full bg-silver-200 text-ink transition-colors hover:bg-flame-500 hover:text-[#fff]" />
         <Link
           to="/admin"
           onClick={onClose}
@@ -332,10 +334,13 @@ export default function Navigation() {
               <Pill href="/#subscribe" variant="solid">Subscribe</Pill>
             </div>
 
+            {/* Theme toggle — desktop only (mobile menu has its own) */}
+            <ThemeToggle className="hidden h-11 w-11 items-center justify-center rounded-full bg-silver-200 text-ink transition-colors hover:bg-flame-500 hover:text-[#fff] md:flex" />
+
             {/* Cart */}
             <button
               onClick={openCart}
-              className="relative flex h-11 w-11 items-center justify-center rounded-full bg-silver-200 text-ink transition-colors hover:bg-flame-500 hover:text-white"
+              className="relative flex h-11 w-11 items-center justify-center rounded-full bg-silver-200 text-ink transition-colors hover:bg-flame-500 hover:text-[#fff]"
               aria-label={`Open bag, ${count} items`}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -346,7 +351,7 @@ export default function Navigation() {
               {count > 0 ? (
                 <span
                   key={count}
-                  className="absolute -right-1 -top-1 flex h-5 min-w-5 animate-badgepop items-center justify-center rounded-full bg-flame-500 px-1 font-mono text-[10px] font-bold text-white ring-2 ring-silver-50"
+                  className="absolute -right-1 -top-1 flex h-5 min-w-5 animate-badgepop items-center justify-center rounded-full bg-flame-500 px-1 font-mono text-[10px] font-bold text-[#fff] ring-2 ring-silver-50"
                 >
                   {count}
                 </span>
@@ -356,7 +361,7 @@ export default function Navigation() {
             {/* Account — desktop only (mobile menu has it) */}
             <Link
               to="/account"
-              className="hidden h-11 w-11 items-center justify-center rounded-full bg-silver-200 text-ink transition-colors hover:bg-flame-500 hover:text-white md:flex"
+              className="hidden h-11 w-11 items-center justify-center rounded-full bg-silver-200 text-ink transition-colors hover:bg-flame-500 hover:text-[#fff] md:flex"
               aria-label="Your account"
               title="Account"
             >
@@ -369,7 +374,7 @@ export default function Navigation() {
             {/* Admin — desktop only */}
             <Link
               to="/admin"
-              className="hidden h-11 w-11 items-center justify-center rounded-full bg-silver-200 font-mono text-ink transition-colors hover:bg-flame-500 hover:text-white md:flex"
+              className="hidden h-11 w-11 items-center justify-center rounded-full bg-silver-200 font-mono text-ink transition-colors hover:bg-flame-500 hover:text-[#fff] md:flex"
               aria-label="Catalogue admin"
               title="Catalogue admin"
             >
@@ -379,7 +384,7 @@ export default function Navigation() {
             {/* Hamburger — mobile only */}
             <button
               onClick={() => setMobileOpen(true)}
-              className="flex h-11 w-11 items-center justify-center rounded-full bg-silver-200 text-ink transition-colors hover:bg-ink hover:text-white md:hidden"
+              className="flex h-11 w-11 items-center justify-center rounded-full bg-silver-200 text-ink transition-colors hover:bg-black hover:text-[#fff] md:hidden"
               aria-label="Open menu"
               aria-expanded={mobileOpen}
             >

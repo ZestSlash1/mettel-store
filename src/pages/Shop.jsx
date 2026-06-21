@@ -1,8 +1,9 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import PageShell from '../components/PageShell'
 import { useProducts } from '../hooks/useProducts'
 import ProductCard from '../components/ProductCard'
+import { useFlipGrid } from '../lib/useFlipGrid'
 
 const SORTS = {
   featured: 'Featured',
@@ -23,7 +24,7 @@ export default function Shop() {
   const [query, setQuery] = useState('')
   const [sort, setSort] = useState('featured')
 
-  const setCategory = (id) => setParams(id ? { category: id } : {})
+  const gridRef = useRef(null)
 
   const visible = useMemo(() => {
     let list = products
@@ -41,6 +42,9 @@ export default function Shop() {
     }
     return [...list].sort(by[sort] || by.featured)
   }, [products, query, sort])
+
+  const captureFlip = useFlipGrid(gridRef, visible)
+  const setCategory = (id) => { captureFlip(); setParams(id ? { category: id } : {}) }
 
   return (
     <PageShell
@@ -62,13 +66,13 @@ export default function Shop() {
       <div className="mb-8 flex flex-wrap items-center gap-2">
         <input
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => { captureFlip(); setQuery(e.target.value) }}
           placeholder="Search the lineup…"
           className="max-w-xs flex-1 rounded-full border border-ink/15 bg-white px-4 py-2 font-mono text-[12px] text-ink outline-none transition-colors placeholder:text-ink/30 focus:border-flame-500"
         />
         <select
           value={sort}
-          onChange={(e) => setSort(e.target.value)}
+          onChange={(e) => { captureFlip(); setSort(e.target.value) }}
           className="rounded-full border border-ink/15 bg-white px-4 py-2 font-mono text-[12px] text-ink outline-none focus:border-flame-500"
         >
           {Object.entries(SORTS).map(([k, label]) => (
@@ -92,7 +96,7 @@ export default function Shop() {
           </p>
         </div>
       ) : (
-        <div className="columns-1 gap-6 sm:columns-2 lg:columns-3 [&>*]:mb-6">
+        <div ref={gridRef} className="columns-1 gap-6 sm:columns-2 lg:columns-3 [&>*]:mb-6">
           {visible.map((p, i) => (
             <ProductCard key={p.id} product={p} index={i} />
           ))}

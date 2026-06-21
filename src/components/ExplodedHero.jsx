@@ -31,6 +31,7 @@ const BASE_ASPECT = 2.1 // matches the case geometry's own H/W ratio below
  */
 export default function ExplodedHero({
   progressRef,
+  cursorRef,
   onReady,
   onError,
   className = '',
@@ -75,7 +76,8 @@ export default function ExplodedHero({
     // Soft studio lighting + a procedural environment for believable metal.
     scene.add(new THREE.AmbientLight(0xffffff, 0.55))
     const key = new THREE.DirectionalLight(0xffffff, 2.4)
-    key.position.set(5, 7, 8)
+    const keyBase = { x: 5, y: 7 }
+    key.position.set(keyBase.x, keyBase.y, 8)
     scene.add(key)
     const rim = new THREE.DirectionalLight(0xffd9b3, 1.1)
     rim.position.set(-6, -3, 2)
@@ -196,6 +198,16 @@ export default function ExplodedHero({
       const time = clock.getElapsedTime()
       group.position.y = Math.sin(time * 0.8) * 0.05 // gentle idle bob
       group.rotation.z = Math.sin(time * 0.45) * 0.012
+
+      // Cursor-reactive key light — desktop-only, capability-gated by the
+      // caller (Hero.jsx only ever populates cursorRef there). Damped so it
+      // glides rather than jitters; harmless no-op when cursorRef is unset.
+      if (cursorRef?.current) {
+        const { x: cx, y: cy } = cursorRef.current
+        key.position.x = THREE.MathUtils.lerp(key.position.x, keyBase.x + cx * 2.2, 0.06)
+        key.position.y = THREE.MathUtils.lerp(key.position.y, keyBase.y - cy * 1.6, 0.06)
+      }
+
       renderer.render(scene, camera)
     }
 

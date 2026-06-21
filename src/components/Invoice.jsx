@@ -21,19 +21,19 @@ export default function Invoice({ order, onClose }) {
   const totalRupees = Math.round((order.amount || 0) / 100)
 
   return (
-    <div className="fixed inset-0 z-[70] flex justify-center overflow-y-auto bg-ink/50 p-4 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[70] flex justify-center overflow-y-auto bg-black/50 p-4 backdrop-blur-sm">
       <div className="my-6 h-fit w-full max-w-2xl">
         {/* Actions (hidden when printing) */}
         <div className="no-print mb-3 flex justify-end gap-2">
           <button
             onClick={() => window.print()}
-            className="rounded-full bg-flame-500 px-5 py-2 font-mono text-[11px] uppercase tracking-[0.16em] text-white transition-colors hover:bg-flame-600"
+            className="rounded-full bg-flame-500 px-5 py-2 font-mono text-[11px] uppercase tracking-[0.16em] text-[#fff] transition-colors hover:bg-flame-600"
           >
             Save as PDF
           </button>
           <button
             onClick={onClose}
-            className="rounded-full bg-white px-5 py-2 font-mono text-[11px] uppercase tracking-[0.16em] text-ink ring-1 ring-ink/15 transition-colors hover:bg-ink hover:text-white"
+            className="rounded-full bg-white px-5 py-2 font-mono text-[11px] uppercase tracking-[0.16em] text-ink ring-1 ring-ink/15 transition-colors hover:bg-black hover:text-[#fff]"
           >
             Close
           </button>

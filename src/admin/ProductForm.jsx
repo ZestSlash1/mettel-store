@@ -328,17 +328,17 @@ export default function ProductForm({ product, categories, products = [], existi
                   <div key={url} className="relative h-20 w-20 overflow-hidden rounded-xl bg-silver-100 ring-2 ring-ink/10">
                     <img src={url} alt="" className="h-full w-full object-contain" />
                     {i === 0 && (
-                      <span className="absolute left-1 top-1 rounded-full bg-flame-500 px-1.5 py-0.5 font-mono text-[8px] uppercase tracking-wide text-white">
+                      <span className="absolute left-1 top-1 rounded-full bg-flame-500 px-1.5 py-0.5 font-mono text-[8px] uppercase tracking-wide text-[#fff]">
                         Primary
                       </span>
                     )}
-                    <div className="absolute inset-x-0 bottom-0 flex justify-between bg-ink/60 px-1 py-0.5">
+                    <div className="absolute inset-x-0 bottom-0 flex justify-between bg-black/60 px-1 py-0.5">
                       {i > 0 ? (
-                        <button onClick={() => moveImage(i, i - 1)} className="font-mono text-[10px] text-white/80 hover:text-white" title="Move left">←</button>
+                        <button onClick={() => moveImage(i, i - 1)} className="font-mono text-[10px] text-[#fff]/80 hover:text-[#fff]" title="Move left">←</button>
                       ) : <span />}
-                      <button onClick={() => removeImage(i)} className="font-mono text-[10px] text-white/80 hover:text-flame-400" title="Remove">×</button>
+                      <button onClick={() => removeImage(i)} className="font-mono text-[10px] text-[#fff]/80 hover:text-flame-400" title="Remove">×</button>
                       {i < form.images.length - 1 ? (
-                        <button onClick={() => moveImage(i, i + 1)} className="font-mono text-[10px] text-white/80 hover:text-white" title="Move right">→</button>
+                        <button onClick={() => moveImage(i, i + 1)} className="font-mono text-[10px] text-[#fff]/80 hover:text-[#fff]" title="Move right">→</button>
                       ) : <span />}
                     </div>
                   </div>

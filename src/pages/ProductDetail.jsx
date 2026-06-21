@@ -6,6 +6,9 @@ import Footer from '../components/Footer'
 import Seo from '../components/Seo'
 import ProductGraphic from '../components/ProductGraphic'
 import ProductCard from '../components/ProductCard'
+import ResponsiveImage from '../components/ResponsiveImage'
+import DraggableCarousel from '../components/DraggableCarousel'
+import ScrambleText from '../components/ScrambleText'
 import WishlistButton from '../components/WishlistButton'
 import ProductReviews from '../components/ProductReviews'
 import { useProducts, formatPrice } from '../hooks/useProducts'
@@ -256,7 +259,7 @@ export default function ProductDetail() {
         <div className="mx-auto flex min-h-[60vh] max-w-[1200px] flex-col items-center justify-center px-6 text-center">
           <h1 className="font-display text-5xl font-black uppercase">Not found</h1>
           <p className="mt-2 font-mono text-[12px] text-ink/50">That product doesn't exist or was removed.</p>
-          <Link to="/" className="mt-6 rounded-full bg-ink px-6 py-3 font-mono text-[11px] uppercase tracking-[0.16em] text-white hover:bg-flame-500">
+          <Link to="/" className="mt-6 rounded-full bg-black px-6 py-3 font-mono text-[11px] uppercase tracking-[0.16em] text-[#fff] hover:bg-flame-500">
             Back to store
           </Link>
         </div>
@@ -326,7 +329,9 @@ export default function ProductDetail() {
             >
               <div className="pointer-events-none absolute -right-32 -top-10 h-[120%] w-1/2 rounded-full bg-flame-gradient opacity-[0.10] blur-3xl" />
               {/* corner registration marks — technical detail */}
-              <span className="pointer-events-none absolute left-4 top-4 font-mono text-[9px] uppercase tracking-[0.2em] text-ink/25">{product.sku}</span>
+              <span className="pointer-events-none absolute left-4 top-4 font-mono text-[9px] uppercase tracking-[0.2em] text-ink/25">
+                <ScrambleText text={product.sku} />
+              </span>
               {activeVideo && embedUrl ? (
                 <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
                   <iframe
@@ -348,7 +353,14 @@ export default function ProductDetail() {
                     style={{ opacity: canvasReady3d ? 0 : 1 }}
                   >
                     {displayImg ? (
-                      <img src={displayImg} alt={product.name} className="h-full w-full object-contain" />
+                      <ResponsiveImage
+                        src={displayImg}
+                        alt={product.name}
+                        loading="eager"
+                        fetchPriority="high"
+                        sizes="(min-width: 1024px) 30vw, 60vw"
+                        widths={[360, 480, 720, 960, 1280]}
+                      />
                     ) : (
                       <ProductGraphic className="h-auto w-full" shell={activeColorway?.color_hex || product.color_hex} accent={activeColorway?.accent_hex || product.accent_hex} />
                     )}
@@ -382,7 +394,14 @@ export default function ProductDetail() {
                   >
                     {displayImg ? (
                       <div className="aspect-[1/2] w-full">
-                        <img src={displayImg} alt={product.name} className="h-full w-full object-contain" />
+                        <ResponsiveImage
+                          src={displayImg}
+                          alt={product.name}
+                          loading="eager"
+                          fetchPriority="high"
+                          sizes="(min-width: 1024px) 30vw, 60vw"
+                          widths={[360, 480, 720, 960, 1280]}
+                        />
                       </div>
                     ) : (
                       <ProductGraphic className="h-auto w-full" shell={activeColorway?.color_hex || product.color_hex} accent={activeColorway?.accent_hex || product.accent_hex} />
@@ -406,7 +425,7 @@ export default function ProductDetail() {
                     }`}
                     aria-label={`View image ${i + 1}`}
                   >
-                    <img src={url} alt="" className="h-full w-full object-contain bg-silver-50" />
+                    <ResponsiveImage src={url} alt="" className="bg-silver-50" widths={[64, 96, 128]} sizes="64px" />
                   </button>
                 ))}
                 {embedUrl ? (
@@ -415,7 +434,7 @@ export default function ProductDetail() {
                     className={`relative h-16 w-16 shrink-0 overflow-hidden rounded-xl ring-2 transition-all ${activeVideo ? 'ring-flame-500' : 'ring-ink/10 hover:ring-ink/30'}`}
                     aria-label="Play video"
                   >
-                    <div className="flex h-full w-full items-center justify-center bg-ink">
+                    <div className="flex h-full w-full items-center justify-center bg-black">
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="white" aria-hidden="true"><polygon points="5,3 19,12 5,21"/></svg>
                     </div>
                   </button>
@@ -426,7 +445,7 @@ export default function ProductDetail() {
 
           {/* Info */}
           <div className="flex flex-col">
-            <div className="eyebrow mb-3">{catLabel} · {product.sku}</div>
+            <div className="eyebrow mb-3">{catLabel} · <ScrambleText text={product.sku} /></div>
             <h1 className="font-display text-display-md font-black uppercase leading-[0.85] tracking-tight">
               {product.name}
             </h1>
@@ -477,7 +496,7 @@ export default function ProductDetail() {
                       key={m}
                       onClick={() => setModel(m)}
                       className={`rounded-full px-4 py-2.5 font-mono text-[11px] uppercase tracking-wider transition-colors ${
-                        model === m ? 'bg-ink text-white' : 'bg-silver-200 text-ink hover:bg-ink/10'
+                        model === m ? 'bg-black text-[#fff]' : 'bg-silver-200 text-ink hover:bg-ink/10'
                       }`}
                     >
                       {m}
@@ -504,7 +523,7 @@ export default function ProductDetail() {
                   <button
                     onClick={checkPincode}
                     disabled={pincode.length < 6}
-                    className="rounded-full bg-ink px-5 py-2.5 font-mono text-[11px] uppercase tracking-[0.16em] text-white transition-colors hover:bg-flame-500 disabled:opacity-40"
+                    className="rounded-full bg-black px-5 py-2.5 font-mono text-[11px] uppercase tracking-[0.16em] text-[#fff] transition-colors hover:bg-flame-500 disabled:opacity-40"
                   >
                     Check
                   </button>
@@ -545,6 +564,7 @@ export default function ProductDetail() {
                     </div>
                     <button
                       onClick={doAdd}
+                      data-cursor="add"
                       className={`btn flex-1 py-3 text-[12px] tracking-[0.18em] ${justAdded ? 'btn-dark animate-addpop' : 'btn-flame'}`}
                     >
                       {justAdded ? 'Added ✓' : product.status === 'preorder' ? 'Pre-order' : 'Add to bag'}
@@ -577,7 +597,7 @@ export default function ProductDetail() {
                 {(product.specs || []).map((s) => (
                   <div key={s.k} className="flex justify-between gap-2 border-b border-dashed border-ink/15 py-2.5 font-mono text-[11px] uppercase tracking-wider">
                     <dt className="text-ink/40">{s.k}</dt>
-                    <dd className="text-ink/80">{s.v}</dd>
+                    <dd className="text-ink/80"><ScrambleText text={s.v} /></dd>
                   </div>
                 ))}
               </dl>
@@ -594,11 +614,11 @@ export default function ProductDetail() {
             <h2 className="mb-8 font-display text-display-md font-black uppercase tracking-tight">
               {curatedRelated.length ? 'Complete the kit' : `More in ${catLabel}`}
             </h2>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <DraggableCarousel ariaLabel="Related products" itemClassName="w-[78%] sm:w-[46%] lg:w-[31%]">
               {related.map((p, i) => (
                 <ProductCard key={p.id} product={p} index={i} />
               ))}
-            </div>
+            </DraggableCarousel>
           </Reveal>
         ) : null}
 
@@ -640,7 +660,7 @@ export default function ProductDetail() {
                   Notify me
                 </button>
               ) : (
-                <button onClick={doAdd} className={`btn btn-flame ml-auto px-6 py-3 text-[12px] ${justAdded ? 'animate-addpop' : ''}`}>
+                <button onClick={doAdd} data-cursor="add" className={`btn btn-flame ml-auto px-6 py-3 text-[12px] ${justAdded ? 'animate-addpop' : ''}`}>
                   {justAdded ? 'Added ✓' : 'Add to bag'}
                 </button>
               )}
@@ -785,7 +805,7 @@ function NotifyForm({ productId }) {
         <button
           type="submit"
           disabled={busy}
-          className="rounded-full bg-ink px-5 py-3 font-mono text-[11px] uppercase tracking-[0.16em] text-white transition-colors hover:bg-flame-500 disabled:opacity-50"
+          className="rounded-full bg-black px-5 py-3 font-mono text-[11px] uppercase tracking-[0.16em] text-[#fff] transition-colors hover:bg-flame-500 disabled:opacity-50"
         >
           {busy ? '…' : 'Notify me'}
         </button>

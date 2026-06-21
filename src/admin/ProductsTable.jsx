@@ -56,7 +56,7 @@ export default function ProductsTable({ products, categories, onEdit, onDuplicat
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="font-display text-sm font-black uppercase">{p.name}</span>
-                      {p.is_featured ? <span className="rounded bg-flame-500 px-1.5 py-0.5 font-mono text-[8px] uppercase tracking-wide text-white">Feat</span> : null}
+                      {p.is_featured ? <span className="rounded bg-flame-500 px-1.5 py-0.5 font-mono text-[8px] uppercase tracking-wide text-[#fff]">Feat</span> : null}
                     </div>
                     <div className="font-mono text-[10px] text-ink/40">{p.sku}</div>
                   </div>

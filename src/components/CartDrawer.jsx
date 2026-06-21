@@ -284,7 +284,7 @@ export default function CartDrawer() {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
-          <div className="absolute inset-0 bg-ink/40 backdrop-blur-sm" onClick={dismiss} />
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={dismiss} />
 
           <motion.aside
             initial={{ x: '100%' }}
@@ -334,7 +334,7 @@ export default function CartDrawer() {
                   initial={{ scale: 0, rotate: reduced ? 0 : -45 }}
                   animate={{ scale: 1, rotate: 0 }}
                   transition={{ duration: reduced ? DUR.fast : DUR.slow, ease: reduced ? EASE.out : EASE.outBack, delay: reduced ? 0 : 0.1 }}
-                  className="flex h-14 w-14 items-center justify-center rounded-full bg-flame-500 text-2xl text-white"
+                  className="flex h-14 w-14 items-center justify-center rounded-full bg-flame-500 text-2xl text-[#fff]"
                 >
                   ✓
                 </motion.div>
@@ -353,13 +353,13 @@ export default function CartDrawer() {
                   <Link
                     to="/track"
                     onClick={dismiss}
-                    className="btn rounded-full bg-ink px-5 py-2 font-mono text-[11px] uppercase tracking-[0.16em] text-white hover:bg-flame-500"
+                    className="btn rounded-full bg-black px-5 py-2 font-mono text-[11px] uppercase tracking-[0.16em] text-[#fff] hover:bg-flame-500"
                   >
                     Track order
                   </Link>
                   <button
                     onClick={dismiss}
-                    className="btn rounded-full bg-silver-200 px-5 py-2 font-mono text-[11px] uppercase tracking-[0.16em] text-ink hover:bg-ink hover:text-white"
+                    className="btn rounded-full bg-silver-200 px-5 py-2 font-mono text-[11px] uppercase tracking-[0.16em] text-ink hover:bg-black hover:text-[#fff]"
                   >
                     Done
                   </button>
@@ -376,7 +376,7 @@ export default function CartDrawer() {
               >
                 <p className="font-display text-xl font-black uppercase text-ink/70">Bag is empty</p>
                 <p className="font-mono text-[11px] text-ink/40">Add something to get started.</p>
-                <button onClick={dismiss} className="btn mt-3 rounded-full bg-ink px-5 py-2 font-mono text-[11px] uppercase tracking-[0.16em] text-white hover:bg-flame-500">
+                <button onClick={dismiss} className="btn mt-3 rounded-full bg-black px-5 py-2 font-mono text-[11px] uppercase tracking-[0.16em] text-[#fff] hover:bg-flame-500">
                   Keep browsing
                 </button>
               </motion.div>
@@ -460,7 +460,7 @@ export default function CartDrawer() {
                       type="button"
                       onClick={applyCoupon}
                       disabled={applyingCoupon || !coupon.trim()}
-                      className="shrink-0 rounded-xl bg-ink px-4 py-2 font-mono text-[11px] uppercase tracking-[0.16em] text-white transition-colors hover:bg-flame-500 disabled:opacity-40"
+                      className="shrink-0 rounded-xl bg-black px-4 py-2 font-mono text-[11px] uppercase tracking-[0.16em] text-[#fff] transition-colors hover:bg-flame-500 disabled:opacity-40"
                     >
                       {applyingCoupon ? '…' : 'Apply'}
                     </button>
@@ -571,7 +571,7 @@ export default function CartDrawer() {
                             <button
                               onClick={() => quickAdd(p)}
                               aria-label={`Add ${p.name} to bag`}
-                              className="rounded-full bg-ink px-2 py-1 font-mono text-[9px] uppercase text-white hover:bg-flame-500"
+                              className="rounded-full bg-black px-2 py-1 font-mono text-[9px] uppercase text-[#fff] hover:bg-flame-500"
                             >
                               +
                             </button>
@@ -725,7 +725,7 @@ function Stepper({ onClick, label }) {
       onClick={onClick}
       whileTap={{ scale: 0.85 }}
       transition={{ duration: DUR.fast, ease: EASE.out }}
-      className="flex h-7 w-7 items-center justify-center rounded-full font-mono text-base text-ink/70 hover:bg-ink hover:text-white"
+      className="flex h-7 w-7 items-center justify-center rounded-full font-mono text-base text-ink/70 hover:bg-black hover:text-[#fff]"
       aria-label={label === '+' ? 'Increase' : 'Decrease'}
     >
       {label}

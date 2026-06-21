@@ -21,7 +21,7 @@ export function Btn({ children, variant = 'solid', className = '', ...props }) {
     solid: 'btn-dark',
     flame: 'btn-flame',
     ghost: 'btn-soft',
-    danger: 'bg-transparent text-flame-700 ring-1 ring-flame-700/30 hover:bg-flame-700 hover:text-white',
+    danger: 'bg-transparent text-flame-700 ring-1 ring-flame-700/30 hover:bg-flame-700 hover:text-[#fff]',
   }
   return (
     <button

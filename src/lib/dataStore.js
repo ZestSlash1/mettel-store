@@ -24,6 +24,7 @@ export function subscribe(fn) {
   return () => listeners.delete(fn)
 }
 function emit() {
+  listCache.clear()
   listeners.forEach((fn) => fn())
 }
 
@@ -70,14 +71,27 @@ if (typeof window !== 'undefined') {
 
 /* ---------------- reads (resilient) ---------------- */
 
+// Short-lived cache of full product-list reads, keyed by category. Lets a
+// card hover warm the exact query the PDP is about to make (useProducts()
+// with no category filter), so the click feels instant. Invalidated on any
+// write via emit().
+const listCache = new Map()
+const LIST_CACHE_TTL = 30_000
+
 export async function listProducts({ category } = {}) {
+  const cacheKey = category ?? '__all__'
+  const cached = listCache.get(cacheKey)
+  if (cached && Date.now() - cached.at < LIST_CACHE_TTL) return cached.data
+
   if (isSupabaseConfigured) {
     try {
       let q = supabase.from('products').select('*').order('rank', { ascending: true })
       if (category) q = q.eq('category_id', category)
       const { data, error } = await q
       if (error) throw error
-      return data ?? []
+      const items = data ?? []
+      listCache.set(cacheKey, { data: items, at: Date.now() })
+      return items
     } catch (e) {
       console.warn('[dataStore] product read failed, using seed:', e?.message)
     }
@@ -85,6 +99,11 @@ export async function listProducts({ category } = {}) {
   let items = clone(local().products).sort((a, b) => (a.rank ?? 0) - (b.rank ?? 0))
   if (category) items = items.filter((p) => p.category_id === category)
   return items
+}
+
+/** Fire-and-forget warm-up of the no-filter product list — used on card hover/focus. */
+export function prefetchProduct() {
+  listProducts({}).catch(() => {})
 }
 
 export async function listCategories() {

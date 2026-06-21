@@ -335,7 +335,7 @@ function OrderDetail({ order, onClose, onSaved, onShowInvoice }) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
-          <div className="absolute inset-0 bg-ink/40 backdrop-blur-sm" onClick={onClose} />
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
 
           <motion.aside
             initial={{ x: '100%' }}

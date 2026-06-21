@@ -9,6 +9,8 @@ import ProductGrid from './components/ProductGrid'
 import Subscribe from './components/Subscribe'
 import Footer from './components/Footer'
 import CartDrawer from './components/CartDrawer'
+import CustomCursor from './components/CustomCursor'
+import EasterEgg from './components/EasterEgg'
 import Seo from './components/Seo'
 import ScrollManager from './components/ScrollManager'
 import ErrorBoundary from './components/ErrorBoundary'
@@ -122,6 +124,9 @@ export default function App() {
             </motion.div>
           </AnimatePresence>
         </Suspense>
+
+        <CustomCursor />
+        <EasterEgg />
 
         {/* Cart drawer lives at app level so it's reachable from every route */}
         <CartDrawer />

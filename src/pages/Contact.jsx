@@ -74,7 +74,7 @@ export default function Contact() {
               initial={{ scale: 0, rotate: reduced ? 0 : -45 }}
               animate={{ scale: 1, rotate: 0 }}
               transition={{ duration: reduced ? DUR.fast : DUR.slow, ease: reduced ? EASE.out : EASE.outBack, delay: reduced ? 0 : 0.1 }}
-              className="flex h-12 w-12 items-center justify-center rounded-full bg-flame-500 text-xl text-white"
+              className="flex h-12 w-12 items-center justify-center rounded-full bg-flame-500 text-xl text-[#fff]"
             >
               ✓
             </motion.div>
