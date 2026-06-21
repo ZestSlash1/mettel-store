@@ -13,6 +13,7 @@ import { useCart } from '../context/CartContext'
 import { useSetting } from '../hooks/useSetting'
 import { isSoldOut, isLowStock } from '../lib/product'
 import { listPhoneModels } from '../lib/dataStore'
+import { supabase, isSupabaseConfigured } from '../lib/supabaseClient'
 import { webglSupported } from '../lib/webgl'
 import { BUSINESS } from '../config/business'
 import { EASE } from '../lib/motion'
@@ -96,6 +97,7 @@ export default function ProductDetail() {
   const [showBar, setShowBar] = useState(false)
   const [colorwayId, setColorwayId] = useState(null)
   const [phoneModels, setPhoneModels] = useState([])
+  const [ratingSummary, setRatingSummary] = useState(null) // { avg, count } | null
   const [isDesktop, setIsDesktop] = useState(false)
   const [canvasReady3d, setCanvasReady3d] = useState(false)
   const [canvasFailed3d, setCanvasFailed3d] = useState(false)
@@ -118,6 +120,22 @@ export default function ProductDetail() {
   useEffect(() => {
     listPhoneModels().then(setPhoneModels)
   }, [])
+
+  // Approved-review rating summary, for the Product JSON-LD aggregateRating.
+  useEffect(() => {
+    setRatingSummary(null)
+    if (!isSupabaseConfigured || !product?.id) return
+    supabase
+      .from('reviews')
+      .select('rating,approved')
+      .eq('product_id', product.id)
+      .eq('approved', true)
+      .then(({ data }) => {
+        if (!data?.length) return
+        const avg = data.reduce((s, r) => s + r.rating, 0) / data.length
+        setRatingSummary({ avg, count: data.length })
+      })
+  }, [product?.id])
 
   // Desktop breakpoint — the live 3D configurator is desktop-only, same gate as the homepage hero.
   useEffect(() => {
@@ -271,6 +289,15 @@ export default function ProductDetail() {
       availability: soldout ? 'https://schema.org/OutOfStock' : 'https://schema.org/InStock',
       url: `https://www.mettel.in/product/${product.id}`,
     },
+    ...(ratingSummary
+      ? {
+          aggregateRating: {
+            '@type': 'AggregateRating',
+            ratingValue: ratingSummary.avg.toFixed(1),
+            reviewCount: ratingSummary.count,
+          },
+        }
+      : {}),
   }
 
   return (
