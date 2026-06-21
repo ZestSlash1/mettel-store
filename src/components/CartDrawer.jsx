@@ -109,7 +109,7 @@ export default function CartDrawer() {
       setForm(emptyForm)
       setLoading(false)
       clear()
-      if (form.email) fetch('/api/sync-cart', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: form.email, items: [], convert: true }) }).catch(() => {})
+      if (form.email) fetch('/api/lifecycle', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'sync-cart', email: form.email, items: [], convert: true }) }).catch(() => {})
     } catch (e) {
       setError(e.message)
       setLoading(false)
@@ -202,7 +202,7 @@ export default function CartDrawer() {
             setLoading(false)
             clear()
             // Mark cart converted so abandoned-cart cron skips this email.
-            if (form.email) fetch('/api/sync-cart', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: form.email, items: [], convert: true }) }).catch(() => {})
+            if (form.email) fetch('/api/lifecycle', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'sync-cart', email: form.email, items: [], convert: true }) }).catch(() => {})
           } catch (err) {
             setError(err.message)
             setLoading(false)
@@ -348,10 +348,10 @@ export default function CartDrawer() {
                     autoComplete="email"
                     onBlur={() => {
                       if (!form.email.includes('@') || items.length === 0) return
-                      fetch('/api/sync-cart', {
+                      fetch('/api/lifecycle', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email: form.email.trim(), items: items.map((l) => ({ productId: l.productId, name: l.name, qty: l.qty })) }),
+                        body: JSON.stringify({ type: 'sync-cart', email: form.email.trim(), items: items.map((l) => ({ productId: l.productId, name: l.name, qty: l.qty })) }),
                       }).catch(() => {})
                     }}
                   />

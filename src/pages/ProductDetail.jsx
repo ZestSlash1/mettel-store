@@ -550,10 +550,10 @@ function NotifyForm({ productId }) {
     setBusy(true)
     setErr('')
     try {
-      const res = await fetch('/api/notify-stock', {
+      const res = await fetch('/api/lifecycle', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productId, email: email.trim() }),
+        body: JSON.stringify({ type: 'notify-stock', productId, email: email.trim() }),
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(data.error || 'Something went wrong.')

@@ -12,10 +12,10 @@ export default function Subscribe() {
     setBusy(true)
     setError('')
     try {
-      const res = await fetch('/api/subscribe', {
+      const res = await fetch('/api/lifecycle', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim() }),
+        body: JSON.stringify({ type: 'subscribe', email: email.trim() }),
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(data.error || 'Something went wrong.')
