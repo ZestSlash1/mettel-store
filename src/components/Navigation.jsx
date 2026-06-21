@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { forwardRef, useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion, useMotionValue, useReducedMotion, useSpring } from 'framer-motion'
 import { useCart } from '../context/CartContext'
 import Logo from './Logo'
 
@@ -13,56 +13,159 @@ const LINKS = [
 
 const MotionLink = motion(Link)
 
-function Pill({ children, href, to, variant = 'ghost', active = false, className = '' }) {
+const Pill = forwardRef(function Pill(
+  { children, href, to, variant = 'ghost', active = false, highlighted, className = '', onMouseEnter, onFocus },
+  ref,
+) {
   const base =
-    'relative inline-flex items-center justify-center rounded-full px-5 py-2.5 text-[11px] font-mono uppercase tracking-[0.18em] transition-colors duration-200 select-none'
+    'relative z-10 inline-flex items-center justify-center whitespace-nowrap rounded-full px-5 py-2.5 text-[11px] font-mono uppercase tracking-[0.18em] transition-colors duration-300 select-none'
   const variants = {
-    ghost: active
-      ? 'bg-ink text-white'
-      : 'bg-transparent text-ink hover:bg-ink/[0.06]',
+    // When `highlighted` is defined, a sibling sliding indicator owns the
+    // background — this pill only ever toggles its text color.
+    ghost:
+      highlighted !== undefined
+        ? highlighted ? 'text-white' : 'text-ink'
+        : active
+          ? 'bg-ink text-white'
+          : 'bg-transparent text-ink hover:bg-ink/[0.06]',
     solid: 'bg-ink text-white hover:bg-flame-500',
     flame: 'bg-flame-500 text-white hover:bg-flame-600',
   }
   const cls = `${base} ${variants[variant]} ${className}`
-  const motionProps = { whileHover: { y: -1 }, whileTap: { scale: 0.97 } }
+  const motionProps = {
+    whileHover: highlighted !== undefined ? undefined : { y: -1 },
+    whileTap: { scale: 0.96 },
+  }
 
   if (to) {
-    return <MotionLink to={to} {...motionProps} className={cls}>{children}</MotionLink>
+    return (
+      <MotionLink ref={ref} to={to} {...motionProps} onMouseEnter={onMouseEnter} onFocus={onFocus} className={cls}>
+        {children}
+      </MotionLink>
+    )
   }
-  return <motion.a href={href || '#'} {...motionProps} className={cls}>{children}</motion.a>
+  return (
+    <motion.a ref={ref} href={href || '#'} {...motionProps} onMouseEnter={onMouseEnter} onFocus={onFocus} className={cls}>
+      {children}
+    </motion.a>
+  )
+})
+
+/** Desktop primary nav — a liquid pill glides between links on hover/focus. */
+function NavLinks({ location }) {
+  const reduce = useReducedMotion()
+  const containerRef = useRef(null)
+  const itemRefs = useRef([])
+  const [box, setBox] = useState(null) // { x, width } | null
+  const [hoverIdx, setHoverIdx] = useState(null)
+
+  const activeIdx = LINKS.findIndex((l) => l.to && location.pathname === l.to)
+  const shownIdx = hoverIdx ?? (activeIdx >= 0 ? activeIdx : null)
+
+  const measure = (idx) => {
+    const el = itemRefs.current[idx]
+    const container = containerRef.current
+    if (!el || !container) return null
+    const er = el.getBoundingClientRect()
+    const cr = container.getBoundingClientRect()
+    return { x: er.left - cr.left, width: er.width }
+  }
+
+  useEffect(() => {
+    setBox(shownIdx != null ? measure(shownIdx) : null)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shownIdx, location.pathname])
+
+  return (
+    <div
+      ref={containerRef}
+      className="relative hidden items-center gap-1 md:flex"
+      onMouseLeave={() => setHoverIdx(null)}
+    >
+      {box ? (
+        <motion.span
+          className="absolute inset-y-0 left-0 z-0 rounded-full bg-ink"
+          initial={reduce ? { x: box.x, width: box.width, opacity: 1 } : false}
+          animate={{ x: box.x, width: box.width, opacity: 1 }}
+          transition={reduce ? { duration: 0 } : { type: 'spring', stiffness: 480, damping: 38, mass: 0.7 }}
+        />
+      ) : null}
+      {LINKS.map((l, i) => (
+        <Pill
+          key={l.label}
+          ref={(el) => (itemRefs.current[i] = el)}
+          to={l.to}
+          href={l.href}
+          highlighted={shownIdx === i}
+          onMouseEnter={() => setHoverIdx(i)}
+          onFocus={() => setHoverIdx(i)}
+        >
+          {l.label}
+        </Pill>
+      ))}
+    </div>
+  )
 }
 
+/** Magnetic CTA — pulls toward the cursor and sweeps a light through on hover. */
 function DiscoverPill() {
+  const reduce = useReducedMotion()
   const [hover, setHover] = useState(false)
+  const ref = useRef(null)
+  const mx = useMotionValue(0)
+  const my = useMotionValue(0)
+  const springX = useSpring(mx, { stiffness: 220, damping: 18, mass: 0.4 })
+  const springY = useSpring(my, { stiffness: 220, damping: 18, mass: 0.4 })
+
+  const handleMove = (e) => {
+    if (reduce || !ref.current) return
+    const r = ref.current.getBoundingClientRect()
+    mx.set((e.clientX - (r.left + r.width / 2)) * 0.28)
+    my.set((e.clientY - (r.top + r.height / 2)) * 0.35)
+  }
+  const reset = () => {
+    setHover(false)
+    mx.set(0)
+    my.set(0)
+  }
+
   return (
-    <a
+    <motion.a
+      ref={ref}
       href="/#products"
       onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      className="relative inline-flex items-center gap-3 overflow-hidden rounded-full px-7 py-2.5 text-[11px] font-mono uppercase tracking-[0.2em] text-ink"
+      onMouseMove={handleMove}
+      onMouseLeave={reset}
+      whileTap={{ scale: 0.96 }}
+      style={{ x: springX, y: springY }}
+      className="group relative inline-flex items-center gap-3 overflow-hidden rounded-full px-7 py-2.5 text-[11px] font-mono uppercase tracking-[0.2em] text-ink ring-1 ring-inset ring-ink/15"
     >
-      <svg className="absolute inset-0 h-full w-full" preserveAspectRatio="none">
-        <rect
-          x="0" y="0" width="100%" height="100%" rx="9999"
-          fill="none" stroke="currentColor" strokeWidth="2"
-          strokeDasharray="6 5"
-          className={hover ? '' : 'animate-dash-march'}
-        />
-      </svg>
       <motion.span
         className="absolute inset-0 rounded-full bg-flame-gradient"
         initial={false}
         animate={{ scaleX: hover ? 1 : 0, opacity: hover ? 1 : 0 }}
         style={{ originX: 0 }}
-        transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
       />
-      <span className={`relative z-10 transition-colors ${hover ? 'text-white' : ''}`}>
+      {/* light sweep */}
+      <motion.span
+        aria-hidden="true"
+        className="absolute inset-y-0 left-0 z-10 w-1/3 -skew-x-[20deg] bg-white/30"
+        initial={{ x: '-150%' }}
+        animate={{ x: hover ? '350%' : '-150%' }}
+        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+      />
+      <span className={`relative z-10 transition-colors duration-300 ${hover ? 'text-white' : ''}`}>
         Discover All Products
       </span>
-      <motion.span className="relative z-10 inline-block" animate={{ x: hover ? 3 : 0 }} transition={{ duration: 0.3 }}>
+      <motion.span
+        className="relative z-10 inline-block"
+        animate={{ x: hover ? 4 : 0 }}
+        transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+      >
         →
       </motion.span>
-    </a>
+    </motion.a>
   )
 }
 
@@ -174,6 +277,7 @@ function MobileMenu({ onClose }) {
 export default function Navigation() {
   const { count, openCart } = useCart()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
   const location = useLocation()
 
   // Close mobile menu on route change.
@@ -185,6 +289,14 @@ export default function Navigation() {
     return () => { document.body.style.overflow = '' }
   }, [mobileOpen])
 
+  // Chrome tightens up + gains weight once the page has scrolled a touch.
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 16)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
   return (
     <>
       <motion.header
@@ -193,20 +305,20 @@ export default function Navigation() {
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
         className="fixed inset-x-0 top-0 z-50 px-3 pt-4 sm:px-6"
       >
-        <nav className="mx-auto flex max-w-[1400px] items-center gap-2 rounded-full bg-white/70 p-2 shadow-soft ring-1 ring-white/50 backdrop-blur-xl">
+        <nav
+          className={`mx-auto flex max-w-[1400px] items-center gap-2 rounded-full ring-1 ring-white/50 backdrop-blur-xl transition-[padding,box-shadow,background-color] duration-500 ease-out ${
+            scrolled ? 'bg-white/90 p-1.5 shadow-soft-lg' : 'bg-white/70 p-2 shadow-soft'
+          }`}
+        >
           {/* Brand mark */}
           <Link to="/" className="flex shrink-0 items-center" aria-label="MetTel home">
-            <Logo />
+            <motion.div whileHover={{ rotate: -6, scale: 1.05 }} whileTap={{ scale: 0.94 }} transition={{ type: 'spring', stiffness: 400, damping: 20 }}>
+              <Logo />
+            </motion.div>
           </Link>
 
           {/* Primary links — desktop only */}
-          <div className="hidden items-center gap-1 md:flex">
-            {LINKS.map((l) => (
-              <Pill key={l.label} to={l.to} href={l.href}>
-                {l.label}
-              </Pill>
-            ))}
-          </div>
+          <NavLinks location={location} />
 
           {/* Discover — large screens */}
           <div className="ml-auto hidden lg:block">
