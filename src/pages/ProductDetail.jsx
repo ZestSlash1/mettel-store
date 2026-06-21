@@ -7,6 +7,7 @@ import Seo from '../components/Seo'
 import ProductGraphic from '../components/ProductGraphic'
 import ProductCard from '../components/ProductCard'
 import ResponsiveImage from '../components/ResponsiveImage'
+import ScrambleText from '../components/ScrambleText'
 import WishlistButton from '../components/WishlistButton'
 import ProductReviews from '../components/ProductReviews'
 import { useProducts, formatPrice } from '../hooks/useProducts'
@@ -327,7 +328,9 @@ export default function ProductDetail() {
             >
               <div className="pointer-events-none absolute -right-32 -top-10 h-[120%] w-1/2 rounded-full bg-flame-gradient opacity-[0.10] blur-3xl" />
               {/* corner registration marks — technical detail */}
-              <span className="pointer-events-none absolute left-4 top-4 font-mono text-[9px] uppercase tracking-[0.2em] text-ink/25">{product.sku}</span>
+              <span className="pointer-events-none absolute left-4 top-4 font-mono text-[9px] uppercase tracking-[0.2em] text-ink/25">
+                <ScrambleText text={product.sku} />
+              </span>
               {activeVideo && embedUrl ? (
                 <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
                   <iframe
@@ -441,7 +444,7 @@ export default function ProductDetail() {
 
           {/* Info */}
           <div className="flex flex-col">
-            <div className="eyebrow mb-3">{catLabel} · {product.sku}</div>
+            <div className="eyebrow mb-3">{catLabel} · <ScrambleText text={product.sku} /></div>
             <h1 className="font-display text-display-md font-black uppercase leading-[0.85] tracking-tight">
               {product.name}
             </h1>
@@ -592,7 +595,7 @@ export default function ProductDetail() {
                 {(product.specs || []).map((s) => (
                   <div key={s.k} className="flex justify-between gap-2 border-b border-dashed border-ink/15 py-2.5 font-mono text-[11px] uppercase tracking-wider">
                     <dt className="text-ink/40">{s.k}</dt>
-                    <dd className="text-ink/80">{s.v}</dd>
+                    <dd className="text-ink/80"><ScrambleText text={s.v} /></dd>
                   </div>
                 ))}
               </dl>

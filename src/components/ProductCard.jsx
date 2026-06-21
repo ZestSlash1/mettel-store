@@ -3,6 +3,7 @@ import { motion, useReducedMotion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import ProductGraphic from './ProductGraphic'
 import ResponsiveImage from './ResponsiveImage'
+import ScrambleText from './ScrambleText'
 import WishlistButton from './WishlistButton'
 import { formatPrice } from '../hooks/useProducts'
 import { useCart } from '../context/CartContext'
@@ -10,6 +11,7 @@ import { useSetting } from '../hooks/useSetting'
 import { isSoldOut, isLowStock } from '../lib/product'
 import { EASE } from '../lib/motion'
 import { prefetchProduct } from '../lib/dataStore'
+import { useScrollVelocityTilt } from '../lib/useScrollVelocityTilt'
 
 const STATUS_LABEL = {
   available: 'In stock',
@@ -26,6 +28,7 @@ export default function ProductCard({ product, index = 0 }) {
   const lowStock = !soldOut && isLowStock(product, lowStockThreshold)
   const [added, setAdded] = useState(false)
   const prefetchTimer = useRef(null)
+  const tiltRef = useScrollVelocityTilt()
 
   const handlePrefetch = () => {
     if (prefetchTimer.current) return
@@ -99,7 +102,7 @@ export default function ProductCard({ product, index = 0 }) {
           className="relative z-10 w-[46%] min-w-[120px] drop-shadow-[0_20px_36px_rgba(0,0,0,0.18)]"
         >
           {image ? (
-            <div className="aspect-[1/2] w-full">
+            <div ref={tiltRef} className="aspect-[1/2] w-full">
               <ResponsiveImage src={image} alt={name} loading="lazy" sizes="(min-width: 1024px) 22vw, 45vw" />
             </div>
           ) : (
@@ -149,13 +152,15 @@ export default function ProductCard({ product, index = 0 }) {
           {specs.slice(0, 4).map((s) => (
             <div key={s.k} className="flex justify-between gap-2 border-b border-ink/[0.06] pb-1">
               <dt className="text-ink/40">{s.k}</dt>
-              <dd className="text-ink/80">{s.v}</dd>
+              <dd className="text-ink/80"><ScrambleText text={s.v} /></dd>
             </div>
           ))}
         </dl>
 
         <div className="mt-auto flex items-center justify-between pt-2">
-          <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-ink/35">{sku}</span>
+          <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-ink/35">
+            <ScrambleText text={sku} />
+          </span>
           <button
             disabled={soldOut}
             onClick={handleAdd}
