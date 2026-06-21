@@ -3,7 +3,6 @@ import { listCategories, subscribe, getSetting } from '../lib/dataStore'
 import { gsap } from '../lib/gsap'
 import { usePrefersReducedMotion } from '../lib/motion'
 import { webglSupported } from '../lib/webgl'
-import PhoneCase from './PhoneCase'
 
 // three.js + the exploded scene are code-split: only desktop, motion-enabled
 // visitors ever download them, and never before first paint.
@@ -146,10 +145,12 @@ export default function Hero() {
     return () => ctx.revert()
   }, [useWebGL, reduced])
 
-  const poster = heroImage ? (
-    <img src={heroImage} alt="MetTel product" className="h-full w-full object-contain" />
-  ) : (
-    <PhoneCase className="h-full w-full" shell="#cfcfcf" accent="#ff6b00" />
+  const poster = (
+    <img
+      src={heroImage || '/hero-exploded.png'}
+      alt="MetTel product — exploded view"
+      className="h-full w-full object-contain"
+    />
   )
 
   return (
