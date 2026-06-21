@@ -15,19 +15,30 @@ export default function Preloader() {
   const reduced = usePrefersReducedMotion()
   const rafRef = useRef()
   const holdRef = useRef()
+  const prevOverflowRef = useRef('')
+
+  // Lock scroll for the boot screen's duration. This component itself never
+  // unmounts (only the inner AnimatePresence child does once `done`), so the
+  // real unlock is driven by `done` directly, below — not by this effect's
+  // cleanup. The cleanup here only exists so StrictMode's dev-mode double
+  // mount/cleanup/mount doesn't re-capture 'hidden' as the "previous" value.
+  useEffect(() => {
+    prevOverflowRef.current = document.documentElement.style.overflow
+    document.documentElement.style.overflow = 'hidden'
+    return () => {
+      document.documentElement.style.overflow = prevOverflowRef.current
+    }
+  }, [])
 
   useEffect(() => {
-    const html = document.documentElement
-    const prevOverflow = html.style.overflow
-    html.style.overflow = 'hidden'
+    if (done) document.documentElement.style.overflow = prevOverflowRef.current
+  }, [done])
 
+  useEffect(() => {
     if (reduced) {
       setCount(100)
       holdRef.current = setTimeout(() => setDone(true), 300)
-      return () => {
-        clearTimeout(holdRef.current)
-        html.style.overflow = prevOverflow
-      }
+      return () => clearTimeout(holdRef.current)
     }
 
     const start = performance.now()
@@ -50,7 +61,6 @@ export default function Preloader() {
       cancelAnimationFrame(rafRef.current)
       clearTimeout(holdRef.current)
       clearTimeout(safety)
-      html.style.overflow = prevOverflow
     }
   }, [reduced])
 
