@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useCart } from '../context/CartContext'
 import { useAuth } from '../context/AuthContext'
-import { formatPrice } from '../hooks/useProducts'
+import { useProducts, formatPrice } from '../hooks/useProducts'
 import { getSetting, subscribe } from '../lib/dataStore'
 import ProductGraphic from './ProductGraphic'
 import { EASE, DUR, STAGGER, usePrefersReducedMotion } from '../lib/motion'
@@ -79,7 +79,8 @@ async function postJSON(url, payload) {
 }
 
 export default function CartDrawer() {
-  const { items, isOpen, closeCart, updateQty, removeItem, subtotal, count, clear } = useCart()
+  const { items, isOpen, closeCart, updateQty, removeItem, addItem, subtotal, count, clear } = useCart()
+  const { products } = useProducts()
   const [placed, setPlaced] = useState(false)
   const [orderRef, setOrderRef] = useState('') // reference shown on confirmation
   const [checkingOut, setCheckingOut] = useState(false) // showing the address form
@@ -99,6 +100,29 @@ export default function CartDrawer() {
   const currency = items[0]?.currency || 'INR'
   const setField = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }))
   const total = Math.max(0, subtotal - couponDiscount)
+
+  // "Complete the kit" — admin-curated related_ids from items in the bag,
+  // topped up with same-category suggestions when there aren't enough.
+  const crossSell = useMemo(() => {
+    if (!items.length || !products.length) return []
+    const inCart = new Set(items.map((l) => l.productId))
+    const curatedIds = []
+    items.forEach((l) => {
+      const p = products.find((pp) => pp.id === l.productId)
+      p?.related_ids?.forEach((rid) => {
+        if (!inCart.has(rid) && !curatedIds.includes(rid)) curatedIds.push(rid)
+      })
+    })
+    let picks = curatedIds.map((id) => products.find((p) => p.id === id)).filter(Boolean)
+    if (picks.length < 4) {
+      const cartCats = new Set(items.map((l) => products.find((p) => p.id === l.productId)?.category_id).filter(Boolean))
+      const fallback = products.filter((p) => cartCats.has(p.category_id) && !inCart.has(p.id) && !picks.some((x) => x.id === p.id))
+      picks = [...picks, ...fallback]
+    }
+    return picks.slice(0, 4)
+  }, [items, products])
+
+  const quickAdd = (p) => addItem(p, { model: p.models?.[0] ?? null })
 
   // Prefill the checkout email from the signed-in account so the order links
   // to it (and shows up in their order history).
@@ -525,6 +549,38 @@ export default function CartDrawer() {
                   ))}
                   </AnimatePresence>
                 </ul>
+
+                {crossSell.length ? (
+                  <div className="mt-6 border-t border-ink/10 pt-4">
+                    <h3 className="mb-3 font-mono text-[10px] uppercase tracking-[0.18em] text-ink/45">Complete the kit</h3>
+                    <div className="flex gap-3 overflow-x-auto pb-1">
+                      {crossSell.map((p) => (
+                        <div key={p.id} className="flex w-28 shrink-0 flex-col gap-1.5 rounded-xl bg-white p-2 ring-1 ring-ink/5">
+                          <Link to={`/product/${p.id}`} onClick={closeCart} className="block">
+                            <div className="aspect-square w-full overflow-hidden rounded-lg bg-silver-50">
+                              {p.image ? (
+                                <img src={p.image} alt={p.name} className="h-full w-full object-contain" />
+                              ) : (
+                                <ProductGraphic className="h-full w-full" shell={p.color_hex} accent={p.accent_hex} />
+                              )}
+                            </div>
+                            <div className="mt-1.5 truncate font-mono text-[10px] uppercase text-ink/70">{p.name}</div>
+                          </Link>
+                          <div className="flex items-center justify-between">
+                            <span className="font-mono text-[10px] text-flame-600">{formatPrice(p.price, p.currency)}</span>
+                            <button
+                              onClick={() => quickAdd(p)}
+                              aria-label={`Add ${p.name} to bag`}
+                              className="rounded-full bg-ink px-2 py-1 font-mono text-[9px] uppercase text-white hover:bg-flame-500"
+                            >
+                              +
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
               </motion.div>
             )}
             </AnimatePresence>

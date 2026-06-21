@@ -32,12 +32,13 @@ const BLANK = {
   images: [],
   models: [],
   colorways: [],
+  related_ids: [],
   stock: 0,
   rank: 0,
   video_url: '',
 }
 
-export default function ProductForm({ product, categories, existingIds, onSave, onCancel }) {
+export default function ProductForm({ product, categories, products = [], existingIds, onSave, onCancel }) {
   const isNew = !product
   const [form, setForm] = useState(() => {
     // Initialise images: if an existing product has none, seed from image.
@@ -52,6 +53,7 @@ export default function ProductForm({ product, categories, existingIds, onSave, 
       images: existingImages,
       specs: product?.specs?.length ? product.specs : [{ k: '', v: '' }],
       colorways: product?.colorways?.length ? product.colorways : [],
+      related_ids: product?.related_ids?.length ? product.related_ids : [],
       category_id: product?.category_id || categories[0]?.id || '',
     }
   })
@@ -90,6 +92,13 @@ export default function ProductForm({ product, categories, existingIds, onSave, 
   }
   function removeColorway(i) {
     setForm((f) => ({ ...f, colorways: f.colorways.filter((_, idx) => idx !== i) }))
+  }
+
+  function addRelated(id) {
+    setForm((f) => (f.related_ids.includes(id) ? f : { ...f, related_ids: [...f.related_ids, id] }))
+  }
+  function removeRelated(id) {
+    setForm((f) => ({ ...f, related_ids: f.related_ids.filter((rid) => rid !== id) }))
   }
 
   const set = (patch) => setForm((f) => ({ ...f, ...patch }))
@@ -189,6 +198,7 @@ export default function ProductForm({ product, categories, existingIds, onSave, 
         specs: cleanSpecs,
         models,
         colorways: cleanColorways,
+        related_ids: (form.related_ids || []).filter((id) => id !== (form.id || '')),
       }
       await onSave(payload)
     } catch (e) {
@@ -452,6 +462,44 @@ export default function ProductForm({ product, categories, existingIds, onSave, 
           ) : (
             <p className="font-mono text-[11px] text-ink/40">No colorways — the product shows its single color/accent above.</p>
           )}
+        </div>
+
+        {/* Cross-sell editor */}
+        <div className="mt-6">
+          <span className={labelClass}>
+            Complete the kit <span className="normal-case text-ink/35">(curated cross-sell — falls back to same-category suggestions when empty)</span>
+          </span>
+          {form.related_ids?.length ? (
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {form.related_ids.map((id) => {
+                const p = products.find((pp) => pp.id === id)
+                return (
+                  <span key={id} className="flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 font-mono text-[10px] uppercase tracking-wide text-ink/70 ring-1 ring-ink/10">
+                    {p?.name || id}
+                    <button onClick={() => removeRelated(id)} type="button" className="text-ink/40 hover:text-flame-700" aria-label={`Remove ${p?.name || id}`}>×</button>
+                  </span>
+                )
+              })}
+            </div>
+          ) : (
+            <p className="mt-2 font-mono text-[11px] text-ink/40">No products added yet.</p>
+          )}
+          {products.filter((p) => p.id !== form.id && !form.related_ids.includes(p.id)).length ? (
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {products
+                .filter((p) => p.id !== form.id && !form.related_ids.includes(p.id))
+                .map((p) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => addRelated(p.id)}
+                    className="rounded-full bg-silver-200 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wide text-ink/60 hover:bg-ink/10"
+                  >
+                    + {p.name}
+                  </button>
+                ))}
+            </div>
+          ) : null}
         </div>
 
         {error ? (

@@ -317,6 +317,7 @@ export default function AdminDashboard() {
               <ProductForm
                 product={editing && Object.keys(editing).length ? editing : null}
                 categories={categories}
+                products={products}
                 existingIds={existingIds}
                 onSave={saveProduct}
                 onCancel={() => setEditing(null)}

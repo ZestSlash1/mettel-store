@@ -192,9 +192,16 @@ export default function ProductDetail() {
     }
   }
 
-  const related = useMemo(
-    () => products.filter((p) => p.category_id === product?.category_id && p.id !== product?.id).slice(0, 3),
+  const curatedRelated = useMemo(
+    () => (product?.related_ids || []).map((rid) => products.find((p) => p.id === rid)).filter(Boolean),
     [products, product],
+  )
+  const related = useMemo(
+    () =>
+      curatedRelated.length
+        ? curatedRelated.slice(0, 3)
+        : products.filter((p) => p.category_id === product?.category_id && p.id !== product?.id).slice(0, 3),
+    [curatedRelated, products, product],
   )
   const recentlyViewed = useMemo(
     () => recentIds.filter((rid) => rid !== product?.id).map((rid) => products.find((p) => p.id === rid)).filter(Boolean).slice(0, 4),
@@ -544,7 +551,9 @@ export default function ProductDetail() {
         {/* Related */}
         {related.length ? (
           <Reveal className="mt-24">
-            <h2 className="mb-8 font-display text-display-md font-black uppercase tracking-tight">More in {catLabel}</h2>
+            <h2 className="mb-8 font-display text-display-md font-black uppercase tracking-tight">
+              {curatedRelated.length ? 'Complete the kit' : `More in ${catLabel}`}
+            </h2>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {related.map((p, i) => (
                 <ProductCard key={p.id} product={p} index={i} />
