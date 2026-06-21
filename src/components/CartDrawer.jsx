@@ -4,8 +4,33 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { useCart } from '../context/CartContext'
 import { useAuth } from '../context/AuthContext'
 import { formatPrice } from '../hooks/useProducts'
+import { getSetting, subscribe } from '../lib/dataStore'
 import ProductGraphic from './ProductGraphic'
 import { EASE, DUR, STAGGER, usePrefersReducedMotion } from '../lib/motion'
+
+/** Reads the admin-editable free-shipping threshold (rupees); null = feature off. */
+function useFreeShippingThreshold() {
+  const [threshold, setThreshold] = useState(null)
+
+  useEffect(() => {
+    let active = true
+    const load = () => {
+      getSetting('free_shipping_threshold').then((v) => {
+        if (!active) return
+        const n = Number(v)
+        setThreshold(Number.isFinite(n) && n > 0 ? n : null)
+      })
+    }
+    load()
+    const unsub = subscribe(load) // pick up admin edits without a reload
+    return () => {
+      active = false
+      unsub()
+    }
+  }, [])
+
+  return threshold
+}
 
 const RZP_SCRIPT = 'https://checkout.razorpay.com/v1/checkout.js'
 const emptyForm = { name: '', email: '', phone: '', address: '', city: '', state: '', pincode: '' }
@@ -67,6 +92,7 @@ export default function CartDrawer() {
   const [couponOk, setCouponOk] = useState(false)
   const [applyingCoupon, setApplyingCoupon] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState('razorpay') // 'razorpay' | 'cod'
+  const freeShippingThreshold = useFreeShippingThreshold()
 
   const { user } = useAuth()
   const reduced = usePrefersReducedMotion()
@@ -264,6 +290,10 @@ export default function CartDrawer() {
                 ×
               </motion.button>
             </div>
+
+            {!placed && items.length > 0 ? (
+              <FreeShippingBar subtotal={subtotal} threshold={freeShippingThreshold} reduced={reduced} />
+            ) : null}
 
             {/* Body */}
             <AnimatePresence mode="wait" initial={false}>
@@ -579,6 +609,40 @@ export default function CartDrawer() {
         </motion.div>
       )}
     </AnimatePresence>
+  )
+}
+
+/** "₹X away from free shipping" — unlocks once the subtotal clears the admin-set threshold. */
+function FreeShippingBar({ subtotal, threshold, reduced }) {
+  if (!threshold) return null // feature off (no value set in admin)
+
+  const pct = Math.min(100, Math.round((subtotal / threshold) * 100))
+  const unlocked = subtotal >= threshold
+  const remaining = Math.max(0, threshold - subtotal)
+
+  return (
+    <div className="border-b border-ink/10 bg-white/60 px-6 py-3">
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.p
+          key={unlocked ? 'unlocked' : remaining}
+          initial={{ opacity: 0, y: reduced ? 0 : -4 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: DUR.fast, ease: EASE.out }}
+          className={`mb-1.5 font-mono text-[10px] uppercase tracking-[0.14em] ${unlocked ? 'text-green-700' : 'text-ink/55'}`}
+        >
+          {unlocked ? 'Free shipping unlocked ✓' : `${formatPrice(remaining)} away from free shipping`}
+        </motion.p>
+      </AnimatePresence>
+      <div className="h-1.5 overflow-hidden rounded-full bg-ink/[0.07]">
+        <motion.div
+          className={`h-full rounded-full ${unlocked ? 'bg-green-600' : 'bg-flame-500'}`}
+          initial={false}
+          animate={{ width: `${pct}%` }}
+          transition={{ duration: reduced ? 0 : DUR.base, ease: EASE.out }}
+        />
+      </div>
+    </div>
   )
 }
 
