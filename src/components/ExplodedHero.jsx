@@ -3,6 +3,18 @@ import * as THREE from 'three'
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js'
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js'
 
+// Case material presets — swapped onto the shell material live, no rebuild.
+const MATERIAL_PRESETS = {
+  aramid: { metalness: 0.6, roughness: 0.34 },
+  aluminium: { metalness: 0.92, roughness: 0.16 },
+  leather: { metalness: 0.08, roughness: 0.62 },
+  frosted: { metalness: 0.15, roughness: 0.55 },
+  tpu: { metalness: 0.05, roughness: 0.78 },
+}
+// Camera-island lens count per device layout (procedural approximation, not a real mesh swap).
+const LENS_COUNTS = { triple: 3, dual: 2, single: 1, square: 3 }
+const BASE_ASPECT = 2.1 // matches the case geometry's own H/W ratio below
+
 /**
  * The signature moment: a phone case built procedurally as layered components
  * that float apart (exploded technical view) and ASSEMBLE as the hero is
@@ -17,8 +29,21 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js'
  * Performance guards: pixel ratio capped at 2, render loop paused via
  * IntersectionObserver when off-screen, everything disposed on unmount.
  */
-export default function ExplodedHero({ progressRef, onReady, onError, className = '' }) {
+export default function ExplodedHero({
+  progressRef,
+  onReady,
+  onError,
+  className = '',
+  colorHex = '#dedede',
+  accentHex = '#ff6b00',
+  material = 'aramid',
+  cameraLayout = 'triple',
+  aspect = BASE_ASPECT,
+}) {
   const mountRef = useRef(null)
+  // Mutable handles the live-update effect below reaches into without tearing
+  // down and recreating the WebGL context on every colorway/device switch.
+  const liveRef = useRef({})
 
   useEffect(() => {
     const mount = mountRef.current
@@ -62,13 +87,14 @@ export default function ExplodedHero({ progressRef, onReady, onError, className 
     const pmrem = new THREE.PMREMGenerator(renderer)
     scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture
 
-    // ---- materials ----
-    const matShell = new THREE.MeshStandardMaterial({ color: 0xdedede, metalness: 0.6, roughness: 0.34 })
+    // ---- materials ---- (initialised from props; live-updated below without rebuild)
+    const shellPreset = MATERIAL_PRESETS[material] || MATERIAL_PRESETS.aramid
+    const matShell = new THREE.MeshStandardMaterial({ color: colorHex, metalness: shellPreset.metalness, roughness: shellPreset.roughness })
     const matFrame = new THREE.MeshStandardMaterial({ color: 0xb9b9b9, metalness: 0.9, roughness: 0.22 })
     const matDark = new THREE.MeshStandardMaterial({ color: 0x1c1c1c, metalness: 0.7, roughness: 0.4 })
     const matLens = new THREE.MeshStandardMaterial({ color: 0x0a0a0a, metalness: 0.9, roughness: 0.08 })
     const matGlass = new THREE.MeshStandardMaterial({ color: 0x12161a, metalness: 0.5, roughness: 0.18 })
-    const matAccent = new THREE.MeshStandardMaterial({ color: 0xff6b00, metalness: 0.3, roughness: 0.4, emissive: 0xff5a00, emissiveIntensity: 0.25 })
+    const matAccent = new THREE.MeshStandardMaterial({ color: accentHex, metalness: 0.3, roughness: 0.4, emissive: accentHex, emissiveIntensity: 0.25 })
     const materials = [matShell, matFrame, matDark, matLens, matGlass, matAccent]
 
     const W = 2.0, H = 4.2, D = 0.18, R = 0.34
@@ -108,6 +134,7 @@ export default function ExplodedHero({ progressRef, onReady, onError, className 
       [-0.16, 1.5],
       [-0.4, 1.04],
     ]
+    const lensObjs = []
     lensSpots.forEach(([lx, ly], i) => {
       const lens = new THREE.Group()
       const hg = new THREE.CylinderGeometry(0.2, 0.22, 0.14, 28)
@@ -120,7 +147,10 @@ export default function ExplodedHero({ progressRef, onReady, onError, className 
       glass.position.z = 0.06
       lens.add(housing, glass)
       addPart(lens, [lx, ly, 0.2], [0.15 + i * 0.1, 0.35 + i * 0.12, 0.95 + i * 0.18])
+      lensObjs.push(lens)
     })
+    const lensCount = LENS_COUNTS[cameraLayout] ?? 3
+    lensObjs.forEach((obj, i) => { obj.visible = i < lensCount })
 
     // MagSafe ring
     {
@@ -135,6 +165,10 @@ export default function ExplodedHero({ progressRef, onReady, onError, className 
     addPart(new THREE.Mesh(box(0.07, 0.26, 0.12, 0.03, 3), matFrame), [-W / 2 - 0.02, 0.95, 0], [-0.9, 0.25, 0.2])
     // flame accent index tab
     addPart(new THREE.Mesh(box(0.52, 0.1, 0.1, 0.04, 3), matAccent), [0, -1.82, 0.06], [0, -0.6, 0.75])
+
+    group.scale.y = (aspect || BASE_ASPECT) / BASE_ASPECT
+
+    liveRef.current = { matShell, matAccent, group, lensObjs }
 
     const smooth = (t) => t * t * (3 - 2 * t)
     function applyProgress(t) {
@@ -190,6 +224,7 @@ export default function ExplodedHero({ progressRef, onReady, onError, className 
 
     return () => {
       disposed = true
+      liveRef.current = {}
       if (raf) cancelAnimationFrame(raf)
       io.disconnect()
       ro.disconnect()
@@ -202,6 +237,22 @@ export default function ExplodedHero({ progressRef, onReady, onError, className 
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // Live colorway/material/device updates — mutate the existing scene instead
+  // of tearing down the WebGL context on every switch.
+  useEffect(() => {
+    const live = liveRef.current
+    if (!live.matShell) return
+    live.matShell.color.set(colorHex)
+    live.matAccent.color.set(accentHex)
+    live.matAccent.emissive.set(accentHex)
+    const preset = MATERIAL_PRESETS[material] || MATERIAL_PRESETS.aramid
+    live.matShell.metalness = preset.metalness
+    live.matShell.roughness = preset.roughness
+    const lensCount = LENS_COUNTS[cameraLayout] ?? 3
+    live.lensObjs.forEach((obj, i) => { obj.visible = i < lensCount })
+    live.group.scale.y = (aspect || BASE_ASPECT) / BASE_ASPECT
+  }, [colorHex, accentHex, material, cameraLayout, aspect])
 
   return <div ref={mountRef} className={className} aria-hidden="true" />
 }

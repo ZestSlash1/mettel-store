@@ -113,6 +113,31 @@ export async function getProduct(id) {
   return clone(local().products).find((p) => p.id === id) || null
 }
 
+// Mirrors the seed rows in supabase/phone-models.sql — used only when
+// Supabase isn't configured, so local/dev mode still has device proportions.
+const LOCAL_PHONE_MODELS = [
+  { label: 'iPhone 16 Pro Max', brand: 'Apple', aspect: 2.16, corner: 0.34, camera_layout: 'triple', rank: 1 },
+  { label: 'iPhone 16 Pro', brand: 'Apple', aspect: 2.16, corner: 0.34, camera_layout: 'triple', rank: 2 },
+  { label: 'iPhone 16', brand: 'Apple', aspect: 2.16, corner: 0.36, camera_layout: 'dual', rank: 3 },
+  { label: 'Pixel 9 Pro', brand: 'Google', aspect: 2.1, corner: 0.3, camera_layout: 'triple', rank: 4 },
+  { label: 'Pixel 9', brand: 'Google', aspect: 2.1, corner: 0.3, camera_layout: 'dual', rank: 5 },
+  { label: 'Galaxy S25', brand: 'Samsung', aspect: 2.18, corner: 0.26, camera_layout: 'triple', rank: 6 },
+]
+
+/** Canonical device list (enriches products.models with 3D proportions). */
+export async function listPhoneModels() {
+  if (isSupabaseConfigured) {
+    try {
+      const { data, error } = await supabase.from('phone_models').select('*').eq('active', true).order('rank', { ascending: true })
+      if (error) throw error
+      return data ?? []
+    } catch (e) {
+      console.warn('[dataStore] phone_models read failed, using local list:', e?.message)
+    }
+  }
+  return clone(LOCAL_PHONE_MODELS)
+}
+
 /* ---------------- writes ---------------- */
 
 export async function upsertProduct(product) {

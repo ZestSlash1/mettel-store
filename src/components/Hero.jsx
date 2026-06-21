@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, lazy, Suspense } from 'react'
 import { listCategories, subscribe, getSetting } from '../lib/dataStore'
 import { gsap } from '../lib/gsap'
 import { usePrefersReducedMotion } from '../lib/motion'
+import { webglSupported } from '../lib/webgl'
 import PhoneCase from './PhoneCase'
 
 // three.js + the exploded scene are code-split: only desktop, motion-enabled
@@ -9,15 +10,6 @@ import PhoneCase from './PhoneCase'
 const ExplodedHero = lazy(() => import('./ExplodedHero'))
 
 const FALLBACK_CATEGORIES = ['Coverage', 'Audio', 'Accessories', 'Lifestyle']
-
-function webglSupported() {
-  try {
-    const c = document.createElement('canvas')
-    return !!(window.WebGLRenderingContext && (c.getContext('webgl2') || c.getContext('webgl')))
-  } catch {
-    return false
-  }
-}
 
 /** One headline line as an overflow-masked word so it can reveal upward. */
 function HeadlineLine({ children, accent = false }) {

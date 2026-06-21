@@ -1,6 +1,6 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
-import { makeProductId, slugify } from '../lib/dataStore'
+import { makeProductId, slugify, listPhoneModels } from '../lib/dataStore'
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient'
 import { formatPrice } from '../hooks/useProducts'
 import ProductGraphic from '../components/ProductGraphic'
@@ -12,6 +12,7 @@ const EXT_BY_TYPE = { 'image/png': 'png', 'image/webp': 'webp', 'image/jpeg': 'j
 
 const STATUS = ['available', 'preorder', 'soldout']
 const CURRENCIES = ['INR', 'USD']
+const COLORWAY_MATERIALS = ['aramid', 'aluminium', 'leather', 'frosted', 'tpu']
 
 const BLANK = {
   id: '',
@@ -30,6 +31,7 @@ const BLANK = {
   image: null,
   images: [],
   models: [],
+  colorways: [],
   stock: 0,
   rank: 0,
   video_url: '',
@@ -49,6 +51,7 @@ export default function ProductForm({ product, categories, existingIds, onSave, 
       ...product,
       images: existingImages,
       specs: product?.specs?.length ? product.specs : [{ k: '', v: '' }],
+      colorways: product?.colorways?.length ? product.colorways : [],
       category_id: product?.category_id || categories[0]?.id || '',
     }
   })
@@ -57,7 +60,37 @@ export default function ProductForm({ product, categories, existingIds, onSave, 
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState('')
+  const [phoneModels, setPhoneModels] = useState([])
   const fileRef = useRef(null)
+
+  useEffect(() => {
+    listPhoneModels().then(setPhoneModels)
+  }, [])
+
+  function addModelLabel(label) {
+    const current = modelsText.split(',').map((m) => m.trim()).filter(Boolean)
+    if (current.includes(label)) return
+    setModelsText([...current, label].join(', '))
+  }
+
+  function setColorway(i, patch) {
+    setForm((f) => {
+      const colorways = f.colorways.map((c, idx) => (idx === i ? { ...c, ...patch } : c))
+      return { ...f, colorways }
+    })
+  }
+  function addColorway() {
+    setForm((f) => ({
+      ...f,
+      colorways: [
+        ...f.colorways,
+        { id: `cw-${Date.now()}`, name: '', material: 'aramid', color_hex: f.color_hex, accent_hex: f.accent_hex, swatch: '', image: '' },
+      ],
+    }))
+  }
+  function removeColorway(i) {
+    setForm((f) => ({ ...f, colorways: f.colorways.filter((_, idx) => idx !== i) }))
+  }
 
   const set = (patch) => setForm((f) => ({ ...f, ...patch }))
 
@@ -140,6 +173,9 @@ export default function ProductForm({ product, categories, existingIds, onSave, 
         .split(',')
         .map((m) => m.trim())
         .filter(Boolean)
+      const cleanColorways = (form.colorways || [])
+        .filter((c) => c.name?.trim())
+        .map((c) => ({ ...c, name: c.name.trim() }))
 
       const cleanImages = (form.images || []).filter((u) => u?.trim())
       const payload = {
@@ -152,6 +188,7 @@ export default function ProductForm({ product, categories, existingIds, onSave, 
         images: cleanImages,
         specs: cleanSpecs,
         models,
+        colorways: cleanColorways,
       }
       await onSave(payload)
     } catch (e) {
@@ -318,6 +355,20 @@ export default function ProductForm({ product, categories, existingIds, onSave, 
 
           <Field label="Variants / models" hint="Comma-separated — devices, sizes, or options. Shown as the buyer’s selector." className="col-span-2">
             <input className={inputClass} value={modelsText} onChange={(e) => setModelsText(e.target.value)} placeholder="iPhone 16 Pro, Pixel 9 Pro  ·  or  ·  500 ml, 1 L" />
+            {phoneModels.length ? (
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {phoneModels.map((m) => (
+                  <button
+                    key={m.label}
+                    type="button"
+                    onClick={() => addModelLabel(m.label)}
+                    className="rounded-full bg-silver-200 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wide text-ink/60 hover:bg-ink/10"
+                  >
+                    + {m.label}
+                  </button>
+                ))}
+              </div>
+            ) : null}
           </Field>
 
           <label className="col-span-2 flex items-center gap-3 rounded-xl bg-white px-3 py-2.5 ring-1 ring-ink/5">
@@ -341,6 +392,66 @@ export default function ProductForm({ product, categories, existingIds, onSave, 
               </div>
             ))}
           </div>
+        </div>
+
+        {/* Colorways editor */}
+        <div className="mt-6">
+          <div className="mb-2 flex items-center justify-between">
+            <span className={labelClass}>
+              Colorways <span className="normal-case text-ink/35">(drives the live 3D material swap + mobile image swap)</span>
+            </span>
+            <Btn variant="ghost" onClick={addColorway} type="button">+ Add colorway</Btn>
+          </div>
+          {form.colorways?.length ? (
+            <div className="space-y-3">
+              {form.colorways.map((cw, i) => (
+                <div key={cw.id || i} className="rounded-xl bg-white p-3 ring-1 ring-ink/5">
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                    <input
+                      className={`${inputClass} col-span-2 sm:col-span-1`}
+                      placeholder="Name (e.g. Carbon)"
+                      value={cw.name}
+                      onChange={(e) => setColorway(i, { name: e.target.value })}
+                    />
+                    <select
+                      className={inputClass}
+                      value={cw.material}
+                      onChange={(e) => setColorway(i, { material: e.target.value })}
+                    >
+                      {COLORWAY_MATERIALS.map((m) => <option key={m} value={m}>{m}</option>)}
+                    </select>
+                    <div className="flex items-center gap-1.5">
+                      <input type="color" value={cw.color_hex || '#cfcfcf'} onChange={(e) => setColorway(i, { color_hex: e.target.value })} className="h-9 w-9 cursor-pointer rounded-lg border border-ink/15" />
+                      <input className={`${inputClass} flex-1`} placeholder="Color hex" value={cw.color_hex || ''} onChange={(e) => setColorway(i, { color_hex: e.target.value })} />
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <input type="color" value={cw.accent_hex || '#ff6b00'} onChange={(e) => setColorway(i, { accent_hex: e.target.value })} className="h-9 w-9 cursor-pointer rounded-lg border border-ink/15" />
+                      <input className={`${inputClass} flex-1`} placeholder="Accent hex" value={cw.accent_hex || ''} onChange={(e) => setColorway(i, { accent_hex: e.target.value })} />
+                    </div>
+                  </div>
+                  <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                    <input
+                      className={inputClass}
+                      placeholder="Swatch image URL (optional — falls back to color)"
+                      value={cw.swatch || ''}
+                      onChange={(e) => setColorway(i, { swatch: e.target.value })}
+                    />
+                    <input
+                      className={inputClass}
+                      placeholder="Product image URL for this colorway (mobile fallback)"
+                      value={cw.image || ''}
+                      onChange={(e) => setColorway(i, { image: e.target.value })}
+                    />
+                  </div>
+                  <button onClick={() => removeColorway(i)} type="button" className="mt-2 font-mono text-[10px] uppercase tracking-wide text-ink/40 hover:text-flame-700">
+                    Remove colorway
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="font-mono text-[11px] text-ink/40">No colorways — the product shows its single color/accent above.</p>
+          )}
         </div>
 
         {error ? (
