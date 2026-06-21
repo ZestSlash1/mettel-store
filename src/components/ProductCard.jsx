@@ -1,13 +1,15 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import ProductGraphic from './ProductGraphic'
+import ResponsiveImage from './ResponsiveImage'
 import WishlistButton from './WishlistButton'
 import { formatPrice } from '../hooks/useProducts'
 import { useCart } from '../context/CartContext'
 import { useSetting } from '../hooks/useSetting'
 import { isSoldOut, isLowStock } from '../lib/product'
 import { EASE } from '../lib/motion'
+import { prefetchProduct } from '../lib/dataStore'
 
 const STATUS_LABEL = {
   available: 'In stock',
@@ -23,6 +25,21 @@ export default function ProductCard({ product, index = 0 }) {
   const lowStockThreshold = Number(useSetting('low_stock_threshold', '5')) || 5
   const lowStock = !soldOut && isLowStock(product, lowStockThreshold)
   const [added, setAdded] = useState(false)
+  const prefetchTimer = useRef(null)
+
+  const handlePrefetch = () => {
+    if (prefetchTimer.current) return
+    prefetchTimer.current = setTimeout(() => {
+      prefetchProduct(product.id)
+      prefetchTimer.current = null
+    }, 150)
+  }
+  const cancelPrefetch = () => {
+    if (prefetchTimer.current) {
+      clearTimeout(prefetchTimer.current)
+      prefetchTimer.current = null
+    }
+  }
 
   const handleAdd = () => {
     if (soldOut) return
@@ -41,6 +58,10 @@ export default function ProductCard({ product, index = 0 }) {
       transition={{ duration: 0.6, delay: (index % 3) * 0.08, ease: EASE.out }}
       whileHover={reduce ? undefined : 'hover'}
       variants={{ hover: { y: -6 } }}
+      onMouseEnter={handlePrefetch}
+      onMouseLeave={cancelPrefetch}
+      onFocus={handlePrefetch}
+      onBlur={cancelPrefetch}
       className="group relative flex break-inside-avoid flex-col overflow-hidden rounded-4xl bg-white shadow-soft ring-1 ring-ink/[0.04] transition-shadow duration-500 hover:shadow-soft-lg"
     >
       {/* hover wash */}
@@ -79,7 +100,7 @@ export default function ProductCard({ product, index = 0 }) {
         >
           {image ? (
             <div className="aspect-[1/2] w-full">
-              <img src={image} alt={name} className="h-full w-full object-contain" loading="lazy" />
+              <ResponsiveImage src={image} alt={name} loading="lazy" sizes="(min-width: 1024px) 22vw, 45vw" />
             </div>
           ) : (
             <ProductGraphic className="h-auto w-full" shell={color_hex} accent={accent_hex} />

@@ -6,6 +6,7 @@ import Footer from '../components/Footer'
 import Seo from '../components/Seo'
 import ProductGraphic from '../components/ProductGraphic'
 import ProductCard from '../components/ProductCard'
+import ResponsiveImage from '../components/ResponsiveImage'
 import WishlistButton from '../components/WishlistButton'
 import ProductReviews from '../components/ProductReviews'
 import { useProducts, formatPrice } from '../hooks/useProducts'
@@ -348,7 +349,14 @@ export default function ProductDetail() {
                     style={{ opacity: canvasReady3d ? 0 : 1 }}
                   >
                     {displayImg ? (
-                      <img src={displayImg} alt={product.name} className="h-full w-full object-contain" />
+                      <ResponsiveImage
+                        src={displayImg}
+                        alt={product.name}
+                        loading="eager"
+                        fetchPriority="high"
+                        sizes="(min-width: 1024px) 30vw, 60vw"
+                        widths={[360, 480, 720, 960, 1280]}
+                      />
                     ) : (
                       <ProductGraphic className="h-auto w-full" shell={activeColorway?.color_hex || product.color_hex} accent={activeColorway?.accent_hex || product.accent_hex} />
                     )}
@@ -382,7 +390,14 @@ export default function ProductDetail() {
                   >
                     {displayImg ? (
                       <div className="aspect-[1/2] w-full">
-                        <img src={displayImg} alt={product.name} className="h-full w-full object-contain" />
+                        <ResponsiveImage
+                          src={displayImg}
+                          alt={product.name}
+                          loading="eager"
+                          fetchPriority="high"
+                          sizes="(min-width: 1024px) 30vw, 60vw"
+                          widths={[360, 480, 720, 960, 1280]}
+                        />
                       </div>
                     ) : (
                       <ProductGraphic className="h-auto w-full" shell={activeColorway?.color_hex || product.color_hex} accent={activeColorway?.accent_hex || product.accent_hex} />
@@ -406,7 +421,7 @@ export default function ProductDetail() {
                     }`}
                     aria-label={`View image ${i + 1}`}
                   >
-                    <img src={url} alt="" className="h-full w-full object-contain bg-silver-50" />
+                    <ResponsiveImage src={url} alt="" className="bg-silver-50" widths={[64, 96, 128]} sizes="64px" />
                   </button>
                 ))}
                 {embedUrl ? (
