@@ -1,11 +1,36 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useCart } from '../context/CartContext'
 import { useAuth } from '../context/AuthContext'
-import { formatPrice } from '../hooks/useProducts'
+import { useProducts, formatPrice } from '../hooks/useProducts'
+import { getSetting, subscribe } from '../lib/dataStore'
 import ProductGraphic from './ProductGraphic'
 import { EASE, DUR, STAGGER, usePrefersReducedMotion } from '../lib/motion'
+
+/** Reads the admin-editable free-shipping threshold (rupees); null = feature off. */
+function useFreeShippingThreshold() {
+  const [threshold, setThreshold] = useState(null)
+
+  useEffect(() => {
+    let active = true
+    const load = () => {
+      getSetting('free_shipping_threshold').then((v) => {
+        if (!active) return
+        const n = Number(v)
+        setThreshold(Number.isFinite(n) && n > 0 ? n : null)
+      })
+    }
+    load()
+    const unsub = subscribe(load) // pick up admin edits without a reload
+    return () => {
+      active = false
+      unsub()
+    }
+  }, [])
+
+  return threshold
+}
 
 const RZP_SCRIPT = 'https://checkout.razorpay.com/v1/checkout.js'
 const emptyForm = { name: '', email: '', phone: '', address: '', city: '', state: '', pincode: '' }
@@ -54,7 +79,8 @@ async function postJSON(url, payload) {
 }
 
 export default function CartDrawer() {
-  const { items, isOpen, closeCart, updateQty, removeItem, subtotal, count, clear } = useCart()
+  const { items, isOpen, closeCart, updateQty, removeItem, addItem, subtotal, count, clear } = useCart()
+  const { products } = useProducts()
   const [placed, setPlaced] = useState(false)
   const [orderRef, setOrderRef] = useState('') // reference shown on confirmation
   const [checkingOut, setCheckingOut] = useState(false) // showing the address form
@@ -67,12 +93,36 @@ export default function CartDrawer() {
   const [couponOk, setCouponOk] = useState(false)
   const [applyingCoupon, setApplyingCoupon] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState('razorpay') // 'razorpay' | 'cod'
+  const freeShippingThreshold = useFreeShippingThreshold()
 
   const { user } = useAuth()
   const reduced = usePrefersReducedMotion()
   const currency = items[0]?.currency || 'INR'
   const setField = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }))
   const total = Math.max(0, subtotal - couponDiscount)
+
+  // "Complete the kit" — admin-curated related_ids from items in the bag,
+  // topped up with same-category suggestions when there aren't enough.
+  const crossSell = useMemo(() => {
+    if (!items.length || !products.length) return []
+    const inCart = new Set(items.map((l) => l.productId))
+    const curatedIds = []
+    items.forEach((l) => {
+      const p = products.find((pp) => pp.id === l.productId)
+      p?.related_ids?.forEach((rid) => {
+        if (!inCart.has(rid) && !curatedIds.includes(rid)) curatedIds.push(rid)
+      })
+    })
+    let picks = curatedIds.map((id) => products.find((p) => p.id === id)).filter(Boolean)
+    if (picks.length < 4) {
+      const cartCats = new Set(items.map((l) => products.find((p) => p.id === l.productId)?.category_id).filter(Boolean))
+      const fallback = products.filter((p) => cartCats.has(p.category_id) && !inCart.has(p.id) && !picks.some((x) => x.id === p.id))
+      picks = [...picks, ...fallback]
+    }
+    return picks.slice(0, 4)
+  }, [items, products])
+
+  const quickAdd = (p) => addItem(p, { model: p.models?.[0] ?? null })
 
   // Prefill the checkout email from the signed-in account so the order links
   // to it (and shows up in their order history).
@@ -264,6 +314,10 @@ export default function CartDrawer() {
                 ×
               </motion.button>
             </div>
+
+            {!placed && items.length > 0 ? (
+              <FreeShippingBar subtotal={subtotal} threshold={freeShippingThreshold} reduced={reduced} />
+            ) : null}
 
             {/* Body */}
             <AnimatePresence mode="wait" initial={false}>
@@ -495,6 +549,38 @@ export default function CartDrawer() {
                   ))}
                   </AnimatePresence>
                 </ul>
+
+                {crossSell.length ? (
+                  <div className="mt-6 border-t border-ink/10 pt-4">
+                    <h3 className="mb-3 font-mono text-[10px] uppercase tracking-[0.18em] text-ink/45">Complete the kit</h3>
+                    <div className="flex gap-3 overflow-x-auto pb-1">
+                      {crossSell.map((p) => (
+                        <div key={p.id} className="flex w-28 shrink-0 flex-col gap-1.5 rounded-xl bg-white p-2 ring-1 ring-ink/5">
+                          <Link to={`/product/${p.id}`} onClick={closeCart} className="block">
+                            <div className="aspect-square w-full overflow-hidden rounded-lg bg-silver-50">
+                              {p.image ? (
+                                <img src={p.image} alt={p.name} className="h-full w-full object-contain" />
+                              ) : (
+                                <ProductGraphic className="h-full w-full" shell={p.color_hex} accent={p.accent_hex} />
+                              )}
+                            </div>
+                            <div className="mt-1.5 truncate font-mono text-[10px] uppercase text-ink/70">{p.name}</div>
+                          </Link>
+                          <div className="flex items-center justify-between">
+                            <span className="font-mono text-[10px] text-flame-600">{formatPrice(p.price, p.currency)}</span>
+                            <button
+                              onClick={() => quickAdd(p)}
+                              aria-label={`Add ${p.name} to bag`}
+                              className="rounded-full bg-ink px-2 py-1 font-mono text-[9px] uppercase text-white hover:bg-flame-500"
+                            >
+                              +
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
               </motion.div>
             )}
             </AnimatePresence>
@@ -579,6 +665,40 @@ export default function CartDrawer() {
         </motion.div>
       )}
     </AnimatePresence>
+  )
+}
+
+/** "₹X away from free shipping" — unlocks once the subtotal clears the admin-set threshold. */
+function FreeShippingBar({ subtotal, threshold, reduced }) {
+  if (!threshold) return null // feature off (no value set in admin)
+
+  const pct = Math.min(100, Math.round((subtotal / threshold) * 100))
+  const unlocked = subtotal >= threshold
+  const remaining = Math.max(0, threshold - subtotal)
+
+  return (
+    <div className="border-b border-ink/10 bg-white/60 px-6 py-3">
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.p
+          key={unlocked ? 'unlocked' : remaining}
+          initial={{ opacity: 0, y: reduced ? 0 : -4 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: DUR.fast, ease: EASE.out }}
+          className={`mb-1.5 font-mono text-[10px] uppercase tracking-[0.14em] ${unlocked ? 'text-green-700' : 'text-ink/55'}`}
+        >
+          {unlocked ? 'Free shipping unlocked ✓' : `${formatPrice(remaining)} away from free shipping`}
+        </motion.p>
+      </AnimatePresence>
+      <div className="h-1.5 overflow-hidden rounded-full bg-ink/[0.07]">
+        <motion.div
+          className={`h-full rounded-full ${unlocked ? 'bg-green-600' : 'bg-flame-500'}`}
+          initial={false}
+          animate={{ width: `${pct}%` }}
+          transition={{ duration: reduced ? 0 : DUR.base, ease: EASE.out }}
+        />
+      </div>
+    </div>
   )
 }
 

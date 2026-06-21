@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, lazy, Suspense } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { AnimatePresence, motion, useMotionValue, useSpring, useReducedMotion } from 'framer-motion'
 import Navigation from '../components/Navigation'
@@ -10,9 +10,17 @@ import WishlistButton from '../components/WishlistButton'
 import ProductReviews from '../components/ProductReviews'
 import { useProducts, formatPrice } from '../hooks/useProducts'
 import { useCart } from '../context/CartContext'
-import { isSoldOut } from '../lib/product'
+import { useSetting } from '../hooks/useSetting'
+import { isSoldOut, isLowStock } from '../lib/product'
+import { listPhoneModels } from '../lib/dataStore'
+import { supabase, isSupabaseConfigured } from '../lib/supabaseClient'
+import { webglSupported } from '../lib/webgl'
 import { BUSINESS } from '../config/business'
 import { EASE } from '../lib/motion'
+
+// Same procedural scene as the homepage hero, reused here at full assembly —
+// only desktop, motion-enabled, WebGL-capable visitors ever download it.
+const ExplodedHero = lazy(() => import('../components/ExplodedHero'))
 
 const VIEWED_KEY = 'mettel:viewed'
 const MAX_VIEWED = 6
@@ -72,6 +80,10 @@ export default function ProductDetail() {
   const { products, categories, loading } = useProducts()
   const { addItem } = useCart()
   const reduce = useReducedMotion()
+  const lowStockThreshold = Number(useSetting('low_stock_threshold', '5')) || 5
+  const trustSecureText = useSetting('trust_secure_text', 'Secure checkout')
+  const trustReturnsText = useSetting('trust_returns_text', '30-day returns')
+  const trustMadeInText = useSetting('trust_madein_text', 'Made in India')
 
   const product = useMemo(() => products.find((p) => p.id === id), [products, id])
   const [model, setModel] = useState(null)
@@ -83,6 +95,13 @@ export default function ProductDetail() {
   const [recentIds, setRecentIds] = useState([])
   const [justAdded, setJustAdded] = useState(false)
   const [showBar, setShowBar] = useState(false)
+  const [colorwayId, setColorwayId] = useState(null)
+  const [phoneModels, setPhoneModels] = useState([])
+  const [ratingSummary, setRatingSummary] = useState(null) // { avg, count } | null
+  const [isDesktop, setIsDesktop] = useState(false)
+  const [canvasReady3d, setCanvasReady3d] = useState(false)
+  const [canvasFailed3d, setCanvasFailed3d] = useState(false)
+  const assembledRef = useRef(1) // PDP always shows the finished, assembled case
   // The sticky buy bar waits for the cookie banner to be dismissed so the two
   // fixed-bottom elements never overlap on a first mobile visit.
   const [cookieClear, setCookieClear] = useState(() => {
@@ -95,6 +114,36 @@ export default function ProductDetail() {
     const onConsent = () => setCookieClear(true)
     window.addEventListener('mettel:cookie', onConsent)
     return () => window.removeEventListener('mettel:cookie', onConsent)
+  }, [])
+
+  // Canonical device list (gives the 3D scene per-model proportions/camera layout).
+  useEffect(() => {
+    listPhoneModels().then(setPhoneModels)
+  }, [])
+
+  // Approved-review rating summary, for the Product JSON-LD aggregateRating.
+  useEffect(() => {
+    setRatingSummary(null)
+    if (!isSupabaseConfigured || !product?.id) return
+    supabase
+      .from('reviews')
+      .select('rating,approved')
+      .eq('product_id', product.id)
+      .eq('approved', true)
+      .then(({ data }) => {
+        if (!data?.length) return
+        const avg = data.reduce((s, r) => s + r.rating, 0) / data.length
+        setRatingSummary({ avg, count: data.length })
+      })
+  }, [product?.id])
+
+  // Desktop breakpoint — the live 3D configurator is desktop-only, same gate as the homepage hero.
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 1024px)')
+    const onChange = () => setIsDesktop(mq.matches)
+    onChange()
+    mq.addEventListener?.('change', onChange)
+    return () => mq.removeEventListener?.('change', onChange)
   }, [])
 
   // Pointer tilt for the main visual (desktop, motion only).
@@ -120,6 +169,9 @@ export default function ProductDetail() {
     setQty(1)
     setPincode('')
     setPincodeStatus(null)
+    setColorwayId(null)
+    setCanvasReady3d(false)
+    setCanvasFailed3d(false)
     window.scrollTo(0, 0)
     if (product?.id) {
       pushViewed(product.id)
@@ -141,9 +193,38 @@ export default function ProductDetail() {
   const gallery = useMemo(() => product ? galleryOf(product) : [], [product])
   const displayImg = activeImg ?? gallery[0] ?? null
 
-  const related = useMemo(
-    () => products.filter((p) => p.category_id === product?.category_id && p.id !== product?.id).slice(0, 3),
+  // Colorways drive both the live 3D material swap and the mobile static-image
+  // swap. Falls back to the product's single color/accent when none are set.
+  const colorways = useMemo(() => {
+    if (!product) return []
+    if (Array.isArray(product.colorways) && product.colorways.length) return product.colorways
+    return [{ id: 'default', name: product.color || 'Default', material: 'aramid', color_hex: product.color_hex, accent_hex: product.accent_hex, swatch: null, image: null }]
+  }, [product])
+  const activeColorway = useMemo(
+    () => colorways.find((c) => c.id === colorwayId) || colorways[0] || null,
+    [colorways, colorwayId],
+  )
+  const phoneModelRow = useMemo(() => phoneModels.find((m) => m.label === model) || null, [phoneModels, model])
+  const is3dCapable = product?.category_id === 'cases' && isDesktop && !reduce && !canvasFailed3d && webglSupported()
+
+  const selectColorway = (cw) => {
+    setColorwayId(cw.id)
+    if (cw.image) {
+      setActiveImg(cw.image)
+      setActiveVideo(false)
+    }
+  }
+
+  const curatedRelated = useMemo(
+    () => (product?.related_ids || []).map((rid) => products.find((p) => p.id === rid)).filter(Boolean),
     [products, product],
+  )
+  const related = useMemo(
+    () =>
+      curatedRelated.length
+        ? curatedRelated.slice(0, 3)
+        : products.filter((p) => p.category_id === product?.category_id && p.id !== product?.id).slice(0, 3),
+    [curatedRelated, products, product],
   )
   const recentlyViewed = useMemo(
     () => recentIds.filter((rid) => rid !== product?.id).map((rid) => products.find((p) => p.id === rid)).filter(Boolean).slice(0, 4),
@@ -185,6 +266,7 @@ export default function ProductDetail() {
   }
 
   const soldout = isSoldOut(product)
+  const lowStock = !soldout && isLowStock(product, lowStockThreshold)
 
   const doAdd = () => {
     addItem(product, { model, qty })
@@ -207,6 +289,15 @@ export default function ProductDetail() {
       availability: soldout ? 'https://schema.org/OutOfStock' : 'https://schema.org/InStock',
       url: `https://www.mettel.in/product/${product.id}`,
     },
+    ...(ratingSummary
+      ? {
+          aggregateRating: {
+            '@type': 'AggregateRating',
+            ratingValue: ratingSummary.avg.toFixed(1),
+            reviewCount: ratingSummary.count,
+          },
+        }
+      : {}),
   }
 
   return (
@@ -246,6 +337,38 @@ export default function ProductDetail() {
                     className="absolute inset-0 h-full w-full rounded-2xl"
                   />
                 </div>
+              ) : is3dCapable ? (
+                <motion.div
+                  style={{ rotateX: rxS, rotateY: ryS, transformPerspective: 1100 }}
+                  className="relative aspect-[1/2] w-[58%] max-w-[260px] drop-shadow-[0_40px_60px_rgba(0,0,0,0.4)]"
+                >
+                  {/* poster — recedes once the live 3D canvas paints */}
+                  <div
+                    className="absolute inset-0 flex items-center justify-center transition-opacity duration-700"
+                    style={{ opacity: canvasReady3d ? 0 : 1 }}
+                  >
+                    {displayImg ? (
+                      <img src={displayImg} alt={product.name} className="h-full w-full object-contain" />
+                    ) : (
+                      <ProductGraphic className="h-auto w-full" shell={activeColorway?.color_hex || product.color_hex} accent={activeColorway?.accent_hex || product.accent_hex} />
+                    )}
+                  </div>
+                  <Suspense fallback={null}>
+                    <div className="absolute inset-0 transition-opacity duration-700" style={{ opacity: canvasReady3d ? 1 : 0 }}>
+                      <ExplodedHero
+                        progressRef={assembledRef}
+                        onReady={() => setCanvasReady3d(true)}
+                        onError={() => setCanvasFailed3d(true)}
+                        className="h-full w-full"
+                        colorHex={activeColorway?.color_hex || product.color_hex}
+                        accentHex={activeColorway?.accent_hex || product.accent_hex}
+                        material={activeColorway?.material || 'aramid'}
+                        cameraLayout={phoneModelRow?.camera_layout || 'triple'}
+                        aspect={phoneModelRow?.aspect || 2.1}
+                      />
+                    </div>
+                  </Suspense>
+                </motion.div>
               ) : (
                 <motion.div
                   style={{ rotateX: rxS, rotateY: ryS, transformPerspective: 1100 }}
@@ -262,7 +385,7 @@ export default function ProductDetail() {
                         <img src={displayImg} alt={product.name} className="h-full w-full object-contain" />
                       </div>
                     ) : (
-                      <ProductGraphic className="h-auto w-full" shell={product.color_hex} accent={product.accent_hex} />
+                      <ProductGraphic className="h-auto w-full" shell={activeColorway?.color_hex || product.color_hex} accent={activeColorway?.accent_hex || product.accent_hex} />
                     )}
                   </motion.div>
                 </motion.div>
@@ -312,9 +435,37 @@ export default function ProductDetail() {
             <div className="mt-6 flex items-baseline gap-3">
               <span className="font-display text-4xl font-black">{formatPrice(product.price, product.currency)}</span>
               <span className={`font-mono text-[11px] uppercase tracking-wider ${soldout ? 'text-ink/40' : 'text-flame-600'}`}>
-                {soldout ? 'Sold out' : STATUS_COPY[product.status]}
+                {soldout ? 'Sold out' : lowStock ? `Only ${product.stock} left in stock` : STATUS_COPY[product.status]}
               </span>
             </div>
+
+            {/* Colorway / material switcher — live 3D swap on desktop, static image swap on mobile */}
+            {product.colorways?.length > 1 ? (
+              <div className="mt-8">
+                <div className="eyebrow mb-2">
+                  {activeColorway?.name || 'Colorway'}
+                  {activeColorway?.material ? <span className="text-ink/35"> · {activeColorway.material}</span> : null}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {colorways.map((cw) => (
+                    <button
+                      key={cw.id}
+                      onClick={() => selectColorway(cw)}
+                      aria-label={cw.name}
+                      title={cw.name}
+                      className={`h-9 w-9 rounded-full ring-2 transition-all ${
+                        activeColorway?.id === cw.id ? 'ring-flame-500' : 'ring-ink/10 hover:ring-ink/30'
+                      }`}
+                      style={
+                        cw.swatch
+                          ? { backgroundImage: `url(${cw.swatch})`, backgroundSize: 'cover' }
+                          : { backgroundColor: cw.color_hex || '#cfcfcf' }
+                      }
+                    />
+                  ))}
+                </div>
+              </div>
+            ) : null}
 
             {/* Model selector */}
             {product.models?.length ? (
@@ -410,6 +561,13 @@ export default function ProductDetail() {
                 />
                 <ShareButton name={product.name} />
               </div>
+
+              {/* Trust block */}
+              <div className="mt-2 flex items-center justify-center gap-4 rounded-2xl bg-silver-100/60 px-3 py-2.5 ring-1 ring-ink/[0.04]">
+                <TrustBadge icon={<LockIcon />} text={trustSecureText} />
+                <TrustBadge icon={<ReturnIcon />} text={trustReturnsText} />
+                <TrustBadge icon={<MadeInIcon />} text={trustMadeInText} />
+              </div>
             </div>
 
             {/* Spec sheet */}
@@ -433,7 +591,9 @@ export default function ProductDetail() {
         {/* Related */}
         {related.length ? (
           <Reveal className="mt-24">
-            <h2 className="mb-8 font-display text-display-md font-black uppercase tracking-tight">More in {catLabel}</h2>
+            <h2 className="mb-8 font-display text-display-md font-black uppercase tracking-tight">
+              {curatedRelated.length ? 'Complete the kit' : `More in ${catLabel}`}
+            </h2>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {related.map((p, i) => (
                 <ProductCard key={p.id} product={p} index={i} />
@@ -489,6 +649,43 @@ export default function ProductDetail() {
         ) : null}
       </AnimatePresence>
     </>
+  )
+}
+
+function TrustBadge({ icon, text }) {
+  if (!text) return null
+  return (
+    <div className="flex items-center gap-1.5 text-ink/50">
+      <span className="text-ink/40">{icon}</span>
+      <span className="font-mono text-[9px] uppercase tracking-[0.12em]">{text}</span>
+    </div>
+  )
+}
+
+function LockIcon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    </svg>
+  )
+}
+
+function ReturnIcon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+      <path d="M3 3v5h5" />
+    </svg>
+  )
+}
+
+function MadeInIcon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 3v18M3 12h18" />
+    </svg>
   )
 }
 

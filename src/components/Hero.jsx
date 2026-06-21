@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, lazy, Suspense } from 'react'
 import { listCategories, subscribe, getSetting } from '../lib/dataStore'
 import { gsap } from '../lib/gsap'
 import { usePrefersReducedMotion } from '../lib/motion'
-import PhoneCase from './PhoneCase'
+import { webglSupported } from '../lib/webgl'
 
 // three.js + the exploded scene are code-split: only desktop, motion-enabled
 // visitors ever download them, and never before first paint.
@@ -10,19 +10,10 @@ const ExplodedHero = lazy(() => import('./ExplodedHero'))
 
 const FALLBACK_CATEGORIES = ['Coverage', 'Audio', 'Accessories', 'Lifestyle']
 
-function webglSupported() {
-  try {
-    const c = document.createElement('canvas')
-    return !!(window.WebGLRenderingContext && (c.getContext('webgl2') || c.getContext('webgl')))
-  } catch {
-    return false
-  }
-}
-
 /** One headline line as an overflow-masked word so it can reveal upward. */
 function HeadlineLine({ children, accent = false }) {
   return (
-    <span className="block overflow-hidden">
+    <span className="block" style={{ clipPath: 'inset(0 -100vw 0 -100vw)' }}>
       <span
         data-hero-word
         className={`block ${accent ? 'text-flame-500' : 'text-ink'}`}
@@ -154,10 +145,12 @@ export default function Hero() {
     return () => ctx.revert()
   }, [useWebGL, reduced])
 
-  const poster = heroImage ? (
-    <img src={heroImage} alt="MetTel product" className="h-full w-full object-contain" />
-  ) : (
-    <PhoneCase className="h-full w-full" shell="#cfcfcf" accent="#ff6b00" />
+  const poster = (
+    <img
+      src={heroImage || '/hero-exploded.png'}
+      alt="MetTel product — exploded view"
+      className="h-full w-full object-contain"
+    />
   )
 
   return (
