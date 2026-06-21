@@ -7,6 +7,7 @@ import Seo from '../components/Seo'
 import ProductGraphic from '../components/ProductGraphic'
 import ProductCard from '../components/ProductCard'
 import ResponsiveImage from '../components/ResponsiveImage'
+import DraggableCarousel from '../components/DraggableCarousel'
 import ScrambleText from '../components/ScrambleText'
 import WishlistButton from '../components/WishlistButton'
 import ProductReviews from '../components/ProductReviews'
@@ -612,11 +613,11 @@ export default function ProductDetail() {
             <h2 className="mb-8 font-display text-display-md font-black uppercase tracking-tight">
               {curatedRelated.length ? 'Complete the kit' : `More in ${catLabel}`}
             </h2>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <DraggableCarousel ariaLabel="Related products" itemClassName="w-[78%] sm:w-[46%] lg:w-[31%]">
               {related.map((p, i) => (
                 <ProductCard key={p.id} product={p} index={i} />
               ))}
-            </div>
+            </DraggableCarousel>
           </Reveal>
         ) : null}
 
