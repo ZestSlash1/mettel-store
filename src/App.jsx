@@ -1,5 +1,8 @@
 import { Suspense, lazy } from 'react'
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, useLocation } from 'react-router-dom'
+import { AnimatePresence, motion } from 'framer-motion'
+import { EASE, DUR, usePrefersReducedMotion } from './lib/motion'
+import Preloader from './components/Preloader'
 import Navigation from './components/Navigation'
 import Hero from './components/Hero'
 import ProductGrid from './components/ProductGrid'
@@ -69,41 +72,55 @@ function AdminFallback() {
 }
 
 export default function App() {
+  const location = useLocation()
+  const reduced = usePrefersReducedMotion()
+
   return (
     <ErrorBoundary>
+      <Preloader />
       <SmoothScroll>
       <div className="min-h-screen bg-silver text-ink">
         <AnnouncementBar />
         <ScrollManager />
         <Suspense fallback={<PageFallback />}>
-          <Routes>
-            <Route path="/" element={<Storefront />} />
-            <Route path="/product/:id" element={<ProductDetail />} />
-            <Route path="/shop" element={<Shop />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/news" element={<News />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/gift-cards" element={<GiftCards />} />
-            <Route path="/shipping" element={<Shipping />} />
-            <Route path="/returns" element={<Returns />} />
-            <Route path="/warranty" element={<Warranty />} />
-            <Route path="/privacy" element={<Privacy />} />
-            <Route path="/terms" element={<Terms />} />
-            <Route path="/faq" element={<FAQ />} />
-            <Route path="/track" element={<Track />} />
-            <Route path="/account" element={<Account />} />
-            <Route
-              path="/admin/*"
-              element={
-                <AuthGate>
-                  <Suspense fallback={<AdminFallback />}>
-                    <AdminDashboard />
-                  </Suspense>
-                </AuthGate>
-              }
-            />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={location.pathname}
+              initial={{ opacity: 0, y: reduced ? 0 : 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: reduced ? 0 : -10 }}
+              transition={{ duration: DUR.base, ease: EASE.out }}
+            >
+              <Routes location={location}>
+                <Route path="/" element={<Storefront />} />
+                <Route path="/product/:id" element={<ProductDetail />} />
+                <Route path="/shop" element={<Shop />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/news" element={<News />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/gift-cards" element={<GiftCards />} />
+                <Route path="/shipping" element={<Shipping />} />
+                <Route path="/returns" element={<Returns />} />
+                <Route path="/warranty" element={<Warranty />} />
+                <Route path="/privacy" element={<Privacy />} />
+                <Route path="/terms" element={<Terms />} />
+                <Route path="/faq" element={<FAQ />} />
+                <Route path="/track" element={<Track />} />
+                <Route path="/account" element={<Account />} />
+                <Route
+                  path="/admin/*"
+                  element={
+                    <AuthGate>
+                      <Suspense fallback={<AdminFallback />}>
+                        <AdminDashboard />
+                      </Suspense>
+                    </AuthGate>
+                  }
+                />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </motion.div>
+          </AnimatePresence>
         </Suspense>
 
         {/* Cart drawer lives at app level so it's reachable from every route */}
