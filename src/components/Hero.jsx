@@ -14,7 +14,7 @@ const FALLBACK_CATEGORIES = ['Coverage', 'Audio', 'Accessories', 'Lifestyle']
 /** One headline line as an overflow-masked word so it can reveal upward. */
 function HeadlineLine({ children, accent = false }) {
   return (
-    <span className="block overflow-hidden">
+    <span className="block" style={{ clipPath: 'inset(0 -100vw 0 -100vw)' }}>
       <span
         data-hero-word
         className={`block ${accent ? 'text-flame-500' : 'text-ink'}`}
