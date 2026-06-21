@@ -47,8 +47,14 @@ export default function Hero() {
 
   const sectionRef = useRef(null)
   const progress = useRef(0) // 0 exploded → 1 assembled, read by ExplodedHero each frame
+  const cursor = useRef({ x: 0, y: 0 }) // -1..1, read by ExplodedHero each frame
+  const [isLargeViewport, setIsLargeViewport] = useState(false)
 
   const useWebGL = isDesktop && !reduced && !canvasFailed && webglSupported()
+  // Cursor-reactive lighting is the most performance-risky item in this
+  // batch, so it gets its own narrower gate on top of useWebGL: a genuinely
+  // large desktop viewport, never mobile/tablet, never reduced motion.
+  const lightingEnabled = useWebGL && isLargeViewport
 
   // Track the desktop breakpoint.
   useEffect(() => {
@@ -58,6 +64,32 @@ export default function Hero() {
     mq.addEventListener?.('change', onChange)
     return () => mq.removeEventListener?.('change', onChange)
   }, [])
+
+  // Narrower breakpoint gating cursor-reactive lighting on top of useWebGL.
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 1280px)')
+    const onChange = () => setIsLargeViewport(mq.matches)
+    onChange()
+    mq.addEventListener?.('change', onChange)
+    return () => mq.removeEventListener?.('change', onChange)
+  }, [])
+
+  // Feed the live cursor position to the hero scene — only while the
+  // lighting effect is actually enabled, so there's no listener cost at all
+  // on mobile, tablet, or under reduced motion.
+  useEffect(() => {
+    if (!lightingEnabled) return
+    const section = sectionRef.current
+    const onMove = (e) => {
+      const rect = section.getBoundingClientRect()
+      cursor.current = {
+        x: ((e.clientX - rect.left) / rect.width) * 2 - 1,
+        y: ((e.clientY - rect.top) / rect.height) * 2 - 1,
+      }
+    }
+    window.addEventListener('pointermove', onMove, { passive: true })
+    return () => window.removeEventListener('pointermove', onMove)
+  }, [lightingEnabled])
 
   // Live category strip + admin-configurable hero image.
   useEffect(() => {
@@ -214,6 +246,7 @@ export default function Hero() {
                   >
                     <ExplodedHero
                       progressRef={progress}
+                      cursorRef={lightingEnabled ? cursor : undefined}
                       onReady={() => setCanvasReady(true)}
                       onError={() => setCanvasFailed(true)}
                       className="h-full w-full"

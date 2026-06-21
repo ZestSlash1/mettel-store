@@ -75,7 +75,7 @@ export default function ProductCard({ product, index = 0 }) {
       />
 
       {/* ---- visual well ---- */}
-      <div className="relative flex items-center justify-center overflow-hidden bg-silver-50/60 px-8 py-12">
+      <div data-cursor="view" className="relative flex items-center justify-center overflow-hidden bg-silver-50/60 px-8 py-12">
         {/* index tag */}
         <span className="absolute left-4 top-4 z-20 font-mono text-[9px] uppercase tracking-[0.22em] text-ink/30">
           /{num}
@@ -164,6 +164,7 @@ export default function ProductCard({ product, index = 0 }) {
           <button
             disabled={soldOut}
             onClick={handleAdd}
+            data-cursor={soldOut ? undefined : 'add'}
             aria-label={soldOut ? 'Sold out' : `Add ${name} to bag`}
             className={`btn px-5 py-2 text-[10px] ${added ? 'btn-flame animate-addpop' : 'btn-dark'}`}
           >

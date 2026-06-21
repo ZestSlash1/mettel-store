@@ -564,6 +564,7 @@ export default function ProductDetail() {
                     </div>
                     <button
                       onClick={doAdd}
+                      data-cursor="add"
                       className={`btn flex-1 py-3 text-[12px] tracking-[0.18em] ${justAdded ? 'btn-dark animate-addpop' : 'btn-flame'}`}
                     >
                       {justAdded ? 'Added ✓' : product.status === 'preorder' ? 'Pre-order' : 'Add to bag'}
@@ -659,7 +660,7 @@ export default function ProductDetail() {
                   Notify me
                 </button>
               ) : (
-                <button onClick={doAdd} className={`btn btn-flame ml-auto px-6 py-3 text-[12px] ${justAdded ? 'animate-addpop' : ''}`}>
+                <button onClick={doAdd} data-cursor="add" className={`btn btn-flame ml-auto px-6 py-3 text-[12px] ${justAdded ? 'animate-addpop' : ''}`}>
                   {justAdded ? 'Added ✓' : 'Add to bag'}
                 </button>
               )}

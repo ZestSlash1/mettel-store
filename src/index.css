@@ -21,6 +21,12 @@
     text-rendering: optimizeLegibility;
   }
 
+  /* ---- Custom cursor (desktop / pointer:fine only — see CustomCursor.jsx) ---- */
+  html.cursor-none,
+  html.cursor-none * {
+    cursor: none !important;
+  }
+
   /* ---- Lenis smooth scroll (only active once <SmoothScroll> mounts it) ---- */
   html.lenis,
   html.lenis body {

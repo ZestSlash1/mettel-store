@@ -114,6 +114,7 @@ export default function DraggableCarousel({ children, itemClassName = '', classN
       ref={scrollerRef}
       role="region"
       aria-label={ariaLabel}
+      data-cursor="drag"
       tabIndex={0}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
