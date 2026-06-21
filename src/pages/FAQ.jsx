@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
 import PageShell from '../components/PageShell'
+import { EASE, DUR } from '../lib/motion'
 
 const FAQS = [
   {
@@ -36,7 +38,7 @@ const FAQS = [
 function Item({ q, a }) {
   const [open, setOpen] = useState(false)
   return (
-    <div className="card-soft overflow-hidden">
+    <div data-reveal className="card-soft overflow-hidden">
       <button
         onClick={() => setOpen((o) => !o)}
         className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition-colors hover:bg-silver-50/60"
@@ -45,9 +47,18 @@ function Item({ q, a }) {
         <span className="font-display text-base font-black uppercase tracking-tight">{q}</span>
         <span className={`shrink-0 font-mono text-lg text-flame-500 transition-transform ${open ? 'rotate-45' : ''}`}>+</span>
       </button>
-      {open ? (
-        <p className="px-5 pb-5 font-mono text-[12px] leading-relaxed text-ink/60">{a}</p>
-      ) : null}
+      <AnimatePresence initial={false}>
+        {open ? (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: DUR.fast, ease: EASE.out }}
+          >
+            <p className="px-5 pb-5 font-mono text-[12px] leading-relaxed text-ink/60">{a}</p>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </div>
   )
 }
@@ -67,7 +78,7 @@ export default function FAQ() {
         ))}
       </div>
 
-      <div className="mt-10 rounded-4xl bg-ink p-6 text-center text-silver shadow-soft">
+      <div data-reveal className="mt-10 rounded-4xl bg-ink p-6 text-center text-silver shadow-soft">
         <p className="font-mono text-[12px] text-silver/70">Didn’t find your answer?</p>
         <Link
           to="/contact"

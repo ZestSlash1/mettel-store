@@ -11,7 +11,7 @@ export default function About() {
       intro="MetTel makes engineered objects for everyday life — phone coverage, audio, accessories, and lifestyle goods, designed in India and shipped worldwide."
     >
       <div className="grid gap-12 lg:grid-cols-3">
-        <div className="space-y-4 font-mono text-[12px] leading-relaxed text-ink/65 lg:col-span-2">
+        <div data-reveal className="space-y-4 font-mono text-[12px] leading-relaxed text-ink/65 lg:col-span-2">
           <p>
             We started MetTel with one frustration: everyday products designed like billboards —
             loud branding, cheap materials, landfill in twelve months. We wanted the opposite — honest
@@ -28,7 +28,7 @@ export default function About() {
           </p>
         </div>
 
-        <aside className="card-soft space-y-6 p-6">
+        <aside data-reveal className="card-soft space-y-6 p-6">
           {[
             ['Founded', '2024 · India'],
             ['Range', 'Coverage · Audio · More'],

@@ -44,7 +44,7 @@ export default function Track() {
       intro="Enter your order reference (from your confirmation or Razorpay receipt) and the email you used at checkout."
     >
       <div className="grid gap-12 lg:grid-cols-2">
-        <form onSubmit={submit} className="card-soft space-y-4 p-6">
+        <form data-reveal onSubmit={submit} className="card-soft space-y-4 p-6">
           <label className="block">
             <span className={labelClass}>Order reference</span>
             <input className={inputClass} value={form.reference} onChange={set('reference')} placeholder="order_… or pay_…" required />
@@ -62,7 +62,7 @@ export default function Track() {
         </form>
 
         {/* Result */}
-        <div>
+        <div data-reveal>
           {result && result.found ? (
             <div className="card-soft p-6">
               <div className="flex items-center justify-between gap-3">

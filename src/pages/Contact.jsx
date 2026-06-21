@@ -1,12 +1,15 @@
 import { useState } from 'react'
+import { motion } from 'framer-motion'
 import PageShell from '../components/PageShell'
 import { inputClass, labelClass, Btn } from '../admin/ui'
+import { EASE, DUR, usePrefersReducedMotion } from '../lib/motion'
 
 export default function Contact() {
   const [form, setForm] = useState({ name: '', email: '', message: '' })
   const [busy, setBusy] = useState(false)
   const [done, setDone] = useState(false)
   const [error, setError] = useState('')
+  const reduced = usePrefersReducedMotion()
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }))
 
@@ -40,7 +43,7 @@ export default function Contact() {
     >
       <div className="grid gap-12 lg:grid-cols-2">
         {/* Direct channels */}
-        <div className="space-y-6">
+        <div data-reveal className="space-y-6">
           {[
             ['General', 'hello@mettel.in'],
             ['Support', 'support@mettel.in'],
@@ -61,8 +64,20 @@ export default function Contact() {
 
         {/* Form */}
         {done ? (
-          <div className="card-soft flex flex-col items-start gap-3 p-8">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-flame-500 text-xl text-white">✓</div>
+          <motion.div
+            initial={{ opacity: 0, y: reduced ? 0 : 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: DUR.base, ease: EASE.out }}
+            className="card-soft flex flex-col items-start gap-3 p-8"
+          >
+            <motion.div
+              initial={{ scale: 0, rotate: reduced ? 0 : -45 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ duration: reduced ? DUR.fast : DUR.slow, ease: reduced ? EASE.out : EASE.outBack, delay: reduced ? 0 : 0.1 }}
+              className="flex h-12 w-12 items-center justify-center rounded-full bg-flame-500 text-xl text-white"
+            >
+              ✓
+            </motion.div>
             <p className="font-display text-xl font-black uppercase">Message sent</p>
             <p className="font-mono text-[11px] text-ink/55">We'll get back to you within one business day.</p>
             <button
@@ -71,9 +86,9 @@ export default function Contact() {
             >
               Send another
             </button>
-          </div>
+          </motion.div>
         ) : (
-          <form onSubmit={submit} className="card-soft space-y-4 p-6">
+          <form data-reveal onSubmit={submit} className="card-soft space-y-4 p-6">
             <label className="block">
               <span className={labelClass}>Name</span>
               <input className={inputClass} value={form.name} onChange={set('name')} placeholder="Your name" required />

@@ -11,10 +11,10 @@ export default function NotFound() {
           That page doesn’t exist or was moved. Let’s get you back to the good stuff.
         </p>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-          <Link to="/" className="rounded-full bg-ink px-6 py-3 font-mono text-[11px] uppercase tracking-[0.16em] text-white transition-colors hover:bg-flame-500">
+          <Link to="/" className="btn rounded-full bg-ink px-6 py-3 font-mono text-[11px] uppercase tracking-[0.16em] text-white hover:bg-flame-500">
             Back to store
           </Link>
-          <Link to="/shop" className="rounded-full bg-silver-200 px-6 py-3 font-mono text-[11px] uppercase tracking-[0.16em] text-ink transition-colors hover:bg-ink hover:text-white">
+          <Link to="/shop" className="btn rounded-full bg-silver-200 px-6 py-3 font-mono text-[11px] uppercase tracking-[0.16em] text-ink hover:bg-ink hover:text-white">
             Browse the lineup
           </Link>
         </div>

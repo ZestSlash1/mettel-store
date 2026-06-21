@@ -25,7 +25,7 @@ export default function GiftCards() {
     >
       <div className="grid gap-12 lg:grid-cols-2">
         {/* Visual card */}
-        <div className="relative flex aspect-[16/10] flex-col justify-between overflow-hidden rounded-4xl bg-ink p-8 text-silver shadow-soft-lg">
+        <div data-reveal className="relative flex aspect-[16/10] flex-col justify-between overflow-hidden rounded-4xl bg-ink p-8 text-silver shadow-soft-lg">
           <div className="pointer-events-none absolute -right-24 -top-10 h-[120%] w-2/3 rounded-full bg-flame-gradient opacity-30 blur-2xl" />
           <div className="relative font-display text-3xl font-black tracking-tight">METTEL</div>
           <div className="relative">
@@ -35,7 +35,7 @@ export default function GiftCards() {
         </div>
 
         {/* Picker */}
-        <div className="flex flex-col">
+        <div data-reveal className="flex flex-col">
           <div className="eyebrow mb-3">Choose an amount</div>
           <div className="flex flex-wrap gap-2">
             {DENOMINATIONS.map((d) => (

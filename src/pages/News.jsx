@@ -42,6 +42,7 @@ export default function News() {
         {POSTS.map((p) => (
           <article
             key={p.title}
+            data-reveal
             className="card-soft flex flex-col gap-3 p-6 sm:flex-row sm:items-baseline sm:justify-between"
           >
             <div className="max-w-xl">
