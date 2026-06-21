@@ -259,7 +259,7 @@ export default function ProductDetail() {
         <div className="mx-auto flex min-h-[60vh] max-w-[1200px] flex-col items-center justify-center px-6 text-center">
           <h1 className="font-display text-5xl font-black uppercase">Not found</h1>
           <p className="mt-2 font-mono text-[12px] text-ink/50">That product doesn't exist or was removed.</p>
-          <Link to="/" className="mt-6 rounded-full bg-ink px-6 py-3 font-mono text-[11px] uppercase tracking-[0.16em] text-white hover:bg-flame-500">
+          <Link to="/" className="mt-6 rounded-full bg-black px-6 py-3 font-mono text-[11px] uppercase tracking-[0.16em] text-[#fff] hover:bg-flame-500">
             Back to store
           </Link>
         </div>
@@ -434,7 +434,7 @@ export default function ProductDetail() {
                     className={`relative h-16 w-16 shrink-0 overflow-hidden rounded-xl ring-2 transition-all ${activeVideo ? 'ring-flame-500' : 'ring-ink/10 hover:ring-ink/30'}`}
                     aria-label="Play video"
                   >
-                    <div className="flex h-full w-full items-center justify-center bg-ink">
+                    <div className="flex h-full w-full items-center justify-center bg-black">
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="white" aria-hidden="true"><polygon points="5,3 19,12 5,21"/></svg>
                     </div>
                   </button>
@@ -496,7 +496,7 @@ export default function ProductDetail() {
                       key={m}
                       onClick={() => setModel(m)}
                       className={`rounded-full px-4 py-2.5 font-mono text-[11px] uppercase tracking-wider transition-colors ${
-                        model === m ? 'bg-ink text-white' : 'bg-silver-200 text-ink hover:bg-ink/10'
+                        model === m ? 'bg-black text-[#fff]' : 'bg-silver-200 text-ink hover:bg-ink/10'
                       }`}
                     >
                       {m}
@@ -523,7 +523,7 @@ export default function ProductDetail() {
                   <button
                     onClick={checkPincode}
                     disabled={pincode.length < 6}
-                    className="rounded-full bg-ink px-5 py-2.5 font-mono text-[11px] uppercase tracking-[0.16em] text-white transition-colors hover:bg-flame-500 disabled:opacity-40"
+                    className="rounded-full bg-black px-5 py-2.5 font-mono text-[11px] uppercase tracking-[0.16em] text-[#fff] transition-colors hover:bg-flame-500 disabled:opacity-40"
                   >
                     Check
                   </button>
@@ -805,7 +805,7 @@ function NotifyForm({ productId }) {
         <button
           type="submit"
           disabled={busy}
-          className="rounded-full bg-ink px-5 py-3 font-mono text-[11px] uppercase tracking-[0.16em] text-white transition-colors hover:bg-flame-500 disabled:opacity-50"
+          className="rounded-full bg-black px-5 py-3 font-mono text-[11px] uppercase tracking-[0.16em] text-[#fff] transition-colors hover:bg-flame-500 disabled:opacity-50"
         >
           {busy ? '…' : 'Notify me'}
         </button>

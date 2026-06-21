@@ -115,7 +115,7 @@ export default function ProductCard({ product, index = 0 }) {
           variants={{ hover: { y: 0 } }}
           initial={{ y: '101%' }}
           transition={{ duration: 0.32, ease: EASE.out }}
-          className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex items-center justify-between bg-ink/90 px-4 py-2 font-mono text-[9px] uppercase tracking-[0.22em] text-white"
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex items-center justify-between bg-black/90 px-4 py-2 font-mono text-[9px] uppercase tracking-[0.22em] text-[#fff]"
         >
           <span>View product</span>
           <span aria-hidden="true">→</span>

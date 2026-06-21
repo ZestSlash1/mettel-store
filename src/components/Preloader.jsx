@@ -70,15 +70,15 @@ export default function Preloader() {
         <motion.div
           exit={{ y: reduced ? 0 : '-100%', opacity: reduced ? 0 : 1 }}
           transition={{ duration: reduced ? DUR.fast : DUR.slow, ease: EASE.outExpo }}
-          className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-ink text-silver-50"
+          className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black text-[#fff]"
         >
-          <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-silver-50/40">
+          <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-[#fff]/40">
             MT // Initializing
           </div>
           <div className="mt-3 font-display text-6xl font-black tabular-nums sm:text-8xl">
             {String(count).padStart(2, '0')}
           </div>
-          <div className="mt-6 h-px w-40 overflow-hidden bg-silver-50/15">
+          <div className="mt-6 h-px w-40 overflow-hidden bg-[#fff]/15">
             <div className="h-full bg-flame-500" style={{ width: `${count}%` }} />
           </div>
         </motion.div>

@@ -147,7 +147,7 @@ export default function AdminDashboard() {
       {/* ---- Sidebar (desktop) ---- */}
       <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-ink/[0.06] bg-white/70 backdrop-blur-xl lg:flex">
         <div className="flex items-center gap-2.5 px-5 py-5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-ink text-white">
+          <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-black text-[#fff]">
             <span className="font-display text-xs font-black">MT</span>
           </div>
           <div>
@@ -181,13 +181,13 @@ export default function AdminDashboard() {
                       key={key}
                       onClick={() => setTab(key)}
                       className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left font-mono text-[12px] tracking-wide transition-colors ${
-                        active ? 'bg-ink text-white' : 'text-ink/70 hover:bg-ink/[0.05]'
+                        active ? 'bg-black text-[#fff]' : 'text-ink/70 hover:bg-ink/[0.05]'
                       }`}
                     >
                       <NavIcon name={key} />
                       <span className="flex-1">{label}</span>
                       {counts[key] != null ? (
-                        <span className={`font-mono text-[10px] ${active ? 'text-white/60' : 'text-ink/35'}`}>{counts[key]}</span>
+                        <span className={`font-mono text-[10px] ${active ? 'text-[#fff]/60' : 'text-ink/35'}`}>{counts[key]}</span>
                       ) : null}
                     </button>
                   )
@@ -246,7 +246,7 @@ export default function AdminDashboard() {
                 key={key}
                 onClick={() => setTab(key)}
                 className={`shrink-0 rounded-full px-4 py-1.5 font-mono text-[11px] uppercase tracking-[0.14em] transition-colors ${
-                  tab === key ? 'bg-ink text-white' : 'bg-silver-200 text-ink hover:bg-ink/10'
+                  tab === key ? 'bg-black text-[#fff]' : 'bg-silver-200 text-ink hover:bg-ink/10'
                 }`}
               >
                 {label}
@@ -312,7 +312,7 @@ export default function AdminDashboard() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <div className="absolute inset-0 bg-ink/40 backdrop-blur-sm" onClick={() => setEditing(null)} />
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setEditing(null)} />
             <div className="relative h-full">
               <ProductForm
                 product={editing && Object.keys(editing).length ? editing : null}

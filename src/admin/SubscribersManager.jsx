@@ -64,7 +64,7 @@ export default function SubscribersManager() {
         </div>
         <button
           onClick={exportCsv}
-          className="rounded-full bg-ink px-4 py-2 font-mono text-[11px] uppercase tracking-[0.16em] text-white transition-colors hover:bg-flame-500"
+          className="rounded-full bg-black px-4 py-2 font-mono text-[11px] uppercase tracking-[0.16em] text-[#fff] transition-colors hover:bg-flame-500"
         >
           Export CSV
         </button>
@@ -76,7 +76,7 @@ export default function SubscribersManager() {
             key={k}
             onClick={() => setFilter(k)}
             className={`rounded-full px-4 py-1.5 font-mono text-[11px] uppercase tracking-[0.14em] transition-colors ${
-              filter === k ? 'bg-ink text-white' : 'bg-silver-200 text-ink hover:bg-ink/10'
+              filter === k ? 'bg-black text-[#fff]' : 'bg-silver-200 text-ink hover:bg-ink/10'
             }`}
           >
             {l}

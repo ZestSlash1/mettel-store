@@ -25,12 +25,12 @@ export default function GiftCards() {
     >
       <div className="grid gap-12 lg:grid-cols-2">
         {/* Visual card */}
-        <div data-reveal className="relative flex aspect-[16/10] flex-col justify-between overflow-hidden rounded-4xl bg-ink p-8 text-silver shadow-soft-lg">
+        <div data-reveal className="relative flex aspect-[16/10] flex-col justify-between overflow-hidden rounded-4xl bg-black p-8 text-[#fff] shadow-soft-lg">
           <div className="pointer-events-none absolute -right-24 -top-10 h-[120%] w-2/3 rounded-full bg-flame-gradient opacity-30 blur-2xl" />
           <div className="relative font-display text-3xl font-black tracking-tight">METTEL</div>
           <div className="relative">
-            <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-silver/50">Gift card</div>
-            <div className="font-pixel text-4xl text-white">{formatPrice(amount)}</div>
+            <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#fff]/50">Gift card</div>
+            <div className="font-pixel text-4xl text-[#fff]">{formatPrice(amount)}</div>
           </div>
         </div>
 

@@ -1,18 +1,27 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'class',
   content: ['./index.html', './src/**/*.{js,jsx,ts,tsx}'],
   theme: {
     extend: {
       colors: {
-        // Light silver / off-white system
+        // Silver/ink/white are CSS-variable-backed (see index.css :root /
+        // html.dark) so every existing text-ink/NN, bg-white, bg-silver-50
+        // etc. across the app repaints for dark mode with zero per-component
+        // changes — only the variables flip when <html> gets .dark. Every
+        // place `white` was used as a literal label color (not a surface —
+        // e.g. "Add to bag" text on a flame button) was hardened to
+        // text-[#fff] so it can't flip; see the bulk find/replace in the
+        // Phase 6 commit.
         silver: {
-          DEFAULT: '#f0f0f0',
-          50: '#fafafa',
-          100: '#f4f4f4',
-          200: '#e6e6e6',
-          300: '#d4d4d4',
+          DEFAULT: 'rgb(var(--color-silver) / <alpha-value>)',
+          50: 'rgb(var(--color-silver-50) / <alpha-value>)',
+          100: 'rgb(var(--color-silver-100) / <alpha-value>)',
+          200: 'rgb(var(--color-silver-200) / <alpha-value>)',
+          300: 'rgb(var(--color-silver-300) / <alpha-value>)',
         },
-        ink: '#000000',
+        ink: 'rgb(var(--color-ink) / <alpha-value>)',
+        white: 'rgb(var(--color-white) / <alpha-value>)',
         // Vibrant -> burnt orange accent ramp
         flame: {
           50: '#fff4ec',

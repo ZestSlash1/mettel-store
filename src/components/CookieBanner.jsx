@@ -41,24 +41,24 @@ export default function CookieBanner() {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 24, opacity: 0 }}
           transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-          className="fixed bottom-4 left-4 right-4 z-[70] mx-auto max-w-xl rounded-2xl bg-ink px-5 py-4 text-white shadow-2xl ring-1 ring-white/10 sm:bottom-6 sm:left-6 sm:right-auto"
+          className="fixed bottom-4 left-4 right-4 z-[70] mx-auto max-w-xl rounded-2xl bg-black px-5 py-4 text-[#fff] shadow-2xl ring-1 ring-[#fff]/10 sm:bottom-6 sm:left-6 sm:right-auto"
           role="dialog"
           aria-label="Cookie notice"
         >
-          <p className="font-mono text-[11px] leading-relaxed text-white/75">
+          <p className="font-mono text-[11px] leading-relaxed text-[#fff]/75">
             We use essential cookies to run the store. We may add analytics in the future.{' '}
-            <Link to="/privacy" className="text-white/90 underline hover:text-flame-400">Privacy policy</Link>
+            <Link to="/privacy" className="text-[#fff]/90 underline hover:text-flame-400">Privacy policy</Link>
           </p>
           <div className="mt-3 flex items-center gap-2">
             <button
               onClick={accept}
-              className="rounded-full bg-flame-500 px-4 py-2 font-mono text-[10px] uppercase tracking-[0.16em] text-white transition-colors hover:bg-flame-600"
+              className="rounded-full bg-flame-500 px-4 py-2 font-mono text-[10px] uppercase tracking-[0.16em] text-[#fff] transition-colors hover:bg-flame-600"
             >
               Accept
             </button>
             <button
               onClick={decline}
-              className="rounded-full bg-white/10 px-4 py-2 font-mono text-[10px] uppercase tracking-[0.16em] text-white/70 transition-colors hover:bg-white/20"
+              className="rounded-full bg-[#fff]/10 px-4 py-2 font-mono text-[10px] uppercase tracking-[0.16em] text-[#fff]/70 transition-colors hover:bg-[#fff]/20"
             >
               Decline
             </button>

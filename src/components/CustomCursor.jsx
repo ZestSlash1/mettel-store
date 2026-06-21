@@ -61,9 +61,9 @@ export default function CustomCursor() {
           state === 'view'
             ? 'h-14 w-14 bg-white text-ink shadow-soft'
             : state === 'add'
-              ? 'h-12 w-12 bg-flame-500 text-white'
+              ? 'h-12 w-12 bg-flame-500 text-[#fff]'
               : state === 'drag'
-                ? 'h-12 w-12 bg-ink text-white'
+                ? 'h-12 w-12 bg-black text-[#fff]'
                 : 'h-2.5 w-2.5 bg-ink'
         }`}
       >
