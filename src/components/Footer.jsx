@@ -84,7 +84,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-[#fff]/10 pt-6 font-mono text-[10px] uppercase tracking-[0.2em] text-[#fff]/40">
-          <span>© {new Date().getFullYear()} MetTel · mettel.in</span>
+          <span>© {new Date().getFullYear()} Mettel · mettel.in</span>
           <div className="flex flex-wrap items-center gap-4">
             <Link to="/privacy" className="transition-colors hover:text-[#fff]">Privacy</Link>
             <Link to="/terms" className="transition-colors hover:text-[#fff]">Terms</Link>

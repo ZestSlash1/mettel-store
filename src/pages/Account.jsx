@@ -15,7 +15,7 @@ export default function Account() {
     <PageShell
       eyebrow="Account"
       seoTitle="Your account"
-      seoDescription="Sign in to MetTel to view your orders."
+      seoDescription="Sign in to Mettel to view your orders."
       title={<>Account</>}
       intro={user ? 'Your orders and details.' : 'Sign in or create an account to track your orders.'}
     >

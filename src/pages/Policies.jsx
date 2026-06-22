@@ -7,7 +7,7 @@ export function Shipping() {
     <PolicyPage
       eyebrow="Support / Shipping"
       seoTitle="Shipping"
-      seoDescription="Dispatch times, domestic and international delivery, and tracking for MetTel orders."
+      seoDescription="Dispatch times, domestic and international delivery, and tracking for Mettel orders."
       title={<>Shipping</>}
       intro="How and when your order reaches you. Built in India, shipped worldwide."
       sections={[
@@ -46,7 +46,7 @@ export function Returns() {
     <PolicyPage
       eyebrow="Support / Returns"
       seoTitle="Returns"
-      seoDescription="MetTel's 14-day return window, how to start a return, and refund timelines."
+      seoDescription="Mettel's 14-day return window, how to start a return, and refund timelines."
       title={<>Returns</>}
       intro="Bought something you can change your mind about. A 14-day, no-drama return window."
       sections={[
@@ -84,14 +84,14 @@ export function Warranty() {
     <PolicyPage
       eyebrow="Support / Warranty"
       seoTitle="Warranty"
-      seoDescription="MetTel's 12-month limited warranty: what's covered and how to make a claim."
+      seoDescription="Mettel's 12-month limited warranty: what's covered and how to make a claim."
       title={<>Warranty</>}
-      intro="Built to last. Every MetTel product is backed by a 12-month warranty."
+      intro="Built to last. Every Mettel product is backed by a 12-month warranty."
       sections={[
         {
           h: 'What’s covered',
           body: [
-            'Every MetTel product carries a 12-month limited warranty against manufacturing defects — material failure, finish defects, and component faults under normal use.',
+            'Every Mettel product carries a 12-month limited warranty against manufacturing defects — material failure, finish defects, and component faults under normal use.',
           ],
         },
         {

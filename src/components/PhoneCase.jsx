@@ -9,7 +9,7 @@ export default function PhoneCase({ shell = '#cfcfcf', accent = '#ff6b00', class
       viewBox="0 0 300 600"
       className={className}
       role="img"
-      aria-label="MetTel phone case, rear view"
+      aria-label="Mettel phone case, rear view"
     >
       <defs>
         <linearGradient id="shellGrad" x1="0" y1="0" x2="1" y2="1">

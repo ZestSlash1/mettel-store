@@ -227,7 +227,7 @@ export default function CartDrawer() {
         order_id: data.razorpayOrderId,
         amount: data.amount,
         currency: data.currency,
-        name: 'MetTel',
+        name: 'Mettel',
         description: 'mettel.in order',
         prefill: { name: form.name, email: form.email, contact: form.phone },
         theme: { color: '#ff6b00' },

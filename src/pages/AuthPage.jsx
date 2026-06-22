@@ -16,7 +16,7 @@ export default function AuthPage() {
     <PageShell
       eyebrow="Sign in"
       seoTitle="Sign in"
-      seoDescription="Sign in to MetTel with Google, Facebook, or your phone number."
+      seoDescription="Sign in to Mettel with Google, Facebook, or your phone number."
       title={<>Sign in</>}
       intro="Tap a logo to continue, or use your mobile number."
     >

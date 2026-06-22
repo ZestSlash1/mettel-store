@@ -180,7 +180,7 @@ export default function Hero() {
   const poster = (
     <img
       src={heroImage || '/hero-exploded.png'}
-      alt="MetTel product — exploded view"
+      alt="Mettel product — exploded view"
       className="h-full w-full object-contain"
     />
   )
@@ -266,7 +266,7 @@ export default function Hero() {
 
         {/* ---- Bottom technical rail ---- */}
         <div className="rule mt-6 flex flex-wrap items-center justify-between gap-y-2 pt-4 font-mono text-[10px] uppercase tracking-[0.22em] text-ink/45">
-          <span>MetTel — est. 2024</span>
+          <span>Mettel — est. 2024</span>
           <span className="hidden sm:inline">Designed in IN</span>
           <span className="hidden sm:inline">Multi-category</span>
           <span className="inline-flex items-center gap-2 text-ink/55">

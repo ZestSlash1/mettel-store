@@ -187,7 +187,7 @@ function MobileMenu({ onClose }) {
     >
       {/* Top bar mirrors the nav */}
       <div className="flex items-center justify-between px-5 pt-5">
-        <Link to="/" onClick={onClose} aria-label="MetTel home">
+        <Link to="/" onClick={onClose} aria-label="Mettel home">
           <Logo />
         </Link>
         <button
@@ -313,7 +313,7 @@ export default function Navigation() {
           }`}
         >
           {/* Brand mark */}
-          <Link to="/" className="flex shrink-0 items-center" aria-label="MetTel home">
+          <Link to="/" className="flex shrink-0 items-center" aria-label="Mettel home">
             <motion.div whileHover={{ rotate: -6, scale: 1.05 }} whileTap={{ scale: 0.94 }} transition={{ type: 'spring', stiffness: 400, damping: 20 }}>
               <Logo />
             </motion.div>

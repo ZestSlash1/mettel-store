@@ -1,4 +1,4 @@
-# MetTel — Storefront
+# Mettel — Storefront
 
 Tech-brutalist e-commerce front end for **mettel.in** — high-end phone covers and accessories.
 Aesthetic: Teenage Engineering–inspired minimalism. Light silver canvas, stark black type,

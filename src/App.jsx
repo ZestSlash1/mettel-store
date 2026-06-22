@@ -5,6 +5,7 @@ import { EASE, DUR, usePrefersReducedMotion } from './lib/motion'
 import Preloader from './components/Preloader'
 import Navigation from './components/Navigation'
 import Hero from './components/Hero'
+import BrandIntro from './components/BrandIntro'
 import ProductGrid from './components/ProductGrid'
 import Subscribe from './components/Subscribe'
 import Footer from './components/Footer'
@@ -50,6 +51,7 @@ function Storefront() {
       <Navigation />
       <main>
         <Hero />
+        <BrandIntro />
         <ProductGrid />
         <Subscribe />
       </main>

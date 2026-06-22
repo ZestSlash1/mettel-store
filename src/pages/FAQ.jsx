@@ -7,7 +7,7 @@ import { EASE, DUR } from '../lib/motion'
 const FAQS = [
   {
     q: 'What kind of products do you sell?',
-    a: 'MetTel carries engineered everyday objects across categories — phone coverage, audio, accessories, and lifestyle goods — all held to the same design standard. Browse the Shop to filter by category.',
+    a: 'Mettel carries engineered everyday objects across categories — phone coverage, audio, accessories, and lifestyle goods — all held to the same design standard. Browse the Shop to filter by category.',
   },
   {
     q: 'How do I know an item fits my device or needs?',
@@ -68,7 +68,7 @@ export default function FAQ() {
     <PageShell
       eyebrow="Support / FAQ"
       seoTitle="FAQ"
-      seoDescription="Answers to common questions about MetTel orders, shipping, returns, and warranty."
+      seoDescription="Answers to common questions about Mettel orders, shipping, returns, and warranty."
       title={<>FAQ</>}
       intro="Quick answers to the questions we get most. Still stuck? Reach our team on the Contact page."
     >

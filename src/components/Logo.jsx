@@ -24,7 +24,7 @@ export default function Logo() {
   return (
     <img
       src={LOGO_SRC}
-      alt="MetTel"
+      alt="Mettel"
       onError={() => setFailed(true)}
       className="h-11 w-auto max-w-[160px] object-contain"
     />

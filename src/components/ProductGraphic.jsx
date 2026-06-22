@@ -7,7 +7,7 @@
  */
 export default function ProductGraphic({ shell = '#cfcfcf', accent = '#ff6b00', className = '' }) {
   return (
-    <svg viewBox="0 0 300 300" className={className} role="img" aria-label="MetTel product">
+    <svg viewBox="0 0 300 300" className={className} role="img" aria-label="Mettel product">
       <defs>
         <linearGradient id="pgShell" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%" stopColor="#ffffff" />

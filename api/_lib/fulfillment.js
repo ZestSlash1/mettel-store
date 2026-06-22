@@ -105,7 +105,7 @@ async function sendOrderConfirmation(order) {
       body: JSON.stringify({
         from: MAIL_FROM,
         to: order.customer_email,
-        subject: `Order confirmed · ${order.invoice_number || 'MetTel'}`,
+        subject: `Order confirmed · ${order.invoice_number || 'Mettel'}`,
         html,
       }),
     })

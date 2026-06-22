@@ -3,7 +3,7 @@
  * EDIT THESE with your real registered details. Used by src/components/Invoice.jsx.
  */
 export const BUSINESS = {
-  name: 'MetTel Inc.',
+  name: 'Mettel Inc.',
   // One entry per line on the invoice.
   addressLines: ['Add your registered business address', 'City, State, PIN'],
   email: 'hello@mettel.in',

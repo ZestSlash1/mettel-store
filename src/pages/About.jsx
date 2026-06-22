@@ -6,14 +6,14 @@ export default function About() {
     <PageShell
       eyebrow="Company / About"
       seoTitle="About"
-      seoDescription="MetTel makes designed objects for everyday life — coverage, audio, accessories, and lifestyle goods, built in India and shipped worldwide."
+      seoDescription="Mettel makes designed objects for everyday life — coverage, audio, accessories, and lifestyle goods, built in India and shipped worldwide."
       title={<>Built<br />to last</>}
-      intro="MetTel makes engineered objects for everyday life — phone coverage, audio, accessories, and lifestyle goods, designed in India and shipped worldwide."
+      intro="Mettel makes engineered objects for everyday life — phone coverage, audio, accessories, and lifestyle goods, designed in India and shipped worldwide."
     >
       <div className="grid gap-12 lg:grid-cols-3">
         <div data-reveal className="space-y-4 font-mono text-[12px] leading-relaxed text-ink/65 lg:col-span-2">
           <p>
-            We started MetTel with one frustration: everyday products designed like billboards —
+            We started Mettel with one frustration: everyday products designed like billboards —
             loud branding, cheap materials, landfill in twelve months. We wanted the opposite — honest
             objects that do their job and get out of the way.
           </p>

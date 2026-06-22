@@ -5,10 +5,10 @@ import { useEffect } from 'react'
  * description + Open Graph/Twitter tags on mount. Drop <Seo title description />
  * into any page. Keeps share previews and browser tabs accurate in an SPA.
  */
-const SITE = 'MetTel'
-const DEFAULT_TITLE = 'MetTel — Engineered Everyday Objects'
+const SITE = 'Mettel'
+const DEFAULT_TITLE = 'Mettel — Premium iPhone Cases, Made in India'
 const DEFAULT_DESC =
-  'Designed objects for everyday life — phone coverage, audio, accessories, and lifestyle goods. Built in India, shipped worldwide.'
+  'Mettel makes premium iPhone cases engineered and manufactured in India. Shop cases for iPhone 15 to 17 Pro Max.'
 
 function setMeta(selector, attr, key, value) {
   let tag = document.head.querySelector(selector)

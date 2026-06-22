@@ -10,7 +10,7 @@ export function Privacy() {
     <PolicyPage
       eyebrow="Legal / Privacy"
       seoTitle="Privacy Policy"
-      seoDescription="How MetTel collects, uses, and protects your personal data."
+      seoDescription="How Mettel collects, uses, and protects your personal data."
       title={<>Privacy<br />policy</>}
       intro={`${UPDATED}. How we collect, use, and protect your information.`}
       sections={[
@@ -53,9 +53,9 @@ export function Terms() {
     <PolicyPage
       eyebrow="Legal / Terms"
       seoTitle="Terms of Service"
-      seoDescription="The terms governing your use of MetTel and purchases from the store."
+      seoDescription="The terms governing your use of Mettel and purchases from the store."
       title={<>Terms of<br />service</>}
-      intro={`${UPDATED}. The terms that govern your use of MetTel and any purchase you make.`}
+      intro={`${UPDATED}. The terms that govern your use of Mettel and any purchase you make.`}
       sections={[
         {
           h: 'Orders & pricing',
@@ -84,7 +84,7 @@ export function Terms() {
         {
           h: 'Liability',
           body: [
-            'MetTel’s liability for any order is limited to the amount you paid for it. Where a product is protective, it guards what it covers but we are not liable for damage to the device or items used with it.',
+            'Mettel’s liability for any order is limited to the amount you paid for it. Where a product is protective, it guards what it covers but we are not liable for damage to the device or items used with it.',
           ],
         },
         {

@@ -12,14 +12,14 @@ export default function GiftCards() {
   const mailto = `mailto:hello@mettel.in?subject=${encodeURIComponent(
     `Gift card — ${formatPrice(amount)}`,
   )}&body=${encodeURIComponent(
-    `I'd like to buy a MetTel gift card worth ${formatPrice(amount)}.`,
+    `I'd like to buy a Mettel gift card worth ${formatPrice(amount)}.`,
   )}`
 
   return (
     <PageShell
       eyebrow="Shop / Gift Cards"
       seoTitle="Gift Cards"
-      seoDescription="Digital MetTel gift cards, delivered by email and redeemable on the full lineup."
+      seoDescription="Digital Mettel gift cards, delivered by email and redeemable on the full lineup."
       title={<>Gift<br />cards</>}
       intro="Give a well-made object. Digital gift cards delivered by email, redeemable on anything in the lineup."
     >

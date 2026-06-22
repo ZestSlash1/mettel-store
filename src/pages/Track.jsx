@@ -39,7 +39,7 @@ export default function Track() {
     <PageShell
       eyebrow="Support / Track order"
       seoTitle="Track your order"
-      seoDescription="Look up the status of your MetTel order with your order reference and email."
+      seoDescription="Look up the status of your Mettel order with your order reference and email."
       title={<>Track<br />order</>}
       intro="Enter your order reference (from your confirmation or Razorpay receipt) and the email you used at checkout."
     >

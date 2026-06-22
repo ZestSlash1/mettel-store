@@ -50,7 +50,7 @@ export default function Shop() {
     <PageShell
       eyebrow="Catalogue"
       seoTitle="Shop"
-      seoDescription="Browse the full MetTel lineup — coverage, audio, accessories, and lifestyle goods."
+      seoDescription="Browse the full Mettel lineup — coverage, audio, accessories, and lifestyle goods."
       title={<>The<br />Lineup</>}
       intro="Engineered objects across categories. Filter by genre, search, or browse the lot."
     >

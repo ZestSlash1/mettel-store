@@ -284,7 +284,7 @@ export default function ProductDetail() {
     description: product.tagline || undefined,
     sku: product.sku,
     image: gallery[0] || undefined,
-    brand: { '@type': 'Brand', name: 'MetTel' },
+    brand: { '@type': 'Brand', name: 'Mettel' },
     offers: {
       '@type': 'Offer',
       priceCurrency: product.currency || 'INR',

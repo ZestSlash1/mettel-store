@@ -5,7 +5,7 @@ const POSTS = [
     date: '2026-05-28',
     tag: 'Range',
     title: 'The range is expanding',
-    body: 'MetTel is growing beyond coverage — audio, accessories, and lifestyle goods are joining the lineup, held to the same standard.',
+    body: 'Mettel is growing beyond coverage — audio, accessories, and lifestyle goods are joining the lineup, held to the same standard.',
   },
   {
     date: '2026-04-15',
@@ -17,7 +17,7 @@ const POSTS = [
     date: '2026-03-02',
     tag: 'Design',
     title: 'The case for no noise',
-    body: 'Why every MetTel object ships understated — the thinking behind honest products with zero printed branding.',
+    body: 'Why every Mettel object ships understated — the thinking behind honest products with zero printed branding.',
   },
 ]
 
@@ -34,7 +34,7 @@ export default function News() {
     <PageShell
       eyebrow="Company / News"
       seoTitle="News"
-      seoDescription="Product drops, restocks, and notes from the MetTel workshop."
+      seoDescription="Product drops, restocks, and notes from the Mettel workshop."
       title={<>News</>}
       intro="Product drops, restocks, and notes from the workshop."
     >

@@ -51,13 +51,13 @@ async function subscribe(req, res) {
       body: JSON.stringify({
         from: MAIL_FROM,
         to: email.trim(),
-        subject: 'You\'re on the list — MetTel',
+        subject: 'You\'re on the list — Mettel',
         html: `
           <div style="font-family:monospace;color:#111;max-width:480px">
             <h2 style="text-transform:uppercase;letter-spacing:1px">You're on the list.</h2>
             <p>Thanks for subscribing. You'll hear from us when new products drop, when things restock, and occasionally when something interesting happens in the workshop.</p>
             <p>No spam. Unsubscribe at any time by replying to this email.</p>
-            <p style="color:#888">— MetTel</p>
+            <p style="color:#888">— Mettel</p>
             <p><a href="${site}">${site}</a></p>
           </div>`,
       }),

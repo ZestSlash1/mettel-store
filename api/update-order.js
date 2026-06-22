@@ -101,8 +101,8 @@ async function sendStatusEmail(order) {
   const site = SITE_URL || 'https://www.mettel.in'
   const shipped = order.status === 'shipped'
   const subject = shipped
-    ? `Your MetTel order has shipped`
-    : `Your MetTel order was delivered`
+    ? `Your Mettel order has shipped`
+    : `Your Mettel order was delivered`
   const trackLine =
     shipped && order.tracking_number
       ? `<p>Tracking: <strong>${order.tracking_number}</strong>${order.carrier ? ` (${order.carrier})` : ''}</p>`
@@ -112,7 +112,7 @@ async function sendStatusEmail(order) {
     <div style="font-family:monospace;color:#111">
       <h2 style="text-transform:uppercase">${subject}</h2>
       <p>Hi ${order.customer_name || 'there'},</p>
-      <p>${shipped ? 'Your order is on its way.' : 'Your order has been delivered. Thanks for shopping with MetTel.'}</p>
+      <p>${shipped ? 'Your order is on its way.' : 'Your order has been delivered. Thanks for shopping with Mettel.'}</p>
       ${trackLine}
       <p>Invoice ${order.invoice_number || ''}. Track anytime at
         <a href="${site}/track">${site}/track</a>.</p>
