@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /admin
 
-Sitemap: https://mettel.in/sitemap.xml
+Sitemap: https://www.mettel.in/sitemap.xml
