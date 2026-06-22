@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import App from './App.jsx'
 import { AuthProvider } from './context/AuthContext'
+import { FirebaseAuthProvider } from './context/FirebaseAuthContext'
 import { CartProvider } from './context/CartContext'
 import './index.css'
 
@@ -10,9 +11,11 @@ createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
       <AuthProvider>
-        <CartProvider>
-          <App />
-        </CartProvider>
+        <FirebaseAuthProvider>
+          <CartProvider>
+            <App />
+          </CartProvider>
+        </FirebaseAuthProvider>
       </AuthProvider>
     </BrowserRouter>
   </StrictMode>,

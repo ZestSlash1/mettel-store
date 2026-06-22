@@ -32,6 +32,7 @@ const Track        = lazy(() => import('./pages/Track'))
 const Account      = lazy(() => import('./pages/Account'))
 const NotFound     = lazy(() => import('./pages/NotFound'))
 const FAQ          = lazy(() => import('./pages/FAQ'))
+const AuthPage      = lazy(() => import('./pages/AuthPage'))
 
 const Shipping  = lazy(() => import('./pages/Policies').then((m) => ({ default: m.Shipping })))
 const Returns   = lazy(() => import('./pages/Policies').then((m) => ({ default: m.Returns })))
@@ -109,6 +110,7 @@ export default function App() {
                 <Route path="/faq" element={<FAQ />} />
                 <Route path="/track" element={<Track />} />
                 <Route path="/account" element={<Account />} />
+                <Route path="/auth" element={<AuthPage />} />
                 <Route
                   path="/admin/*"
                   element={
